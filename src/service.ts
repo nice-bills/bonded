@@ -4,7 +4,7 @@ import { callDolphin } from "./dolphin";
 import { ledger, loadRequest, newId, save, saveRequest } from "./store";
 import { readUnderwriting, underwrite, type Step, RATING_GUIDE_HASH } from "./underwrite";
 import { judgeClaim, readJudgment } from "./claims";
-import { combine, PERILS, price, RULES } from "./pricing";
+import { panelVerdict, PERILS, price, RULES } from "./pricing";
 import { EXPLORER, payout, poolAddress, poolUsd, SCALE, toUnits, verifyPremium } from "./chain";
 
 const activeCover = () => Object.values(ledger().bonds).filter((b: any) => b.status === "active").reduce((s: number, b: any) => s + b.coverUsd, 0);
@@ -30,7 +30,10 @@ export async function quote(c: Case, step?: Step) {
   if (bad) throw new Error(bad);
   const freeCapitalUsd = (await poolUsd()) - activeCover();
   const r = await underwrite(c, freeCapitalUsd, step);
+  // Every panel member's exact request is stored, so a re-check can re-run all of them.
   saveRequest(r.dolphin.requestHash, r.body);
+  for (const m of r.panel.members) if (m.requestHash !== r.dolphin.requestHash && m.body) saveRequest(m.requestHash, m.body);
+  r.panel.members = r.panel.members.map(({ body, ...m }: any) => m);
   const { body, ...rest } = r;
   const now = new Date();
   const q = {
@@ -97,7 +100,8 @@ export async function claim(bondId: string, statement: string, evidence: Doc[], 
   return c;
 }
 
-/** Re-run a stored decision on the same open weights, byte-identical request, and compare. */
+/** Re-run a stored decision on the same open weights, byte-identical requests, and compare.
+ *  A quote is re-run through the whole panel (both models), combined exactly as at quote time. */
 export async function recheck(id: string) {
   const l = ledger();
   const q = l.quotes[id], c = l.claims[id];
@@ -105,17 +109,34 @@ export async function recheck(id: string) {
   if (!rec) throw new Error("unknown quote or claim");
   const body = loadRequest(rec.dolphin.requestHash);
   if (!body) throw new Error("stored request not found");
-  const run = await callDolphin(body);
-  if (q) {
-    const uw = readUnderwriting(run.content);
-    const pLoss = combine(Object.fromEntries(PERILS.map((k) => [k, uw.perils[k].p])));
-    const p = price(q.case.coverUsd, pLoss, q.freeCapitalUsd);
-    const original = q.serv.verdict === "agree" ? q.decision : "decline"; // compare the model's price decision, before SERV's veto
-    const priced = price(q.case.coverUsd, q.pLoss, q.freeCapitalUsd).decision;
-    return { id, kind: "quote", requestHash: rec.dolphin.requestHash, fingerprint: run.fingerprint, originalFingerprint: q.dolphin.fingerprint, original: { pLoss: q.pLoss, decision: priced, final: original }, rerun: { pLoss, decision: p.decision }, sameDecision: p.decision === priced, pLossDelta: pLoss - q.pLoss, latencyMs: run.latencyMs };
+  if (c) {
+    const run = await callDolphin(body);
+    const j = readJudgment(run.content);
+    return { id, kind: "claim", requestHash: rec.dolphin.requestHash, fingerprint: run.fingerprint, originalFingerprint: c.dolphin.fingerprint, original: { decision: c.judgment.decision, peril: c.judgment.peril }, rerun: { decision: j.decision, peril: j.peril }, sameDecision: j.decision === c.judgment.decision, latencyMs: run.latencyMs };
   }
-  const j = readJudgment(run.content);
-  return { id, kind: "claim", requestHash: rec.dolphin.requestHash, fingerprint: run.fingerprint, originalFingerprint: c.dolphin.fingerprint, original: { decision: c.judgment.decision, peril: c.judgment.peril }, rerun: { decision: j.decision, peril: j.peril }, sameDecision: j.decision === c.judgment.decision, latencyMs: run.latencyMs };
+  // Quote: replay every stored panel request, fall back to the primary alone if one is gone.
+  const members: any[] = q.panel?.members?.length ? q.panel.members : [{ model: q.dolphin.model, requestHash: q.dolphin.requestHash }];
+  const stored = members.map((m) => loadRequest(m.requestHash));
+  const runs = await Promise.allSettled(stored.filter((b): b is Record<string, unknown> => !!b).map((b) => callDolphin(b)));
+  const ok = runs.filter((r): r is PromiseFulfilledResult<Awaited<ReturnType<typeof callDolphin>>> => r.status === "fulfilled").map((r) => r.value);
+  if (!ok.length) throw new Error("no stored request could be re-run");
+  const uws = ok.map((run) => readUnderwriting(run.content));
+  const v = panelVerdict(uws.map((u) => Object.fromEntries(PERILS.map((k) => [k, u.perils[k].p]))));
+  const p = price(q.case.coverUsd, v.pLoss, q.freeCapitalUsd, q.panel?.disagreementLoading ?? 0);
+  const original = q.serv.verdict === "agree" ? q.decision : "decline"; // compare the panel's price decision, before SERV's veto
+  const priced = price(q.case.coverUsd, q.pLoss, q.freeCapitalUsd, q.panel?.disagreementLoading ?? 0).decision;
+  return {
+    id, kind: "quote", requestHash: rec.dolphin.requestHash,
+    panel: {
+      requested: members.map((m) => m.model), rerun: ok.map((r) => r.model),
+      rerunMembers: ok.map((r, i) => ({ model: r.model, fingerprint: r.fingerprint, requestHash: r.requestHash, latencyMs: r.latencyMs, fallbackSuspect: r.fallbackSuspect })),
+      missing: stored.map((b, i) => (b ? null : members[i].model)).filter(Boolean),
+      conflict: v.conflict, disagreementLoading: v.disagreementLoading,
+    },
+    fingerprints: ok.map((r) => r.fingerprint), originalFingerprints: [...new Set([q.dolphin.fingerprint, ...(q.panel?.members ?? []).map((m: any) => m.fingerprint)].filter(Boolean))],
+    original: { pLoss: q.pLoss, decision: priced, final: original }, rerun: { pLoss: v.pLoss, decision: p.decision },
+    sameDecision: v.conflict ? p.decision === "decline" : p.decision === priced, pLossDelta: v.pLoss - q.pLoss, latencyMs: Math.max(...ok.map((r) => r.latencyMs)),
+  };
 }
 
 /** Public view: images are dropped (they can be large); everything else is shown. */
@@ -125,5 +146,8 @@ export function publicView(x: any) {
   const y = structuredClone(x);
   if (y.case) y.case.docs = strip(y.case.docs);
   if (y.evidence) y.evidence = strip(y.evidence);
+  // Raw request bodies carry base64 images; they stay server-side (re-checks read them from the store).
+  delete y.body;
+  y.panel?.members?.forEach((m: any) => delete m.body);
   return y;
 }

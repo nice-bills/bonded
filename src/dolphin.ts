@@ -4,6 +4,15 @@ export const DOLPHIN_URL = "https://lighthouse.dphn.ai/run/text-v/v1/chat/comple
 export const DOLPHIN_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash";
 /** Open weights the underwriter is pinned to (MIT licence). */
 export const WEIGHTS_URL = "https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash";
+/**
+ * Second member of the underwriting panel. Served by the same Dolphin endpoint
+ * (GET /v1/models lists three models); Gemma is a different model family than
+ * DeepSeek, so disagreement between them is a genuine cross-check, and its 262k
+ * context is large enough for the full vendor history.
+ */
+export const PANEL_MODEL = "nvidia/Gemma-4-26B-A4B-NVFP4";
+export const PANEL_WEIGHTS_URL = "https://huggingface.co/nvidia/Gemma-4-26B-A4B-NVFP4";
+export const PANEL_CONTEXT_TOKENS = 262_144; // per the /v1/models listing
 const PRICE = { in: 0.01, out: 0.07 }; // $/M tokens, dphn.ai pricing
 
 export type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
@@ -23,9 +32,13 @@ export interface DolphinRun {
   fallbackSuspect: boolean;
 }
 
-export function buildBody(messages: Message[], maxTokens: number) {
+export function buildBody(messages: Message[], maxTokens: number, model: string = DOLPHIN_MODEL) {
   // Fixed decoding so a re-run on the same weights should land on the same decision.
-  return { model: DOLPHIN_MODEL, messages, max_tokens: maxTokens, temperature: 0, seed: 7, reasoning_effort: "low", response_format: { type: "json_object" } };
+  // Gemma (the panel's second model) has no reasoning_effort knob: passing it makes it
+  // emit a reasoning field and never emit content, so only DeepSeek gets it.
+  const base: Record<string, unknown> = { model, messages, max_tokens: maxTokens, temperature: 0, seed: 7, response_format: { type: "json_object" } };
+  if (model === DOLPHIN_MODEL) base.reasoning_effort = "low";
+  return base;
 }
 
 export const hashBody = (body: unknown) => createHash("sha256").update(JSON.stringify(body)).digest("hex");
@@ -77,7 +90,7 @@ export async function callDolphin(body: Record<string, unknown>, timeoutMs = 150
         costUsd: (inTokens * PRICE.in + outTokens * PRICE.out) / 1e6,
         latencyMs: Date.now() - started,
         // Dolphin may fall back to OpenRouter; a decision served elsewhere is flagged, not hidden.
-        fallbackSuspect: (!!model && model !== DOLPHIN_MODEL) || headers.includes("openrouter"),
+        fallbackSuspect: (!!model && model !== body.model) || headers.includes("openrouter"),
       };
     } catch (e) {
       lastErr = e;

@@ -12,6 +12,13 @@ export const RULES = {
   maxShareOfFreeCapital: 0.25,
   quoteTtlMinutes: 30,
   claimWindowDays: 30,
+  // Underwriting panel (two open models on the same rating guide and documents).
+  panel: {
+    /** Combined p(loss) differs from a model's p(loss) by more than this → extra loading. */
+    disagreeDelta: 0.05,
+    /** Extra premium loading while the panel disagrees (charged on top of `loading`). */
+    disagreementLoading: 0.25,
+  },
 };
 
 export const clamp = (p: number) => (Number.isFinite(p) ? Math.min(1, Math.max(0, p)) : 1);
@@ -23,6 +30,44 @@ export function combine(perils: Partial<Record<Peril, number>>): number {
   return 1 - survive;
 }
 
+export type PerilMap = Record<Peril, number>;
+
+/**
+ * Panel combination: per peril, take the HIGHER of the two models' probabilities
+ * (conservative: a peril either model is worried about stays priced in).
+ */
+export function combinePanel(perilsList: Partial<PerilMap>[]): PerilMap {
+  const out = {} as PerilMap;
+  for (const k of PERILS) out[k] = clamp(Math.max(...perilsList.map((m) => m[k] ?? 0)));
+  return out;
+}
+
+export interface PanelVerdict {
+  /** Per-model p(loss), in the order the models were run. */
+  pLossList: number[];
+  /** Combined (per-peril max) p(loss) the premium is priced on. */
+  pLoss: number;
+  /** Extra premium loading because the models disagree. */
+  disagreementLoading: number;
+  /** True when one model calls it insurable (≤ declineAbove) and the other does not. */
+  conflict: boolean;
+}
+
+/**
+ * Turn two or more per-model p(loss) numbers into the panel verdict:
+ * an insurability conflict vetoes the action; a smaller disagreement adds
+ * an extra loading to the premium instead of pretending the models agree.
+ */
+export function panelVerdict(perilsList: Partial<PerilMap>[]): PanelVerdict {
+  const perils = combinePanel(perilsList);
+  const pLossList = perilsList.map((m) => combine(m));
+  const insurable = pLossList.map((p) => p <= RULES.declineAbove);
+  const conflict = insurable.some((x) => x) && insurable.some((x) => !x);
+  const delta = pLossList.length >= 2 ? Math.abs(Math.max(...pLossList) - Math.min(...pLossList)) : 0;
+  const disagreementLoading = !conflict && delta > RULES.panel.disagreeDelta ? RULES.panel.disagreementLoading : 0;
+  return { pLossList, pLoss: combine(perils), disagreementLoading, conflict };
+}
+
 export interface Price {
   pLoss: number;
   premiumUsd: number;
@@ -30,10 +75,11 @@ export interface Price {
   reason: string | null;
 }
 
-/** freeCapitalUsd: pool balance minus the cover of every active bond (fully reserved pool). */
-export function price(coverUsd: number, pLoss: number, freeCapitalUsd: number): Price {
+/** freeCapitalUsd: pool balance minus the cover of every active bond (fully reserved pool).
+ *  extraLoading: added on top of RULES.loading (the panel's disagreement loading). */
+export function price(coverUsd: number, pLoss: number, freeCapitalUsd: number, extraLoading = 0): Price {
   const p = clamp(pLoss);
-  const premiumUsd = round2(Math.max(RULES.minPremiumUsd, coverUsd * p * (1 + RULES.loading)));
+  const premiumUsd = round2(Math.max(RULES.minPremiumUsd, coverUsd * p * (1 + RULES.loading + Math.max(0, extraLoading))));
   if (!(coverUsd > 0)) return { pLoss: p, premiumUsd: 0, decision: "decline", reason: "Cover must be above zero." };
   if (p > RULES.declineAbove) return { pLoss: p, premiumUsd, decision: "decline", reason: `Estimated chance of loss ${pct(p)} is above the ${pct(RULES.declineAbove)} limit: uninsurable, do not act.` };
   if (coverUsd > freeCapitalUsd * RULES.maxShareOfFreeCapital) return { pLoss: p, premiumUsd, decision: "decline", reason: `Cover $${coverUsd} is above ${pct(RULES.maxShareOfFreeCapital)} of the pool's free capital ($${round2(freeCapitalUsd)}).` };

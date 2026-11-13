@@ -231,6 +231,12 @@ function notes(d, serv, extra = "") {
     <p><span class="sc">cost.</span> ${d.inTokens.toLocaleString()} tokens in · ${usd(d.costUsd, 5)} · ${(d.latencyMs / 1000).toFixed(1)} s</p></aside>`;
 }
 
+// Second open model on Dolphin: higher estimate per peril wins; disagreement raises the price or declines.
+function panelNote(q) {
+  const p = q.panel; if (!p) return "";
+  if (p.mode !== "panel") return `<p><span class="sc">panel.</span> second model unavailable, priced by one model${p.fallbackReason ? ` (${esc(p.fallbackReason.slice(0, 60))})` : ""}.</p>`;
+  return `<p><span class="sc">panel.</span> ${p.members.map((m, i) => `${esc(m.model.split("/").pop())} ${pct(p.pLossList[i])}`).join(" · ")}${p.conflict ? ", models disagree on insurability" : p.disagreementLoading ? `, disagreement loading +${p.disagreementLoading}` : ", in agreement"}.</p>`;
+}
 async function runQuote() {
   const slip = $("#slip");
   clearMarks(slip);
@@ -251,7 +257,7 @@ async function runQuote() {
         ${ok ? "" : `<div class="note bad">${esc(q.reason)} Payrun must not pay.</div>`}
         <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on the same weights</button></div>
         <div id="after"></div>
-      </div>${notes(q.dolphin, q.serv, ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × 1.4 = ${usd(q.premiumUsd, 2)}</p>` : "")}</div>`;
+      </div>${notes(q.dolphin, q.serv, panelNote(q) + (ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × ${(1.4 + (q.panel?.disagreementLoading || 0)).toFixed(2)} = ${usd(q.premiumUsd, 2)}</p>` : ""))}</div>`;
     flow($("#prem"), ok ? q.premiumUsd : q.pLoss, ok ? money2 : { style: "percent", maximumFractionDigits: 1 });
     mark($("#vword"), ok ? { type: "circle", color: css("--green"), padding: 8 } : { type: "underline", color: css("--red"), strokeWidth: 2 });
     if (!ok) document.querySelectorAll("#slip tr.hot td:first-child").forEach((td) => mark(td.firstChild?.nodeType === 3 ? td : td, { type: "highlight", color: css("--hl"), multiline: true }));

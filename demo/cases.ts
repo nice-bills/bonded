@@ -4,6 +4,7 @@
  * Images are rendered by `npm run render` from demo/html.
  */
 import type { Case, Doc } from "../src/case";
+import { LONG_HISTORY_DOCS } from "./vendor-history";
 
 const KWAME_WALLET = "0x5a3B9e0C1f2d4E6a7B8c9D0e1F2a3b4C5d6E7f81";
 const AMA_WALLET = "0x7cE21b0A9d8F3e4C5b6A7d8E9f0A1b2C3d4E5f62";
@@ -30,17 +31,9 @@ ama,Ama Owusu,ama@owusu.studio,${AMA_WALLET},400,8,2024-11-15,none
 efua,Efua Asante,efua@asante.write,${EFUA_WALLET},150,8,2025-06-01,none`,
 };
 
-const HISTORY: Doc = {
-  name: "payment-history.csv",
-  source: "records",
-  text: `date,vendor,invoice,period,work,amount_usd,paid_to,tx
-2026-08-04,kwame,INV-0924,2026-07,Rate limiter service,2400,${KWAME_WALLET},0x8f1c…a210
-2026-09-03,kwame,INV-0926,2026-08,Postgres migration,2100,${KWAME_WALLET},0x2be9…771d
-2026-10-02,kwame,INV-0928,2026-09,Payments API webhooks (phase 1),1500,${KWAME_WALLET},0x41aa…09c3
-2026-09-01,ama,INV-2204,2026-08,Design system tokens,2800,${AMA_WALLET},0xc017…5e42
-2026-10-01,ama,INV-2206,2026-09,Checkout screens,3200,${AMA_WALLET},0x9d33…b018
-2026-10-06,efua,INV-0117,2026-09,Help-centre articles,750,${EFUA_WALLET},0x0e7f…c3a9`,
-};
+// Two years of invoices, line items, payments and the contractors' emails — the full
+// history duplicates and overbilling are judged against (see demo/vendor-history.ts).
+// It includes the rows that used to be quoted verbatim in a 6-row payment-history.csv.
 
 const contract = (who: string, rate: number, cap: number, scope: string): Doc => ({
   name: `agreement-${who.toLowerCase().split(" ")[0]}.txt`,
@@ -48,7 +41,7 @@ const contract = (who: string, rate: number, cap: number, scope: string): Doc =>
   text: `Contractor agreement: Tetteh & Co. and ${who}. Day rate $${rate} (USDC). Up to ${cap} days per month. Scope: ${scope}. Invoices monthly, one per period. Payment to the wallet on file within 14 days.`,
 });
 
-const records = (who: string, rate: number, cap: number, scope: string) => [contract(who, rate, cap, scope), VENDORS, HISTORY, POLICY];
+const records = (who: string, rate: number, cap: number, scope: string) => [contract(who, rate, cap, scope), VENDORS, POLICY, ...LONG_HISTORY_DOCS];
 
 export const CASES: Record<string, Case> = {
   clean: {
