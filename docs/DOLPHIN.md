@@ -128,3 +128,18 @@ were declined via panel disagreement (DS 74–76% vs Gemma 0.4–0.6%).
   case (`clean-3`) where the models disagreed on insurability — the safe direction for a
   guarantee pool, and the reason clean insured stayed 15/16 rather than improving.
 - Keep Dolphin spend modest: verified runs + backtest ≈ $0.03 total at dphn.ai pricing.
+
+## Decision after the panel backtest (Nov 13)
+
+The panel caught no more traps than one model (23/24 vs 24/24) and was about 5× slower, so it is now opt-in (`BONDED_PANEL=on`). The one miss was arithmetic ("20 × 300 = 6,300") that both models skipped on that run. The fix is in code, not in more models: the underwriter copies the invoice figures (quantity, rate, line amount, total) and `checkArithmetic` in `src/pricing.ts` recomputes them; a mismatch sets overbilling to at least 90%.
+
+| | One model (before) | Panel | One model + code check (now) |
+|---|---|---|---|
+| Traps declined | 24/24 | 23/24 | **24/24** |
+| Clean insured | 15/16 | 15/16 | **16/16** |
+| AUC / Brier | 0.997 / 0.027 | 0.997 / 0.032 | **1.000 / 0.009** |
+| Same decision on re-run | 95% | n/a (1 run) | **97.5%** |
+| Mean clean premium | 2.03% | 1.38% | 1.75% |
+| p50 / p95 latency | 5.5 / 10.7 s | 26.6 / 337.5 s | 7.0 / 134 s |
+
+The two-year vendor history stays on: it is what lets duplicate and overbilling be judged against the full ledger.

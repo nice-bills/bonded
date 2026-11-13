@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { buildBody, callDolphin, DOLPHIN_MODEL, PANEL_MODEL, PANEL_WEIGHTS_URL, parseJson, WEIGHTS_URL, type Message } from "./dolphin";
 import { docParts, type Case } from "./case";
 import { servReview } from "./serv";
-import { clamp, combine, panelVerdict, PERILS, price, RULES, type Peril } from "./pricing";
+import { clamp, combine, panelVerdict, PERILS, price, RULES, type Peril, checkArithmetic, type InvoiceLine } from "./pricing";
 
 export const RATING_GUIDE = `BONDED RATING GUIDE v1
 You estimate, for ONE proposed agent action, the probability that it causes a loss under each covered peril:
@@ -25,13 +25,17 @@ ${RATING_GUIDE}
 Reply with one JSON object only:
 {"transcript":[{"doc":"<untrusted document name>","text":"<verbatim text of the document, including small, faint, rotated or hidden text>"}],
  "perils":{"payee_not_vendor":{"p":0.0,"evidence":"..."},"duplicate":{"p":0.0,"evidence":"..."},"overbilling":{"p":0.0,"evidence":"..."},"unauthorized":{"p":0.0,"evidence":"..."},"tampered":{"p":0.0,"evidence":"..."}},
+ "invoice":{"lines":[{"qty":0,"rate":0,"amount":0}],"total":0},
  "summary":"<one sentence a payments lead would understand>"}
-Transcribe only the UNTRUSTED documents. Probabilities are numbers between 0 and 1.`;
+Transcribe only the UNTRUSTED documents. Probabilities are numbers between 0 and 1.
+"invoice" copies the figures exactly as printed on the invoice being paid (quantity, unit rate and line amount per line, and the stated total); do not correct them.`;
 
 export interface Underwriting {
   transcript: { doc: string; text: string }[];
   perils: Record<Peril, { p: number; evidence: string }>;
   summary: string;
+  /** Result of the code check of the invoice figures; null when they add up or none were read. */
+  arithmetic?: string | null;
 }
 
 export type Step = (name: string, detail?: Record<string, unknown>) => void;
@@ -44,6 +48,8 @@ export interface PanelBody {
 }
 
 /** Build both panel requests. Documents are read once and shared; only the model differs. */
+export const PANEL_ON = process.env.BONDED_PANEL === "on";
+
 export async function panelBodies(c: Case): Promise<PanelBody[]> {
   const a = c.action;
   const parts: any[] = [
@@ -54,10 +60,10 @@ export async function panelBodies(c: Case): Promise<PanelBody[]> {
     { role: "system", content: SYSTEM },
     { role: "user", content: parts },
   ];
-  return [
-    { model: DOLPHIN_MODEL, weights: WEIGHTS_URL, body: buildBody(messages, 6000, DOLPHIN_MODEL) },
-    { model: PANEL_MODEL, weights: PANEL_WEIGHTS_URL, body: buildBody(messages, 6000, PANEL_MODEL) },
-  ];
+  const primary = { model: DOLPHIN_MODEL, weights: WEIGHTS_URL, body: buildBody(messages, 6000, DOLPHIN_MODEL) };
+  // The second model is opt-in: in the backtest it added latency without catching more traps (docs/DOLPHIN.md).
+  if (!PANEL_ON) return [primary];
+  return [primary, { model: PANEL_MODEL, weights: PANEL_WEIGHTS_URL, body: buildBody(messages, 6000, PANEL_MODEL) }];
 }
 
 /** Kept for compatibility (scripts, tests): the primary model's request. */
@@ -69,7 +75,13 @@ export function readUnderwriting(content: string): Underwriting {
   const j = parseJson<any>(content);
   const perils = {} as Underwriting["perils"];
   for (const k of PERILS) perils[k] = { p: clamp(Number(j?.perils?.[k]?.p)), evidence: String(j?.perils?.[k]?.evidence ?? "") };
-  return { transcript: Array.isArray(j?.transcript) ? j.transcript.map((t: any) => ({ doc: String(t?.doc ?? ""), text: String(t?.text ?? "") })) : [], perils, summary: String(j?.summary ?? "") };
+  const num = (x: any) => Number(String(x ?? "").replace(/[^0-9.\-]/g, ""));
+  const lines = Array.isArray(j?.invoice?.lines) ? j.invoice.lines.map((l: any) => ({ qty: num(l?.qty), rate: num(l?.rate), amount: num(l?.amount) })).filter((l: InvoiceLine) => [l.qty, l.rate, l.amount].every(Number.isFinite)) : [];
+  const total = j?.invoice?.total == null || !Number.isFinite(num(j.invoice.total)) ? null : num(j.invoice.total);
+  const arithmetic = checkArithmetic({ lines, total });
+  // A failed recomputation is hard evidence of overbilling, whatever the model estimated.
+  if (arithmetic) perils.overbilling = { p: Math.max(perils.overbilling.p, 0.9), evidence: `${arithmetic} ${perils.overbilling.evidence}`.trim() };
+  return { transcript: Array.isArray(j?.transcript) ? j.transcript.map((t: any) => ({ doc: String(t?.doc ?? ""), text: String(t?.text ?? "") })) : [], perils, summary: String(j?.summary ?? ""), arithmetic };
 }
 
 /** Record of one panel member, stored on the quote. */
@@ -139,7 +151,7 @@ export async function underwrite(c: Case, freeCapitalUsd: number, step: Step = (
 
   const [primaryRes, secondaryRes] = await Promise.allSettled([
     callDolphin(bodies[0].body),
-    withDeadline(callDolphin(bodies[1].body, PANEL_DEADLINE_MS), PANEL_DEADLINE_MS),
+    bodies[1] ? withDeadline(callDolphin(bodies[1].body, PANEL_DEADLINE_MS), PANEL_DEADLINE_MS) : Promise.reject(new Error("panel off")),
   ]);
   if (primaryRes.status === "rejected") {
     // The panel does not help if the primary is down; surface the error (callDolphin already retried).
@@ -151,7 +163,9 @@ export async function underwrite(c: Case, freeCapitalUsd: number, step: Step = (
   let members: PanelMember[] = [memberOf(bodies[0].model, bodies[0].weights, primaryRun, primaryUw, bodies[0].body)];
   let panelFallback: string | undefined;
 
-  if (secondaryRes.status === "fulfilled") {
+  if (!bodies[1]) {
+    // Single-model underwriting (default).
+  } else if (secondaryRes.status === "fulfilled") {
     const secondaryRun = secondaryRes.value;
     const secondaryUw = readUnderwriting(secondaryRun.content);
     members.push(memberOf(bodies[1].model, bodies[1].weights, secondaryRun, secondaryUw, bodies[1].body));
@@ -217,7 +231,7 @@ export async function underwrite(c: Case, freeCapitalUsd: number, step: Step = (
       inTokens: members[0].inTokens, outTokens: members[0].outTokens, costUsd: members[0].costUsd, latencyMs: members[0].latencyMs, fallbackSuspect: members[0].fallbackSuspect,
     },
     panel: {
-      mode: members.length === bodies.length ? "panel" : "single-fallback",
+      mode: bodies.length === 1 ? "single" : members.length === bodies.length ? "panel" : "single-fallback",
       fallbackReason: panelFallback ?? null,
       pLossList: v.pLossList,
       conflict: v.conflict,

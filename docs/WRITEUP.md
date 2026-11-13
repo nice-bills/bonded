@@ -17,7 +17,7 @@ In the demo, Payrun (our Edition 01 payments agent) is the first insured:
 ## Why Dolphin is the hero
 An insurer's loss history is only valid while the underwriter stays the same. Closed models get swapped or pulled (OpenServ itself removed Qwen on Aug 21 and 13 models on Sep 11, 2026). Bonded pins open MIT weights (DeepSeek-V4.1-Flash) served by Dolphin, records the serving fingerprint on every decision, hashes its rating guide, and stores each exact request so a claimant or auditor can **re-check** any quote or claim on the same weights: there's a button for it. One 1M-context multimodal call reads the whole case including images for about $0.0001.
 
-The backtest found something closed APIs hide: within one run Dolphin served from two vLLM builds (0.33.0rc1 and 0.32.0rc1). Same weights, so decisions held (95% identical on re-run), and Bonded logs the build so drift is visible.
+The backtest found something closed APIs hide: within one run Dolphin served from two vLLM builds (0.33.0rc1 and 0.32.0rc1). Same weights, so decisions held (97.5% identical on re-run), and Bonded logs the build so drift is visible.
 
 ## SERV Reasoning, deeply
 - **Prompt Guard** screens every untrusted document (the underwriter's verbatim transcript, including hidden text) before a bond is issued.
@@ -25,7 +25,7 @@ The backtest found something closed APIs hide: within one run Dolphin served fro
 - Bonded is an **OpenServ agent** (`quote`, `bind`, `claim`) sold on the **x402 Agent Market**: any agent can buy a quote per call in USDC on Base.
 
 ## Proof
-Backtest on Payrun's 40 labelled invoices (24 traps), two runs each: 24/24 traps declined, 15/16 clean invoices insured at ~2% premium, AUC 0.997, Brier 0.027, 95% identical decisions on re-run, $81k of bad exposure declined, $0.0074 total model cost. `npm run backtest` reproduces it.
+Backtest on Payrun's 40 labelled invoices (24 traps), two runs each: 24/24 traps declined, 16/16 clean invoices insured at ~1.75% premium, AUC 1.000, Brier 0.009, 97.5% identical decisions on re-run, $81k of bad exposure declined, $0.0074 total model cost. `npm run backtest` reproduces it.
 
 ## Revenue
 Premium spread (loading 40% over expected loss), plus a per-quote x402 fee ($0.02) for agents that only want the risk read. Every bonded action is also a labelled data point, so the pool's loss history becomes the moat, and it stays valid because the weights don't move.

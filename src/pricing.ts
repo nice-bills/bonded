@@ -91,3 +91,17 @@ export const pct = (p: number) => `${(p * 100).toFixed(p < 0.01 ? 2 : 1)}%`;
 
 /** Brier score of probability forecasts against 0/1 outcomes (lower is better). */
 export const brier = (ps: number[], ys: number[]) => ps.reduce((s, p, i) => s + (p - ys[i]) ** 2, 0) / ps.length;
+
+export interface InvoiceLine { qty: number; rate: number; amount: number }
+export interface InvoiceFigures { lines: InvoiceLine[]; total: number | null }
+
+/** Recompute the invoice in code: qty × rate per line, and the lines against the stated total.
+ *  The model only reads the numbers off the documents; it never does the multiplication. */
+export function checkArithmetic(inv: InvoiceFigures | null | undefined): string | null {
+  if (!inv || !inv.lines.length) return null;
+  const bad: string[] = [];
+  for (const l of inv.lines) if (Math.abs(l.qty * l.rate - l.amount) > 0.01) bad.push(`${l.qty} × ${l.rate} is ${round2(l.qty * l.rate)}, not ${l.amount}`);
+  const sum = round2(inv.lines.reduce((s, l) => s + l.amount, 0));
+  if (inv.total != null && Math.abs(sum - inv.total) > 0.01) bad.push(`lines add up to ${sum}, not the stated total ${inv.total}`);
+  return bad.length ? `Code check: ${bad.join("; ")}.` : null;
+}

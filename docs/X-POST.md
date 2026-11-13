@@ -18,4 +18,4 @@
 > #SERVHackathon
 
 Reply with the proof:
-> Backtest on 40 labelled invoices (24 traps): 24/24 traps priced out, 15/16 clean ones insured at ~2%, AUC 0.997, 95% same decision on re-run. Total model cost: under one cent.
+> Backtest on 40 labelled invoices (24 traps): 24/24 traps priced out, 16/16 clean ones insured at ~1.75%, AUC 1.0, 97.5% same decision on re-run. Total model cost: under one cent.

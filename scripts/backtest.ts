@@ -8,10 +8,11 @@
  *                                  single-model run in backtest/results.json on traps
  *                                  declined AND clean invoices insured)
  */
+import "dotenv/config";
 import { readFileSync, writeFileSync } from "node:fs";
 import { buildCases, type Contractor, type EvalCase } from "../backtest/payrun-cases";
 import { callDolphin } from "../src/dolphin";
-import { panelBodies, readUnderwriting } from "../src/underwrite";
+import { PANEL_ON, panelBodies, readUnderwriting } from "../src/underwrite";
 import { brier, panelVerdict, pct, price, PERILS, round2 } from "../src/pricing";
 import type { Case } from "../src/case";
 
@@ -20,6 +21,8 @@ const policy = readFileSync("backtest/policy.md", "utf8");
 const cases = buildCases(contractors);
 const RUNS = Number(process.env.RUNS ?? 1);
 const POOL = 90_000;
+// Default: one model plus the code arithmetic check. BONDED_PANEL=on measures the two-model panel.
+const OUT = PANEL_ON ? "backtest/results-panel.json" : "backtest/results-check.json";
 
 function toCase(e: EvalCase): Case {
   const c = contractors.find((x) => x.id === e.contractorId)!;
@@ -74,6 +77,7 @@ await pool(jobs, 6, async ({ e, run }) => {
       latencyMs: Date.now() - started,
       costUsd: ok.reduce((s, r) => s + r.costUsd, 0),
       models: ok.map((r, i) => ({ model: bodies[i]?.model ?? r.model, fingerprint: r.fingerprint, inTokens: r.inTokens, outTokens: r.outTokens, requestHash: r.requestHash })),
+      arithmetic: uws[0].arithmetic ?? null,
       perils: Object.fromEntries(PERILS.map((k) => [k, uws[0].perils[k].p])),
       perilsPanel: Object.fromEntries(PERILS.map((k) => [k, Math.max(...uws.map((u) => u.perils[k].p))])),
     });
@@ -99,8 +103,13 @@ const fingerprints: Record<string, string[]> = {};
 for (const r of ok) for (const m of r.models) (fingerprints[m.model] ??= []).includes(m.fingerprint) || fingerprints[m.model].push(m.fingerprint);
 
 const summary = {
-  ranAt: new Date().toISOString(), panel: true,
-  models: Object.keys(fingerprints), fingerprints,
+  ranAt: new Date().toISOString(), panel: PANEL_ON,
+  models: Object.keys(fingerprints),
+  // Single model: a flat list of serving builds (what the console shows); panel: per model.
+  fingerprints: PANEL_ON ? fingerprints : Object.values(fingerprints).flat(),
+  arithmeticFlags: first.filter((r) => r.arithmetic).length,
+  // Same decision on the re-run of the same request (runs 0 and 1).
+  rerunAgreement: (() => { const pairs = first.map((a) => [a, ok.find((b) => b.id === a.id && b.run === 1)]).filter(([, b]) => b); return pairs.length ? pairs.filter(([a, b]) => a.decision === b.decision).length / pairs.length : null; })(),
   runs: RUNS,
   cases: cases.length, traps: cases.filter((c) => !c.shouldPay).length, errors: rows.length - ok.length,
   trapsDeclined: first.filter((r) => r.loss && r.decision === "decline").length,
@@ -113,7 +122,7 @@ const summary = {
   latencyP50Ms: q(0.5), latencyP95Ms: q(0.95), costUsdTotal: ok.reduce((s, r) => s + r.costUsd, 0),
   byKind,
 };
-writeFileSync("backtest/results-panel.json", JSON.stringify({ summary, rows }, null, 1));
+writeFileSync(OUT, JSON.stringify({ summary, rows }, null, 1));
 
 // Overwrite the published single-model backtest page only if the panel is at least as
 // good on both gates: traps priced out and clean invoices insured.
@@ -122,7 +131,7 @@ try {
   const base = JSON.parse(readFileSync("backtest/results.json", "utf8")).summary;
   if (summary.trapsDeclined >= base.trapsDeclined && summary.cleanInsured >= base.cleanInsured) {
     const S = summary;
-    const html = `<p><b>${S.trapsDeclined} of ${S.traps} traps priced out</b> (declined) and <b>${S.cleanInsured} of ${S.cleanTotal} clean invoices insured</b> at a mean premium of ${pct(S.meanCleanPremiumRate)} of cover, on Payrun's ${S.cases} labelled invoices — underwritten by a panel of two open models (${Object.keys(fingerprints).join(" + ")}), combined per-peril max with a disagreement loading. Run ${S.ranAt.slice(0, 10)} on Dolphin.</p>
+    const html = `<p><b>${S.trapsDeclined} of ${S.traps} traps priced out</b> (declined) and <b>${S.cleanInsured} of ${S.cleanTotal} clean invoices insured</b> at a mean premium of ${pct(S.meanCleanPremiumRate)} of cover, on Payrun's ${S.cases} labelled invoices — underwritten by ${PANEL_ON ? `a panel of two open models (${Object.keys(fingerprints).join(" + ")}), combined per-peril max with a disagreement loading` : `${Object.keys(fingerprints).join("")}, with invoice arithmetic recomputed in code (${S.arithmeticFlags} flagged)`}. Run ${S.ranAt.slice(0, 10)} on Dolphin.</p>
 <table><tr><th>Trap kind</th><th>Cases</th><th>Declined</th><th>Mean p(loss)</th></tr>${byKind.map((k) => `<tr><td>${k.kind.replaceAll("_", " ")}</td><td>${k.n}</td><td>${k.declined}</td><td>${pct(k.meanPLoss)}</td></tr>`).join("")}</table>
 <dl class="kv"><dt>Book</dt><dd>premiums $${S.premiumsUsd.toLocaleString()} · losses $${S.lossesUsd.toLocaleString()} · loss ratio ${S.lossRatio == null ? "n/a" : pct(S.lossRatio)} · exposure declined $${S.exposureAvoidedUsd.toLocaleString()}</dd>
 <dt>Panel</dt><dd>${S.panelDisagreements} disagreement loadings · ${S.panelConflicts} panel-conflict declines · mean |Δp(loss)| between models ${S.meanAbsDeltaPLoss?.toFixed(4)}</dd>
