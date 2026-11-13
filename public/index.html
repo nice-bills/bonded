@@ -27,7 +27,8 @@ nav{display:flex;align-items:baseline;gap:20px;padding:16px 0 10px;border-bottom
 nav .brand{font-style:italic;font-size:26px;margin-right:4px}
 nav a{color:var(--dim);text-decoration:none;font-size:16px}
 nav a:hover{color:var(--ink)}
-nav #theme{margin-left:auto;border:1px solid var(--line)}
+nav #theme{margin-left:auto;font:inherit;font-size:12px;color:var(--dim);background:none;border:1px solid var(--line);border-radius:999px;padding:2px 10px;cursor:pointer}
+#poolline a{text-transform:none;font-family:"JetBrains Mono",monospace}
 nav .live{margin-left:12px}
 .hero{display:grid;grid-template-columns:1.7fr 1fr;gap:28px;align-items:end;padding:18px 0 12px}
 h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6px}
@@ -102,7 +103,7 @@ dialog img{max-width:100%;display:block}dialog pre{white-space:pre-wrap;font:13p
     <a href="#console">Console</a><a href="#backtest">Backtest</a><a href="/api/pool">API</a>
     <a href="https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1">x402 market</a>
     <a href="https://github.com/nice-bills/bonded">Code</a>
-    <button class="tab" id="theme" aria-label="Toggle dark mode" style="font-size:13px">Dark</button>
+    <button id="theme" aria-label="Toggle dark mode">Dark</button>
     <span class="live sc" id="poolline">pool live · base sepolia</span>
   </nav>
 
