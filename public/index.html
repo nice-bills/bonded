@@ -4,132 +4,136 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bonded</title>
-<meta name="description" content="Bonded: AI agents get a guarantee before they act. An open-weight underwriter on Dolphin prices each action; SERV Reasoning audits it.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='12' fill='none' stroke='%2316a34a' stroke-width='4'/></svg>">
+<meta name="description" content="Bonded: AI agents buy a guarantee before they act. An open-weight underwriter on Dolphin prices each action; SERV Reasoning audits it.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='13' fill='none' stroke='%232f5d3a' stroke-width='3'/></svg>">
+<!-- Libraries from the Uncommon Web catalog: ET Book (Tufte CSS), Rough Notation, NumberFlow, Vara. -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/rough-notation@0.5.1/lib/rough-notation.iife.js"></script>
+<script src="https://unpkg.com/vara@1.4.1/lib/vara.min.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/number-flow@0.6.2/+esm"></script>
 <style>
-:root{--bg:#fafaf9;--card:#fff;--ink:#18181b;--soft:#3f3f46;--dim:#71717a;--line:#e7e5e4;--sub:#f4f4f5;--green:#15803d;--greenbg:#f0fdf4;--red:#b91c1c;--redbg:#fef2f2;--link:#1d4ed8;--btn:#18181b;--btnink:#fff;--img:#fff}
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0c0c0e;--card:#141417;--ink:#ededef;--soft:#c4c4cc;--dim:#8b8b94;--line:#26262c;--sub:#1c1c21;--green:#4ade80;--greenbg:#4ade8014;--red:#f87171;--redbg:#f8717114;--link:#93b4ff;--btn:#ededef;--btnink:#111;--img:#e9e9ec}}
-:root[data-theme=dark]{--bg:#0c0c0e;--card:#141417;--ink:#ededef;--soft:#c4c4cc;--dim:#8b8b94;--line:#26262c;--sub:#1c1c21;--green:#4ade80;--greenbg:#4ade8014;--red:#f87171;--redbg:#f8717114;--link:#93b4ff;--btn:#ededef;--btnink:#111;--img:#e9e9ec}
+:root{--paper:#fffff8;--card:#fffffb;--ink:#111;--soft:#3d3a33;--dim:#6b675c;--line:#e4dfcf;--hl:#efe7c6;--green:#2f5d3a;--red:#8a3b2a;--link:#2f4e7a;--img:#fff}
+@media not all{:root{--paper:#151411;--card:#1b1a16;--ink:#ece6d6;--soft:#cfc8b6;--dim:#9a9381;--line:#34312a;--hl:#4a4127;--green:#8cc59b;--red:#e59a86;--link:#9db8e0;--img:#f4f1e8}}
+:root[data-theme=dark]{--paper:#151411;--card:#1b1a16;--ink:#ece6d6;--soft:#cfc8b6;--dim:#9a9381;--line:#34312a;--hl:#4a4127;--green:#8cc59b;--red:#e59a86;--link:#9db8e0;--img:#f4f1e8}
 *{box-sizing:border-box}
-html{background:var(--bg);color-scheme:light dark}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
-.mono,code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.86em}
-.num{font-variant-numeric:tabular-nums}
-.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
-.label{font-size:12px;color:var(--dim);font-weight:500}
-nav{display:flex;align-items:center;gap:22px;height:60px;border-bottom:1px solid var(--line)}
-nav .brand{font-weight:600;font-size:16px;display:flex;align-items:center;gap:8px;color:var(--ink)}
-nav .brand i{width:14px;height:14px;border:3px solid var(--green);border-radius:50%}
-nav a.l{color:var(--dim);font-size:14px}nav a.l:hover{color:var(--ink);text-decoration:none}
-nav .live{margin-left:auto;font-size:13px;color:var(--dim);display:flex;align-items:center;gap:8px}
-nav .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
-.hero{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;padding:32px 0 24px;flex-wrap:wrap}
-h1{font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-.02em;margin:0 0 8px;max-width:620px}
-.sub{color:var(--dim);margin:0;max-width:560px}
-.kpis{display:flex;gap:32px}
-.kpis div{display:flex;flex-direction:column}
-.kpis number-flow{font-size:20px;font-weight:500;color:var(--ink)}
-.tabs{display:flex;gap:4px;background:var(--sub);padding:4px;border-radius:10px;width:fit-content;margin-bottom:16px;flex-wrap:wrap}
-.tab{border:0;background:none;font:inherit;font-size:14px;color:var(--dim);padding:6px 14px;border-radius:7px;cursor:pointer}
-.tab[aria-selected=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px #0000001a}
-:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
-.action{font-size:17px;font-weight:500;margin:4px 0 4px}
-.facts{display:flex;gap:16px;flex-wrap:wrap;color:var(--dim);font-size:13px;margin-bottom:14px}
-.facts b{color:var(--ink);font-weight:500}
-.inv{width:100%;aspect-ratio:820/400;object-fit:cover;object-position:top;border:1px solid var(--line);border-radius:8px;display:block;background:var(--img);cursor:zoom-in}
-.docs{margin-top:12px;font-size:13px;color:var(--dim)}
-.docs button{font:inherit;font-size:13px;background:none;border:0;padding:0;color:var(--link);cursor:pointer}
-.docs .u{color:var(--red)}
-.slip{display:flex;flex-direction:column}
-.slip h2{font-size:22px;font-weight:600;letter-spacing:-.01em;margin:4px 0 6px}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;padding:3px 10px;border-radius:999px}
-.badge.ok{color:var(--green);background:var(--greenbg)}.badge.no{color:var(--red);background:var(--redbg)}
-.big{display:flex;align-items:baseline;gap:10px;margin:14px 0 4px}
-.big number-flow{font-size:36px;font-weight:600;letter-spacing:-.02em}
-.big span{color:var(--dim);font-size:14px}
-.summary{color:var(--soft);margin:6px 0 14px}
-.perils{display:grid;gap:8px;margin-bottom:6px}
-.peril{display:grid;grid-template-columns:130px 1fr 54px;gap:10px;align-items:center;font-size:13px}
-.peril .bar{height:6px;background:var(--sub);border-radius:3px;overflow:hidden}
-.peril .bar i{display:block;height:100%;background:var(--green);border-radius:3px}
-.peril.hot .bar i{background:var(--red)}.peril.hot{color:var(--red)}
-.peril .v{text-align:right}
-.why{font-size:13px;color:var(--red);background:var(--redbg);border-radius:8px;padding:10px 12px;margin:8px 0}
-.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.btn{font:inherit;font-size:14px;font-weight:500;padding:9px 16px;border-radius:8px;border:1px solid var(--btn);background:var(--btn);color:var(--btnink);cursor:pointer}
-.btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn.sm{font-size:13px;padding:6px 12px}
-.btn:disabled{opacity:.5;cursor:default}
-details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:13px}
-summary{cursor:pointer;color:var(--dim);font-weight:500}
-dl{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;margin:10px 0 0}
-dt{color:var(--dim)}dd{margin:0;overflow-wrap:anywhere}
-.steps{list-style:none;padding:0;margin:12px 0;font-size:14px;color:var(--dim);display:grid;gap:8px}
-.steps li{display:flex;gap:10px;align-items:center}
-.steps li::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--dim);flex:none}
-.steps li.done{color:var(--ink)}.steps li.done::before{background:var(--green);border-color:var(--green)}
-.steps li.run::before{animation:pulse 1s infinite}
-@keyframes pulse{50%{opacity:.3}}
-.note{font-size:13px;margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--sub);color:var(--soft)}
-.note.ok{background:var(--greenbg);color:var(--green)}.note.bad{background:var(--redbg);color:var(--red)}
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
-.duo h3{font-size:15px;font-weight:600;margin:2px 0 10px}
-.claim{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
-.claim span{display:block;font-size:12px;color:var(--dim)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.stats b{display:block;font-size:20px;font-weight:600;letter-spacing:-.01em}
-.stats .label{display:block}
-footer{color:var(--dim);font-size:12px;padding:8px 0 32px}
-dialog{max-width:min(860px,94vw);border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:20px}
-dialog::backdrop{background:#0009}
-dialog img{max-width:100%;display:block;border-radius:6px;background:var(--img)}dialog pre{white-space:pre-wrap;font:12px/1.5 "JetBrains Mono",monospace;color:var(--soft)}
-@media (max-width:900px){.row,.duo{grid-template-columns:1fr}.kpis{gap:20px;flex-wrap:wrap}nav a.l{display:none}}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.sc{text-transform:uppercase;letter-spacing:.07em;color:var(--dim);font-size:11px;font-weight:500}
+.num{font-variant-numeric:lining-nums tabular-nums}
+nav{display:flex;align-items:baseline;gap:20px;padding:16px 0 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav .brand{font-style:italic;font-size:26px;margin-right:4px}
+nav a{color:var(--dim);text-decoration:none;font-size:16px}
+nav a:hover{color:var(--ink)}
+nav #theme{margin-left:auto;border:1px solid var(--line)}
+nav .live{margin-left:12px}
+.hero{display:grid;grid-template-columns:1.7fr 1fr;gap:28px;align-items:end;padding:18px 0 12px}
+h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6px}
+.sub{color:var(--soft);font-size:17px;margin:0;max-width:640px}
+.kpis{display:grid;grid-template-columns:repeat(4,auto);gap:18px;justify-content:end}
+.kpis div{white-space:nowrap}
+.kpis number-flow,.kpis b{display:block;font-size:26px;font-weight:400;color:var(--ink);font-variant-numeric:lining-nums}
+.tabs{display:flex;gap:22px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-bottom:12px}
+.tab{background:none;border:0;padding:2px 0;font:inherit;font-size:17px;color:var(--dim);cursor:pointer;border-bottom:1px solid transparent}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
+.tab:focus-visible,.btn:focus-visible,.doc:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr 1.12fr;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
+.action{font-size:21px;margin:2px 0 6px}
+.facts{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--soft);margin-bottom:10px}
+.facts code{font:13px "JetBrains Mono",ui-monospace,monospace;color:var(--soft)}
+.inv{width:100%;aspect-ratio:820/360;object-fit:cover;object-position:top;border:1px solid var(--line);display:block;background:var(--img);cursor:zoom-in}
+.docs{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:10px}
+.doc{font:inherit;font-size:14px;background:none;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--soft);cursor:pointer}
+.doc.u{border-color:color-mix(in srgb,var(--red) 45%,var(--line));color:var(--red)}
+.slip{display:flex;flex-direction:column;min-height:100%}
+.slip h2{font-weight:400;font-size:26px;margin:2px 0 6px}
+.verdict{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:2px 0 4px}
+.verdict h2{font-style:italic;font-size:34px;margin:0}
+.verdict .fig{font-size:15px;color:var(--dim)}
+.verdict number-flow{font-size:34px;color:var(--ink);margin-left:4px;font-variant-numeric:lining-nums}
+.green{color:var(--green)}.red{color:var(--red)}
+.summary{color:var(--soft);margin:4px 0 8px;font-size:16px}
+.slipgrid{display:grid;grid-template-columns:1fr 200px;gap:18px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:3px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.r{text-align:right;white-space:nowrap}
+tr.hot td{color:var(--red)}
+.ev{font-size:13px;color:var(--dim);display:block;line-height:1.3;padding-bottom:2px}
+.notes{font-size:14px;line-height:1.4;color:var(--soft)}
+.notes p{margin:0 0 9px;overflow-wrap:anywhere}
+.notes .sc{font-size:14px;color:var(--red)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{font:inherit;font-size:16px;padding:7px 16px;border-radius:3px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.g{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.steps{list-style:none;padding:0;margin:8px 0;font-size:16px;color:var(--dim)}
+.steps li{padding:3px 0}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{content:"✓ ";color:var(--green)}
+.steps li.run::before{content:"… "}
+.note{font-size:15px;margin:8px 0 0;padding:6px 10px;border-left:2px solid var(--line)}
+.note.ok{border-color:var(--green)}.note.bad{border-color:var(--red)}
+#sig{height:58px;margin-top:4px}
+.sigline{border-top:1px solid var(--line);width:62%;font-size:13px;color:var(--dim);padding-top:3px}
+.trio{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;margin:16px 0 8px}
+.trio h3{font-weight:400;font-size:21px;margin:2px 0 6px}
+.trio p{margin:0 0 6px;font-size:15px;color:var(--soft)}
+.claim{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.claim img{width:64px;height:42px;object-fit:cover;object-position:top;border:1px solid var(--line);background:var(--img);cursor:zoom-in}
+.claim b{font-weight:400;display:block}
+.claim span{font-size:13px;color:var(--dim)}
+.btn.sm{font-size:14px;padding:4px 10px}
+.ledger td{font-size:14px}
+footer{color:var(--dim);font-size:14px;padding:6px 0 24px}
+dialog{max-width:min(860px,94vw);border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);padding:18px}
+dialog::backdrop{background:rgba(20,18,14,.45)}
+dialog img{max-width:100%;display:block}dialog pre{white-space:pre-wrap;font:13px/1.5 "JetBrains Mono",ui-monospace,monospace}
+@media (max-width:960px){.hero{grid-template-columns:1fr}.kpis{justify-content:start;grid-template-columns:repeat(2,auto)}.row,.trio{grid-template-columns:1fr}.slipgrid{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <nav aria-label="Main">
-    <span class="brand"><i></i>Bonded</span>
-    <a class="l" href="#backtest">Backtest</a>
-    <a class="l" href="https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1">x402 market</a>
-    <a class="l" href="https://github.com/nice-bills/bonded">Code</a>
-    <span class="live" id="poolline">Pool live · Base Sepolia</span>
+    <span class="brand">Bonded</span>
+    <a href="#console">Console</a><a href="#backtest">Backtest</a><a href="/api/pool">API</a>
+    <a href="https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1">x402 market</a>
+    <a href="https://github.com/nice-bills/bonded">Code</a>
+    <button class="tab" id="theme" aria-label="Toggle dark mode" style="font-size:13px">Dark</button>
+    <span class="live sc" id="poolline">pool live · base sepolia</span>
   </nav>
 
   <header class="hero">
     <div>
-      <h1>A guarantee for each action your agent takes, priced before it happens.</h1>
-      <p class="sub">An open-weight underwriter on Dolphin reads the whole case, invoice images included. If the pool won't guarantee it, the agent doesn't do it.</p>
+      <h1>A guarantee for each thing your agent does, <span id="mark">priced before it happens.</span></h1>
+      <p class="sub">An open-weight underwriter reads the whole case, invoice images included. If the pool won't insure an action, the agent doesn't take it.</p>
     </div>
     <div class="kpis num">
-      <div><span class="label">Pool capital</span><number-flow id="k-cap"></number-flow></div>
-      <div><span class="label">Reserved</span><number-flow id="k-res"></number-flow></div>
-      <div><span class="label">Bonds</span><number-flow id="k-bonds"></number-flow></div>
-      <div><span class="label">Paid out</span><number-flow id="k-paid"></number-flow></div>
+      <div class="sc">pool capital<number-flow id="k-cap"></number-flow></div>
+      <div class="sc">reserved<number-flow id="k-res"></number-flow></div>
+      <div class="sc">bonds<number-flow id="k-bonds"></number-flow></div>
+      <div class="sc">paid out<number-flow id="k-paid"></number-flow></div>
     </div>
   </header>
 
-  <main>
+  <main id="console">
     <div class="tabs" id="tabs" role="tablist" aria-label="Demo cases"></div>
     <div class="row">
       <section class="card" id="casecard" aria-label="The action"></section>
       <section class="card slip" id="slip" aria-live="polite" aria-label="Guarantee"></section>
     </div>
-    <div class="duo">
+    <div class="trio">
       <section class="card" id="claims" aria-label="Claims"></section>
       <section class="card" id="backtest" aria-label="Backtest"></section>
+      <section class="card" id="ledger" aria-label="Ledger"></section>
     </div>
   </main>
-  <footer>Hackathon demo of an action guarantee pool on Base Sepolia test USDC. Not insurance. Underwriter: <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">DeepSeek-V4.1-Flash</a> (open weights) on <a href="https://dphn.ai">Dolphin</a> · second line: SERV Reasoning · <a href="/api/ledger">ledger</a> · <a href="/api/pool">API</a></footer>
+  <footer>A hackathon demo of an action guarantee pool on Base Sepolia test USDC, not insurance. Underwriter: <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">DeepSeek-V4.1-Flash</a> (open weights) on <a href="https://dphn.ai">Dolphin</a>; second line: SERV Reasoning.</footer>
 </div>
-<dialog id="dlg"><div id="dlgbody"></div><form method="dialog"><button class="btn g" style="margin-top:14px">Close</button></form></dialog>
+<dialog id="dlg"><div id="dlgbody"></div><form method="dialog"><button class="btn g" style="margin-top:12px">Close</button></form></dialog>
 
 <script>
 const $ = (s) => document.querySelector(s);
@@ -137,7 +141,12 @@ const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<
 const usd = (n, d = 0) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d || 2 });
 const pct = (p) => (p * 100).toFixed(p < 0.01 ? 2 : 1) + "%";
 const short = (h) => (h ? h.slice(0, 6) + "…" + h.slice(-4) : "");
-let DATA, current, lastQuote, lastBond;
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+let DATA, current, lastQuote, lastBond, marks = [];
+
+// Rough Notation marks: drawn after layout settles, cleared before each re-render.
+function mark(el, opts) { if (!el || !window.RoughNotation) return; const a = RoughNotation.annotate(el, { animationDuration: 600, ...opts }); marks.push(a); requestAnimationFrame(() => setTimeout(() => a.show(), 60)); }
+function clearMarks(scope) { marks = marks.filter((a) => { if (!scope || scope.contains(a._e || a.element)) { a.remove(); return false; } return true; }); }
 
 function flow(el, v, fmt) { if (!el) return; customElements.whenDefined("number-flow").then(() => { el.format = fmt; el.update(v); }); }
 const money = { style: "currency", currency: "USD", maximumFractionDigits: 0 };
@@ -165,12 +174,11 @@ async function ndjson(url, body, onStep) {
 }
 
 function openDoc(d) {
-  $("#dlgbody").innerHTML = `<span class="badge ${d.source === "untrusted" ? "no" : "ok"}">${d.source === "untrusted" ? "Untrusted · from outside" : "Insured's own records"}</span><h2 style="font-size:18px;margin:10px 0">${esc(d.name)}</h2>${d.image ? `<img src="${d.image}" alt="${esc(d.name)}">` : ""}${d.text ? `<pre>${esc(d.text)}</pre>` : ""}`;
+  $("#dlgbody").innerHTML = `<div class="sc">${d.source === "untrusted" ? "untrusted · received from outside" : "insured's own records"}</div><h2 style="font-weight:400;margin:2px 0 10px">${esc(d.name)}</h2>${d.image ? `<img src="${d.image}" alt="${esc(d.name)}">` : ""}${d.text ? `<pre>${esc(d.text)}</pre>` : ""}`;
   $("#dlg").showModal();
 }
 document.addEventListener("click", (e) => {
   const t = e.target.closest("[data-doc]"); if (!t) return;
-  e.preventDefault();
   const [g, i] = t.dataset.doc.split(":");
   openDoc(g === "case" ? current.docs[+i] : DATA.claims[g].evidence[+i]);
 });
@@ -180,31 +188,31 @@ async function loadPool() {
     const p = await (await fetch("/api/pool")).json();
     flow($("#k-cap"), p.capitalUsd, money); flow($("#k-res"), p.reservedUsd, money);
     flow($("#k-bonds"), p.bonds, {}); flow($("#k-paid"), p.paidUsd, money);
-    $("#poolline").innerHTML = `Pool live · <a href="${p.explorer}" class="mono">${short(p.address)}</a>`;
-  } catch { $("#poolline").textContent = "Pool status unavailable"; }
+    $("#poolline").innerHTML = `pool live · <a href="${p.explorer}">${short(p.address)}</a> · base sepolia`;
+  } catch { $("#poolline").textContent = "pool status unavailable"; }
 }
 
 function renderCase() {
   const a = current.action, img = current.docs.findIndex((d) => d.image);
-  $("#casecard").innerHTML = `<span class="label">The action</span>
+  $("#casecard").innerHTML = `<div class="sc">the action</div>
     <div class="action">${esc(a.description)}</div>
-    <div class="facts num"><span>Amount <b>${usd(a.amountUsd)}</b></span><span>Pay to <code>${short(a.payTo)}</code></span></div>
+    <div class="facts num"><span>${usd(a.amountUsd)}</span><span>to <code>${short(a.payTo)}</code></span><span>cover asked ${usd(current.coverUsd)}</span></div>
     ${img >= 0 ? `<img class="inv" src="${current.docs[img].image}" alt="${esc(current.docs[img].name)}" data-doc="case:${img}">` : ""}
-    <div class="docs">${current.docs.length} documents: ${current.docs.map((d, i) => `<button class="${d.source === "untrusted" ? "u" : ""}" data-doc="case:${i}">${esc(d.name)}</button>`).join(", ")}</div>`;
-  $("#slip").innerHTML = `<span class="label">Guarantee</span><h2>Should the agent pay this?</h2>
-    <p class="summary">Bonded's underwriter reads all ${current.docs.length} documents in one call and prices five ways this payment could go wrong. SERV Reasoning screens the documents and checks the estimate. Code sets the price.</p>
-    <div class="btns"><button class="btn" id="quoteBtn">Request a guarantee</button></div>`;
+    <div class="docs">${current.docs.map((d, i) => `<button class="doc ${d.source === "untrusted" ? "u" : ""}" data-doc="case:${i}">${esc(d.name)}</button>`).join("")}</div>`;
+  clearMarks($("#slip"));
+  $("#slip").innerHTML = `<div class="sc">guarantee quote</div><h2>Ask the pool to guarantee this payment.</h2>
+    <p class="summary">The underwriter reads all ${current.docs.length} documents in one call, images included, and prices five perils. SERV Reasoning screens the documents and audits the estimate. Bonded's code sets the price.</p>
+    <div class="btns"><button class="btn" id="quoteBtn">Request cover</button></div>`;
   $("#quoteBtn").onclick = runQuote;
 }
 
 const STEP = {
-  dolphin: (e) => `Dolphin reads ${e.docs} documents, ${e.images} image${e.images === 1 ? "" : "s"}`,
-  priced: (e) => `Chance of loss ${pct(e.pLoss)} · ${(e.latencyMs / 1000).toFixed(1)} s`,
-  serv: () => "SERV screens documents and audits the estimate",
-  multipath: () => "SERV Multipath checks the three rulebooks",
+  dolphin: (e) => `Dolphin reads ${e.docs} documents (${e.images} image${e.images === 1 ? "" : "s"}) in one call`,
+  priced: (e) => `Estimated chance of loss ${pct(e.pLoss)} · ${e.inTokens.toLocaleString()} tokens · ${(e.latencyMs / 1000).toFixed(1)} s`,
+  serv: () => "SERV Reasoning: Prompt Guard screens the documents, Shadow Agent audits",
   decided: (e) => `Decision: ${e.decision}`,
-  judged: (e) => `Claims judge: ${e.decision}`,
-  payout: (e) => `Paying ${usd(e.usd)} on Base Sepolia`,
+  judged: (e) => `Claims judge: ${e.decision} · ${(e.latencyMs / 1000).toFixed(1)} s`,
+  payout: (e) => `Paying ${usd(e.usd)} from the pool on Base Sepolia`,
 };
 function stepper(el) {
   const ul = document.createElement("ul"); ul.className = "steps"; el.appendChild(ul);
@@ -212,34 +220,39 @@ function stepper(el) {
 }
 const finish = (el) => el.querySelectorAll("li.run").forEach((li) => (li.className = "done"));
 
-function provenance(q) {
-  const d = q.dolphin, s = q.serv;
-  return `<details><summary>How this was priced</summary><dl>
-    <dt>Underwriter</dt><dd>${esc(d.model)} · <a href="${d.weights}">open weights</a>${d.fallbackSuspect ? " · served by fallback" : ""}</dd>
-    <dt>Serving build</dt><dd class="mono">${esc((d.fingerprint || "n/a").split("+")[0])}</dd>
-    <dt>Request</dt><dd class="mono">${esc(d.requestHash.slice(0, 16))}… stored for re-checks</dd>
-    <dt>Second line</dt><dd>SERV ${s.verdict === "blocked" ? "Prompt Guard refused the documents" : s.verdict === "agree" ? "Prompt Guard clear, Shadow Agent agrees" : "Shadow Agent objected"}</dd>
-    ${q.decision === "insure" ? `<dt>Price</dt><dd class="num">${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × 1.4 = ${usd(q.premiumUsd, 2)}</dd>` : ""}
-    <dt>Cost</dt><dd class="num">${d.inTokens.toLocaleString()} tokens · ${usd(d.costUsd, 5)} · ${(d.latencyMs / 1000).toFixed(1)} s</dd></dl></details>`;
+function notes(d, serv, extra = "") {
+  return `<aside class="notes">
+    <p><span class="sc">underwriter.</span> ${esc(d.model)}, <a href="${d.weights}">open weights</a>${d.fallbackSuspect ? ", <b>served by fallback</b>" : ""}.</p>
+    <p><span class="sc">build.</span> ${esc((d.fingerprint || "n/a").split("+")[0])} · request ${esc(d.requestHash.slice(0, 8))}… stored for re-checks.</p>
+    <p><span class="sc">second line.</span> SERV ${serv.verdict === "blocked" ? "Prompt Guard refused the documents" : serv.verdict === "agree" ? "guard clear; Shadow Agent agrees" : "Shadow Agent objected"}.</p>
+    ${extra}
+    <p><span class="sc">cost.</span> ${d.inTokens.toLocaleString()} tokens in · ${usd(d.costUsd, 5)} · ${(d.latencyMs / 1000).toFixed(1)} s</p></aside>`;
 }
 
 async function runQuote() {
   const slip = $("#slip");
-  slip.innerHTML = `<span class="label">Underwriting · about 30 seconds</span>`;
+  clearMarks(slip);
+  slip.innerHTML = `<div class="sc">underwriting</div>`;
   const step = stepper(slip);
   try {
     const q = await ndjson("/api/quote", { caseId: current.id }, step);
     lastQuote = q; lastBond = null;
     const ok = q.decision === "insure";
     const perils = Object.entries(q.underwriting.perils);
-    slip.innerHTML = `<div><span class="badge ${ok ? "ok" : "no"}">${ok ? "Guaranteed" : "Not guaranteed"}</span></div>
-      <div class="big num"><number-flow id="prem"></number-flow><span>${ok ? `premium on ${usd(q.case.coverUsd)} cover` : "chance of loss"}</span></div>
-      <p class="summary">${esc(q.underwriting.summary)}</p>
-      <div class="perils num">${perils.map(([k, v]) => `<div class="peril ${v.p >= 0.1 ? "hot" : ""}" title="${esc(v.evidence || "")}"><span>${k.replaceAll("_", " ")}</span><span class="bar"><i style="width:${Math.max(1.5, v.p * 100)}%"></i></span><span class="v">${pct(v.p)}</span></div>`).join("")}</div>
-      ${ok ? "" : `<div class="why">${esc(q.reason)} The agent must not pay.</div>`}
-      <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on same weights</button></div>
-      <div id="after"></div>${provenance(q)}`;
+    slip.innerHTML = `<div class="sc">guarantee quote · ${esc(q.id)}</div>
+      <div class="verdict"><h2 id="vword" class="${ok ? "green" : "red"}">${ok ? "Insured" : "Not insurable"}</h2>
+        <span class="fig">${ok ? `premium<number-flow id="prem"></number-flow>` : `chance of loss<number-flow id="prem"></number-flow>`}</span></div>
+      <p class="summary"><span id="sum">${esc(q.underwriting.summary)}</span></p>
+      <div class="slipgrid"><div>
+        <table class="num">${perils.map(([k, v]) => `<tr class="${v.p >= 0.1 ? "hot" : ""}"><td>${k.replaceAll("_", " ")}${v.p >= 0.1 && v.evidence ? `<span class="ev">${esc(v.evidence)}</span>` : ""}</td><td class="r">${pct(v.p)}</td></tr>`).join("")}
+        <tr><td><b>combined</b></td><td class="r"><b>${pct(q.pLoss)}</b></td></tr></table>
+        ${ok ? "" : `<div class="note bad">${esc(q.reason)} Payrun must not pay.</div>`}
+        <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on the same weights</button></div>
+        <div id="after"></div>
+      </div>${notes(q.dolphin, q.serv, ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × 1.4 = ${usd(q.premiumUsd, 2)}</p>` : "")}</div>`;
     flow($("#prem"), ok ? q.premiumUsd : q.pLoss, ok ? money2 : { style: "percent", maximumFractionDigits: 1 });
+    mark($("#vword"), ok ? { type: "circle", color: css("--green"), padding: 8 } : { type: "underline", color: css("--red"), strokeWidth: 2 });
+    if (!ok) document.querySelectorAll("#slip tr.hot td:first-child").forEach((td) => mark(td.firstChild?.nodeType === 3 ? td : td, { type: "highlight", color: css("--hl"), multiline: true }));
     $("#reBtn").onclick = () => recheck(q.id, $("#after"));
     if (ok) $("#payBtn").onclick = payPremium;
   } catch (e) {
@@ -247,47 +260,53 @@ async function runQuote() {
     slip.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div><div class="btns"><button class="btn" id="retry">Try again</button></div>`);
     $("#retry").onclick = runQuote;
   }
-  loadPool();
+  loadPool(); loadLedger();
 }
 
 async function recheck(id, el) {
-  el.innerHTML = `<div class="note">Re-running the stored request on the same weights…</div>`;
+  el.innerHTML = `<div class="note">Re-running the stored request: same bytes, same weights…</div>`;
   try {
     const r = await ndjson(`/api/recheck/${id}`, {}, () => {});
     const same = r.fingerprint === r.originalFingerprint;
-    el.innerHTML = `<div class="note ${r.sameDecision ? "ok" : "bad"}">${r.sameDecision ? "Same decision" : "Different decision"} on re-run: ${r.kind === "quote" ? `${pct(r.original.pLoss)} then ${pct(r.rerun.pLoss)}` : `${r.original.decision} then ${r.rerun.decision}`}. Serving build ${same ? "unchanged" : "changed"}.</div>`;
+    el.innerHTML = `<div class="note ${r.sameDecision ? "ok" : "bad"}"><b>${r.sameDecision ? "Same decision" : "Different decision"}</b> on re-run: ${r.kind === "quote" ? `${pct(r.original.pLoss)} then ${pct(r.rerun.pLoss)}, ${r.original.decision} then ${r.rerun.decision}` : `${r.original.decision} then ${r.rerun.decision}`}. Serving build ${same ? "unchanged" : "changed"}.</div>`;
   } catch (e) { el.innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
 }
 
 async function payPremium() {
-  const btn = $("#payBtn"); btn.disabled = true; btn.textContent = "Paying on Base Sepolia…";
+  const btn = $("#payBtn"); btn.disabled = true; btn.textContent = "Paying premium on Base Sepolia…";
   try {
     const r = await (await fetch("/api/demo/pay-premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteId: lastQuote.id }) })).json();
     if (r.error) throw new Error(r.error);
     lastBond = r.bond;
-    $("#slip").innerHTML = `<div><span class="badge ok">Bond active</span> <span class="label mono">${esc(r.bond.id)}</span></div>
-      <h2 style="margin-top:12px">Cover for one payment</h2>
-      <div class="big num"><number-flow id="cov"></number-flow><span>covered · premium ${usd(r.bond.premiumUsd, 2)} paid</span></div>
-      <dl><dt>Payment</dt><dd>${usd(r.bond.action.amountUsd)} to <code>${short(r.bond.action.payTo)}</code></dd>
-      <dt>Premium tx</dt><dd><a class="mono" href="${r.bond.premiumTxUrl}">${short(r.tx)}</a></dd>
-      <dt>Claims window</dt><dd>30 days</dd></dl>
-      <div class="note ok">Cover is reserved in the pool. The agent can pay the invoice.</div>${provenance(lastQuote)}`;
+    const slip = $("#slip"); clearMarks(slip);
+    slip.innerHTML = `<div class="sc">bond certificate · ${esc(r.bond.id)}</div>
+      <h2>Guarantee of one payment</h2>
+      <p class="summary">${esc(r.bond.action.description)}, ${usd(r.bond.action.amountUsd)} to <code style="font-size:13px">${short(r.bond.action.payTo)}</code>.</p>
+      <div class="slipgrid"><div>
+        <table class="num"><tr><td>cover</td><td class="r"><number-flow id="cov"></number-flow></td></tr><tr><td>premium paid</td><td class="r">${usd(r.bond.premiumUsd, 2)}</td></tr>
+        <tr><td>chance of loss</td><td class="r">${pct(lastQuote.pLoss)}</td></tr><tr><td>premium tx</td><td class="r"><a href="${r.bond.premiumTxUrl}">${short(r.tx)}</a></td></tr>
+        <tr><td>claims window</td><td class="r">30 days</td></tr></table>
+        <div id="sig" aria-label="Signed: Bonded"></div><div class="sigline">signed by the underwriter · re-checkable on the same weights</div>
+        <div class="note ok">Cover is reserved in the pool. Payrun may now pay the invoice.</div>
+      </div>${notes(lastQuote.dolphin, lastQuote.serv)}</div>`;
     flow($("#cov"), r.bond.coverUsd, money);
+    if (window.Vara) new Vara("#sig", "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json", [{ text: "Bonded", fontSize: 30, strokeWidth: 1.3, color: css("--ink"), duration: 1600, textAlign: "left" }]);
     renderClaims();
   } catch (e) { btn.disabled = false; btn.textContent = "Try again"; $("#after").innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
-  loadPool();
+  loadPool(); loadLedger();
 }
 
-function renderClaims() {
-  const el = $("#claims");
+function renderClaims(result) {
+  const el = $("#claims"); clearMarks(el);
   if (!lastBond) {
-    el.innerHTML = `<h3>Claims</h3><p class="label" style="font-size:14px">Bind a guarantee first. If something goes wrong later, a claims judge on the same pinned weights reads the case, the bond and the evidence. SERV checks the ruling, and approved claims are paid on chain.</p>`;
+    el.innerHTML = `<div class="sc">claims</div><h3>Something went wrong later?</h3><p>Bind a quote first. A claims judge on the same pinned weights reads the original case, the quote and the evidence together; SERV audits; approved claims are paid on chain.</p>`;
     return;
   }
-  el.innerHTML = `<h3>File a claim on this bond</h3>
-    ${Object.entries(DATA.claims).map(([k, c]) => `<div class="claim"><div>${esc(c.title)}<span>${c.evidence.map((d, i) => `<a href="#" data-doc="${k}:${i}">${esc(d.name)}</a>`).join(", ")}</span></div><button class="btn sm g" data-claim="${k}">File</button></div>`).join("")}
+  el.innerHTML = `<div class="sc">claims on ${esc(lastBond.id)}</div><h3>File a claim</h3>
+    ${Object.entries(DATA.claims).map(([k, c]) => `<div class="claim">${c.evidence[0]?.image ? `<img src="${c.evidence[0].image}" alt="" data-doc="${k}:0">` : "<span></span>"}<div><b>${esc(c.title)}</b><span>${c.evidence.length} document${c.evidence.length > 1 ? "s" : ""} · ${c.evidence.map((d, i) => `<a href="#" data-doc="${k}:${i}">${esc(d.name)}</a>`).join(", ")}</span></div><button class="btn sm g" data-claim="${k}">File</button></div>`).join("")}
     <div id="claimout"></div>`;
   el.querySelectorAll("[data-claim]").forEach((b) => (b.onclick = () => runClaim(b.dataset.claim)));
+  el.querySelectorAll("a[data-doc]").forEach((a) => a.addEventListener("click", (e) => e.preventDefault()));
 }
 
 async function runClaim(id) {
@@ -298,31 +317,47 @@ async function runClaim(id) {
   try {
     const c = await ndjson("/api/claim", { bondId: lastBond.id, claimId: id }, step);
     const pay = c.decision === "pay";
-    out.innerHTML = `<div class="note ${pay ? "ok" : "bad"}"><b>${pay ? `Paid ${usd(c.payoutUsd)}` : "Denied"}.</b> ${esc(c.reason.length > 240 ? c.reason.slice(0, 240) + "…" : c.reason)}
-      ${pay && c.payoutTxUrl ? `<br>Payout <a class="mono" href="${c.payoutTxUrl}">${short(c.payoutTx)}</a>` : ""}</div>
-      <div class="btns"><button class="btn sm g" id="reClaim">Re-check on same weights</button></div><div id="afterClaim"></div>`;
+    out.innerHTML = `<h3 id="cword" class="${pay ? "green" : "red"}" style="margin-top:8px">${pay ? `Paid ${usd(c.payoutUsd)}` : "Denied"}</h3>
+      <p>${esc(c.reason.length > 260 ? c.reason.slice(0, 260) + "…" : c.reason)}</p>
+      ${pay && c.payoutTxUrl ? `<p>Payout <a href="${c.payoutTxUrl}">${short(c.payoutTx)}</a> on Base Sepolia.</p>` : ""}
+      <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}</p>
+      <button class="btn sm g" id="reClaim">Re-check on the same weights</button><div id="afterClaim"></div>`;
+    mark($("#cword"), pay ? { type: "circle", color: css("--green"), padding: 6 } : { type: "strike-through", color: css("--red"), strokeWidth: 2 });
     $("#reClaim").onclick = () => recheck(c.id, $("#afterClaim"));
   } catch (e) { finish(out); out.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div>`); }
   $("#claims").querySelectorAll("[data-claim]").forEach((b) => (b.disabled = false));
-  loadPool();
+  loadPool(); loadLedger();
 }
 
 async function loadBacktest() {
   const el = $("#backtest");
   try {
     const { summary: s } = await (await fetch("/backtest.json")).json();
-    el.innerHTML = `<h3>Backtest on ${s.cases} labelled invoices</h3>
-      <div class="stats num">
-        <div><b>${s.trapsDeclined}/${s.traps}</b><span class="label">bad invoices declined</span></div>
-        <div><b>${s.cleanInsured}/${s.cleanTotal}</b><span class="label">clean ones guaranteed, avg ${pct(s.meanCleanPremiumRate)}</span></div>
-        <div><b>${s.auc.toFixed(3)}</b><span class="label">AUC</span></div>
-        <div><b>${pct(s.rerunAgreement)}</b><span class="label">same decision on re-run</span></div>
-        <div><b>${usd(s.exposureAvoidedUsd)}</b><span class="label">bad payments avoided</span></div>
-        <div><b>${usd(s.costUsdTotal, 3)}</b><span class="label">model cost, ${s.cases * s.runs} calls</span></div>
-      </div>`;
-  } catch { el.innerHTML = `<h3>Backtest</h3><p class="label">Not available.</p>`; }
+    el.innerHTML = `<div class="sc" id="backtest-anchor">backtest · ${s.cases} labelled invoices · ${s.runs} runs</div>
+      <h3><span id="bt">${s.trapsDeclined} of ${s.traps} traps priced out</span></h3>
+      <table class="num"><tr><td>clean invoices insured</td><td class="r">${s.cleanInsured}/${s.cleanTotal} at ${pct(s.meanCleanPremiumRate)}</td></tr>
+      <tr><td>AUC · Brier</td><td class="r">${s.auc.toFixed(3)} · ${s.brier.toFixed(3)}</td></tr>
+      <tr><td>same decision on re-run</td><td class="r">${pct(s.rerunAgreement)}</td></tr>
+      <tr><td>bad exposure declined</td><td class="r">${usd(s.exposureAvoidedUsd)}</td></tr>
+      <tr><td>model cost, ${s.cases * s.runs} calls</td><td class="r">${usd(s.costUsdTotal, 4)}</td></tr></table>
+      <p style="margin-top:6px;font-size:14px">Dolphin served from ${s.fingerprints.length} vLLM builds during the run; every decision records which.</p>`;
+    mark($("#bt"), { type: "underline", color: css("--green"), strokeWidth: 2 });
+  } catch { el.innerHTML = `<div class="sc">backtest</div><p>Not available.</p>`; }
 }
 
+async function loadLedger() {
+  try {
+    const l = await (await fetch("/api/ledger")).json();
+    const rows = l.quotes.slice(0, 6).map((q) => `<tr><td>${esc(q.case.action.payee || q.case.action.description)}</td><td class="r ${q.decision === "insure" ? "green" : "red"}">${q.decision === "insure" ? usd(q.premiumUsd, 2) : "declined"}</td><td class="r">${pct(q.pLoss)}</td></tr>`).join("");
+    const claims = l.claims.slice(0, 3).map((c) => `<tr><td>claim ${esc(c.bondId.slice(-4))}</td><td class="r ${c.decision === "pay" ? "green" : "red"}">${c.decision === "pay" ? usd(c.payoutUsd) : "denied"}</td><td class="r">${c.payoutTxUrl ? `<a href="${c.payoutTxUrl}">tx</a>` : ""}</td></tr>`).join("");
+    $("#ledger").innerHTML = `<div class="sc">ledger · latest</div><h3>${l.quotes.length ? `${l.quotes.length} quote${l.quotes.length > 1 ? "s" : ""} this session` : "No quotes yet"}</h3><table class="ledger num">${rows}${claims}</table>`;
+  } catch { $("#ledger").innerHTML = `<div class="sc">ledger</div><p>Not available.</p>`; }
+}
+
+const themeBtn = $("#theme");
+const setTheme = (t) => { document.documentElement.dataset.theme = t; themeBtn.textContent = t === "dark" ? "Light" : "Dark"; try { localStorage.setItem("theme", t); } catch {} };
+try { setTheme(localStorage.getItem("theme") || "light"); } catch { setTheme("light"); }
+themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 (async () => {
   DATA = await (await fetch("/api/cases")).json();
   $("#tabs").innerHTML = DATA.cases.map((c, i) => `<button class="tab" role="tab" aria-selected="${i === 0}" data-id="${c.id}">${esc(c.title)}</button>`).join("");
@@ -331,7 +366,8 @@ async function loadBacktest() {
     current = DATA.cases.find((c) => c.id === t.dataset.id); renderCase();
   }));
   current = DATA.cases[0]; renderCase(); renderClaims();
-  loadPool(); loadBacktest();
+  loadPool(); loadLedger(); loadBacktest();
+  window.addEventListener("load", () => document.fonts.ready.then(() => mark($("#mark"), { type: "underline", color: css("--red"), strokeWidth: 2 })));
 })();
 </script>
 </body>
