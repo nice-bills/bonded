@@ -1,0 +1,233 @@
+{
+  "generatedAt": "2026-11-13T19:34:13.219Z",
+  "auditedWith": "gpt-6-luna-serv-kronos",
+  "servModel": "gpt-6-luna",
+  "ratingGuideHash": "b5b4b18586e903e528d619f67759a5c74252774ca0f2aa73c94fbcde2ff9b992",
+  "guideHashesMatch": true,
+  "method": "SERV Kronos does not return its audit log over the API. Each prompt gets two Kronos calls: the exact prompt run as-is on a text-only probe case (auditedRun, with its request id and answer), and the same bytes supplied as data to a Kronos-enabled audit prompt that returns the findings. See docs/KRONOS.md.",
+  "prompts": [
+    {
+      "name": "underwriter",
+      "source": "src/underwrite.ts › SYSTEM (role + RATING_GUIDE + reply contract)",
+      "note": "Exact system string sent by underwriteRequest(CASES.clean). Its guide hash must equal RATING_GUIDE_HASH in src/underwrite.ts.",
+      "promptSha256": "98389d32f1724e4dde89f251ec4a24c7d4c845361516136a0e7c7809e349557a",
+      "promptChars": 2246,
+      "guideSha256": "b5b4b18586e903e528d619f67759a5c74252774ca0f2aa73c94fbcde2ff9b992",
+      "guideMatchesRatingGuide": true,
+      "verdict": "issues",
+      "summary": "The prompt leaves material uncertainty about what counts as a loss and how to price missing evidence, which can change the risk estimates.",
+      "findings": [
+        {
+          "severity": "medium",
+          "clause": "“the probability that it causes a loss”",
+          "issue": "“Loss” is not defined, so reviewers may assign different probabilities depending on whether they count only realized financial loss or also other harms, and on how loss is measured.",
+          "suggestion": "Define loss for this rating purpose, including what harms count and how the amount or occurrence is determined."
+        },
+        {
+          "severity": "medium",
+          "clause": "Missing rule: how to estimate a peril when a relevant supporting document is absent.",
+          "issue": "The prompt requires evidence-based probabilities but does not say how missing evidence affects an estimate; reviewers could treat absence as neutral or as increasing risk.",
+          "suggestion": "Add a rule stating how missing relevant documents affect the probability estimate."
+        }
+      ],
+      "auditedRun": {
+        "requestedModel": "gpt-6-luna-serv-kronos",
+        "servedModel": "gpt-6-luna",
+        "requestId": "3f0fe678-f70d-41bc-b92b-ebedc3e19983",
+        "timestamp": "2026-11-13T19:32:49.216Z",
+        "latencyMs": 10209,
+        "usage": {
+          "prompt_tokens": 12534,
+          "completion_tokens": 649,
+          "total_tokens": 13183,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 12531,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 189,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "finishReason": "stop",
+        "answer": {
+          "transcript": [
+            {
+              "doc": "email-kwame.txt",
+              "text": "From: Kwame Mensah <kwame@mensah.dev>\nDate: 2026-11-02\nSubject: Invoice INV-0931\n\nHi, October invoice attached: phase 2 of the webhooks work (retries + signing). Same wallet as always. Thanks, Kwame"
+            }
+          ],
+          "perils": {
+            "payee_not_vendor": {
+              "p": 0.001,
+              "evidence": "The proposed wallet matches the wallet on file and Kwame’s prior wallet confirmations; see vendor-records.csv and vendor-mailbox-export.txt."
+            },
+            "duplicate": {
+              "p": 0.001,
+              "evidence": "The ledger shows no prior October 2026 invoice or payment for Kwame; the September entry is phase 1, not the October phase 2 work. See vendor-invoice-ledger.csv and vendor-payment-ledger.csv."
+            },
+            "overbilling": {
+              "p": 0.001,
+              "evidence": "$1,800 equals six days at the contract rate of $300/day, within the 10-day monthly cap; phase 2 was planned for October at the same rate. See agreement-kwame.txt and vendor-mailbox-export.txt."
+            },
+            "unauthorized": {
+              "p": 0.001,
+              "evidence": "Payments API webhooks work is within the backend engineering scope, and the October phase 2 work was planned in advance. See agreement-kwame.txt and vendor-mailbox-export.txt."
+            },
+            "tampered": {
+              "p": 0.001,
+              "evidence": "The submitted email contains no apparent reviewer-directed or hidden instructions and is consistent with the prior phase 2 plan; see email-kwame.txt and vendor-mailbox-export.txt."
+            }
+          },
+          "summary": "The $1,800 October phase 2 payment matches Kwame’s recorded wallet, contract rate and scope, with no identified duplicate in the ledgers."
+        }
+      },
+      "auditPass": {
+        "requestedModel": "gpt-6-luna-serv-kronos",
+        "servedModel": "gpt-6-luna",
+        "requestId": "33d6284d-4aed-403c-9ae5-f8f4eeeeb213",
+        "timestamp": "2026-11-13T19:33:50.508Z",
+        "latencyMs": 61291,
+        "usage": {
+          "prompt_tokens": 2487,
+          "completion_tokens": 881,
+          "total_tokens": 3368,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 2484,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 683,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "finishReason": "stop"
+      }
+    },
+    {
+      "name": "claims-judge",
+      "source": "src/claims.ts › CLAIM_SYSTEM (role + BOND_WORDING + reply contract)",
+      "note": "Exact claims-judge system prompt. guideSha256 signs BOND_WORDING, the wording the judge applies.",
+      "promptSha256": "95e2a14b323fe2494c2c8ef335759b99908422f12210f0e043afad76d75099d8",
+      "promptChars": 1469,
+      "guideSha256": "93fecded0cd537fb88b5b22a65f3d358e39476658631fbe5e9807aa555ab4129",
+      "guideMatchesRatingGuide": null,
+      "verdict": "issues",
+      "summary": "The prompt leaves key coverage and evidence tests undefined, so the same claim could receive different outcomes.",
+      "findings": [
+        {
+          "severity": "high",
+          "clause": "Covered perils: “payee_not_vendor, duplicate, overbilling (the excess only), unauthorized, tampered.”",
+          "issue": "The peril labels are not defined. Reviewers could disagree about what facts establish each peril, including what makes a payee “not_vendor,” a payment “duplicate,” or an action “unauthorized” or “tampered.”",
+          "suggestion": "Add a short definition and evidence test for each peril."
+        },
+        {
+          "severity": "high",
+          "clause": "“Bonded pays the insured's direct financial loss caused by the bonded action” and exclusion 2(a): “any action other than the bonded one (a different amount, payee or pay-to address).”",
+          "issue": "The prompt does not specify how to determine whether an action matches the bond when only some action details differ, or how to allocate loss when a mismatch affects only part of the payment. Reviewers could differ on whether coverage or the exclusion applies and on the payable amount.",
+          "suggestion": "State how partial and full mismatches affect action matching, the exclusion, and loss calculation."
+        },
+        {
+          "severity": "medium",
+          "clause": "Exclusion 2(d): “a claim evidenced only by the insured's own statement, with no third-party document.”",
+          "issue": "“Third-party document” is undefined, so reviewers could disagree about which documents satisfy this evidence condition.",
+          "suggestion": "Define what qualifies as a third-party document."
+        },
+        {
+          "severity": "medium",
+          "clause": "Exclusion 2(b): “claims filed more than 30 days after binding.”",
+          "issue": "The prompt does not define when a claim is considered filed, leaving the timing exclusion open to different applications.",
+          "suggestion": "Specify the event or date that constitutes filing."
+        },
+        {
+          "severity": "medium",
+          "clause": "“The claims judge reads the whole original case, the underwriter's quote and the claim evidence together” and the required “transcript” field.",
+          "issue": "The prompt does not specify which documents belong in the transcript or whether it must reproduce the entire original case, the quote, and claim evidence. This can change the evidence presented and the resulting decision.",
+          "suggestion": "Define the transcript’s document scope and whether all included documents must be reproduced verbatim."
+        }
+      ],
+      "auditedRun": {
+        "requestedModel": "gpt-6-luna-serv-kronos",
+        "servedModel": "gpt-6-luna",
+        "requestId": "513972a9-bd39-4334-bbf9-e13bf049e2b3",
+        "timestamp": "2026-11-13T19:34:00.910Z",
+        "latencyMs": 10401,
+        "usage": {
+          "prompt_tokens": 12515,
+          "completion_tokens": 674,
+          "total_tokens": 13189,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 12512,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 300,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "finishReason": "stop",
+        "answer": {
+          "transcript": [
+            {
+              "doc": "CLAIM statement",
+              "text": "CLAIM filed 2026-11-12T10:00:00.000Z by Payrun (payments agent for Tetteh & Co.). Statement (untrusted): At month-end reconciliation our bank statement showed Kwame was already paid $1,800 for the same October webhooks work on invoice INV-0929, settled by bank transfer on 2026-10-30 before we paid INV-0931. Kwame has refused to refund (email attached)."
+            },
+            {
+              "doc": "bank-statement-oct.txt",
+              "text": "2026-10-30 BANK TRANSFER OUT 1,800.00 USD to KWAME MENSAH ref INV-0929"
+            },
+            {
+              "doc": "email-kwame-refund.txt",
+              "text": "I sent INV-0929 to your accountant and INV-0931 to the payments inbox by mistake, both for the October webhooks work. The money has already gone to my tax bill, so I can't refund it this year."
+            }
+          ],
+          "peril": "duplicate",
+          "action_matches_bond": true,
+          "third_party_evidence": true,
+          "exclusion": "none",
+          "loss_usd": 1800,
+          "decision": "pay",
+          "reasons": [
+            "The claim was filed within 30 days of binding.",
+            "The bonded action matches the $1,800 amount, Kwame Mensah, and the wallet specified in the bond.",
+            "The bank-statement-oct.txt documents a $1,800 transfer for INV-0929; email-kwame-refund.txt confirms INV-0929 and INV-0931 were both for the same October webhooks work and the funds will not be refunded.",
+            "This establishes a duplicate-payment loss of $1,800, within the $1,800 cover."
+          ]
+        }
+      },
+      "auditPass": {
+        "requestedModel": "gpt-6-luna-serv-kronos",
+        "servedModel": "gpt-6-luna",
+        "requestId": "47bb4061-4328-4bf7-b582-6fd54bf76772",
+        "timestamp": "2026-11-13T19:34:13.219Z",
+        "latencyMs": 12309,
+        "usage": {
+          "prompt_tokens": 2285,
+          "completion_tokens": 837,
+          "total_tokens": 3122,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "cache_write_tokens": 2282,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 348,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "finishReason": "stop"
+      }
+    }
+  ]
+}

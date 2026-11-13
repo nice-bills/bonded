@@ -61,6 +61,7 @@ export function mount(app: Express) {
     cases: Object.values(CASES).map(caseView),
     claims: Object.fromEntries(Object.entries(CLAIMS).map(([k, v]) => [k, { ...v, evidence: v.evidence.map((d) => ({ ...d, image: d.image ? `/${d.image}` : undefined })) }])),
   }));
+  app.get("/api/kronos", (_req, res) => res.sendFile(`${ROOT}public/kronos.json`));
   app.get("/api/ledger", (_req, res) => {
     const l = ledger();
     const last = (o: Record<string, any>) => Object.values(o).slice(-30).reverse().map(publicView);
