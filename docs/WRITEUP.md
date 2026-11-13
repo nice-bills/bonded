@@ -1,6 +1,6 @@
 # Bonded: agents buy a guarantee before they act
 
-**Track:** Dolphin · **Live:** https://bonded-pool.onrender.com · **Code:** https://github.com/nice-bills/bonded
+**Track:** Dolphin · **Live:** https://bonded-pool.onrender.com · **Code:** https://github.com/nice-bills/bonded · **x402:** [quote](https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1), [claim](https://platform.openserv.ai/workspace/paywall/97f6b7afdca343cf9a99317f2104019a)
 
 ## Problem
 AI agents now move money: they pay invoices, top up accounts, settle bills. When one gets it wrong (a swapped wallet, a duplicate invoice, a prompt injection hidden in a PDF), the loss is final. Agent insurance today (Klaimee, Corgi, Armilla) is a yearly enterprise policy written by humans. Nothing prices the one action an agent is about to take.

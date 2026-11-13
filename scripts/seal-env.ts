@@ -3,7 +3,7 @@
  * The unseal key is kept in .env as BONDED_ENV_KEY (created on first run) and set on the host.
  */
 import { createCipheriv, randomBytes } from "node:crypto";
-import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { parse } from "dotenv";
 
 const env = parse(readFileSync(".env"));
@@ -13,7 +13,9 @@ if (!key) {
   key = randomBytes(32).toString("hex");
   appendFileSync(".env", `BONDED_ENV_KEY=${key}\n`);
 }
-const payload = Object.fromEntries(KEEP.filter((k) => env[k]).map((k) => [k, env[k]]));
+const payload: Record<string, string> = Object.fromEntries(KEEP.filter((k) => env[k]).map((k) => [k, env[k]]));
+// The provisioned OpenServ identity, so the host reuses agent 4958 and its workflows instead of registering anew.
+if (existsSync(".openserv.json")) payload.BONDED_OPENSERV_STATE = readFileSync(".openserv.json", "utf8");
 const iv = randomBytes(12);
 const c = createCipheriv("aes-256-gcm", Buffer.from(key, "hex"), iv);
 const data = Buffer.concat([c.update(JSON.stringify(payload), "utf8"), c.final()]);

@@ -7,6 +7,7 @@ Bonded is an action guarantee pool for AI agents, built for the OpenServ SERV Ha
 It is a demo of an action guarantee pool on testnet funds, not an insurance product.
 
 - Live console: https://bonded-pool.onrender.com
+- x402 Agent Market: [Bonded Quote](https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1) ($0.02) · [Bonded Claim](https://platform.openserv.ai/workspace/paywall/97f6b7afdca343cf9a99317f2104019a) ($0.01) · OpenServ agent #4958
 - Pool: [`0x4D94…0BED` on Base Sepolia](https://sepolia.basescan.org/address/0x4D948Ed7a54061e8474612C98420Ae9b91400BED)
 
 ## Why open weights are the point

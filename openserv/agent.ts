@@ -9,7 +9,7 @@
  * First run: `npm run openserv` (provision() registers the agent and workflows, writes .openserv.json).
  */
 import "../src/sealed";
-import { existsSync } from "node:fs";
+import { existsSync, writeFileSync } from "node:fs";
 import { Agent, run } from "@openserv-labs/sdk";
 import { provision, triggers } from "@openserv-labs/client";
 import { z } from "zod";
@@ -88,6 +88,8 @@ agent.addCapability({
 mount((agent as unknown as { app: any }).app);
 
 async function main() {
+  // Hosted copy: the provisioned identity arrives sealed in the env, so the host never signs up a new account.
+  if (process.env.BONDED_OPENSERV_STATE && !existsSync(".openserv.json")) writeFileSync(".openserv.json", process.env.BONDED_OPENSERV_STATE, { mode: 0o600 });
   if (process.env.BONDED_REQUIRE_OPENSERV_STATE === "1" && !existsSync(".openserv.json")) {
     throw new Error(".openserv.json is missing, so provision() would create a new OpenServ account.");
   }

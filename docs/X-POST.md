@@ -13,6 +13,7 @@
 > 🎥 [demo video]
 > https://bonded-pool.onrender.com
 > https://github.com/nice-bills/bonded
+> Buy cover per call on the x402 market: https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1
 >
 > #SERVHackathon
 

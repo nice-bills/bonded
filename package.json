@@ -13,7 +13,7 @@
     "openserv": "tsx openserv/agent.ts",
     "openserv:build": "tsx scripts/build-openserv.mts",
     "openserv:deploy": "npm run openserv:build && tsx scripts/deploy-openserv.mts",
-    "start": "tsx src/server.ts",
+    "start": "tsx openserv/agent.ts",
     "seal": "tsx scripts/seal-env.ts"
   },
   "dependencies": {
