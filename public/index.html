@@ -211,6 +211,7 @@ const STEP = {
   dolphin: (e) => `Dolphin reads ${e.docs} documents (${e.images} image${e.images === 1 ? "" : "s"}) in one call`,
   priced: (e) => `Estimated chance of loss ${pct(e.pLoss)} · ${e.inTokens.toLocaleString()} tokens · ${(e.latencyMs / 1000).toFixed(1)} s`,
   serv: () => "SERV Reasoning: Prompt Guard screens the documents, Shadow Agent audits",
+  multipath: () => "SERV Multipath weighs the bond wording, payment policy and vendor contract",
   decided: (e) => `Decision: ${e.decision}`,
   judged: (e) => `Claims judge: ${e.decision} · ${(e.latencyMs / 1000).toFixed(1)} s`,
   payout: (e) => `Paying ${usd(e.usd)} from the pool on Base Sepolia`,
@@ -321,7 +322,8 @@ async function runClaim(id) {
     out.innerHTML = `<h3 id="cword" class="${pay ? "green" : "red"}" style="margin-top:8px">${pay ? `Paid ${usd(c.payoutUsd)}` : "Denied"}</h3>
       <p>${esc(c.reason.length > 260 ? c.reason.slice(0, 260) + "…" : c.reason)}</p>
       ${pay && c.payoutTxUrl ? `<p>Payout <a href="${c.payoutTxUrl}">${short(c.payoutTx)}</a> on Base Sepolia.</p>` : ""}
-      <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}</p>
+      ${c.multipath ? `<table class="num" style="margin:6px 0">${c.multipath.rulebooks.map((r) => `<tr><td>${r.rulebook.replaceAll("_", " ")}${r.clause ? `<span class="ev">${esc(r.clause.length > 90 ? r.clause.slice(0, 90) + "…" : r.clause)}</span>` : ""}</td><td class="r ${r.finding === "covered" ? "green" : "red"}">${r.finding}</td></tr>`).join("")}</table>` : ""}
+      <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}${c.multipath ? ` · multipath ${esc(c.multipath.verdict)}` : ""}</p>
       <button class="btn sm g" id="reClaim">Re-check on the same weights</button><div id="afterClaim"></div>`;
     mark($("#cword"), pay ? { type: "circle", color: css("--green"), padding: 6 } : { type: "strike-through", color: css("--red"), strokeWidth: 2 });
     $("#reClaim").onclick = () => recheck(c.id, $("#afterClaim"));
