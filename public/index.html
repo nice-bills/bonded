@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bonded</title>
+<meta name="description" content="Bonded: AI agents buy a guarantee before they act. An open-weight underwriter on Dolphin prices each action; SERV Reasoning audits it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f6f2ea;--card:#fffdf8;--ink:#1b1a17;--muted:#6d675c;--line:#e2dccf;--green:#1f6b45;--green-bg:#e4f1e8;--red:#a5281f;--red-bg:#f8e3df;--amber:#9a6a00;--blue:#1d4f8f}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#15140f;--card:#1e1c16;--ink:#ece6d8;--muted:#a49c8b;--line:#34302a;--green:#62c08d;--green-bg:#1c2d22;--red:#ee8076;--red-bg:#33201d;--amber:#e0b04a;--blue:#8db6ee}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+a{color:var(--blue)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{padding:34px 0 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font:700 40px/1 Fraunces,Georgia,serif;margin:0;letter-spacing:-.01em}
+.tag{color:var(--muted);font-size:16px;max-width:640px}
+h2{font:600 22px/1.2 Fraunces,Georgia,serif;margin:0 0 12px}
+.mono,code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:20px 0 6px}
+.stat{background:var(--card);padding:10px 14px}
+.stat b{display:block;font:500 20px "IBM Plex Mono",monospace}
+.stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+section{padding:28px 0;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
+.tab[aria-selected=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+.action{font-size:16px;margin:0 0 10px}
+.docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.doc{border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;background:var(--paper);text-align:left;color:var(--ink);font-family:inherit}
+.doc img{width:100%;height:110px;object-fit:cover;object-position:top;border-radius:4px;display:block;margin-bottom:6px;background:#fff}
+.doc .src{color:var(--muted)}
+.doc.untrusted{border-color:color-mix(in srgb,var(--red) 40%,var(--line))}
+.btn{border:0;background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:8px;font:600 15px "IBM Plex Sans",sans-serif;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.steps{list-style:none;padding:0;margin:14px 0;font-size:14px}
+.steps li{padding:5px 0 5px 22px;position:relative;color:var(--muted)}
+.steps li::before{content:"";position:absolute;left:4px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--line)}
+.steps li.done{color:var(--ink)}.steps li.done::before{background:var(--green)}
+.steps li.run::before{background:var(--amber);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.steps li.run::before{animation:none}}
+.slip{border-top:2px solid var(--ink);margin-top:10px;padding-top:14px}
+.verdict{display:inline-block;font:700 22px Fraunces,serif;letter-spacing:.08em;padding:4px 14px;border:3px solid currentColor;border-radius:6px;transform:rotate(-2deg)}
+.verdict.insure,.verdict.pay{color:var(--green)}.verdict.decline,.verdict.deny{color:var(--red)}
+.big{font:500 28px "IBM Plex Mono",monospace}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px;margin:12px 0}
+.kv dt{color:var(--muted)}.kv dd{margin:0;overflow-wrap:anywhere}
+.peril{display:grid;grid-template-columns:130px 1fr 56px;gap:8px;align-items:center;font-size:13px;margin:4px 0}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green)}
+.bar i.hot{background:var(--red)}
+.ev{color:var(--muted);font-size:12px;margin:0 0 6px 138px}
+@media (max-width:560px){.peril{grid-template-columns:100px 1fr 50px}.ev{margin-left:0}}
+.note{padding:10px 12px;border-radius:8px;font-size:14px;margin:10px 0}
+.note.ok{background:var(--green-bg)}.note.bad{background:var(--red-bg)}.note.info{background:color-mix(in srgb,var(--blue) 10%,var(--card))}
+.muted{color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:500}
+.scroll{overflow-x:auto}
+dialog{max-width:min(900px,94vw);border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:16px}
+dialog img{max-width:100%}dialog pre{white-space:pre-wrap;font:13px "IBM Plex Mono",monospace}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.how .card p{margin:6px 0 0;color:var(--muted);font-size:14px}
+footer{padding:26px 0 50px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand"><h1>Bonded</h1><span class="tag">Agents buy a guarantee before they act. An open-weight underwriter prices each action. If it won't insure it, the agent doesn't do it.</span></div>
+  <div class="stats" id="stats"></div>
+  <div class="muted mono" id="poolline"></div>
+</div></header>
+
+<main class="wrap">
+<section>
+  <h2>1 · An agent asks for cover</h2>
+  <p class="muted">Payrun, the payments agent for Tetteh &amp; Co., must buy a guarantee before it pays each invoice. Pick a case and request cover.</p>
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <div class="grid">
+    <div class="card" id="casecard"></div>
+    <div class="card" id="quotecard"><p class="muted">The underwriter reads every document above in one call, images included, and prices the action.</p><button class="btn" id="quoteBtn">Request cover</button></div>
+  </div>
+</section>
+
+<section id="claimsec" hidden>
+  <h2>2 · Something went wrong: claims</h2>
+  <p class="muted">A claims judge on the same pinned weights reads the original case, the quote and the evidence together. SERV Reasoning audits it. Approved claims are paid from the pool on chain.</p>
+  <div class="grid">
+    <div class="card" id="claimpick"></div>
+    <div class="card" id="claimcard"><p class="muted">Pick a claim.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Why open weights</h2>
+  <div class="how">
+    <div class="card"><b>Loss history only means something if the underwriter stays the same.</b><p>Closed models get swapped or pulled. Bonded pins <a href="https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash">DeepSeek-V4.1-Flash</a> (MIT weights) served by Dolphin, records the serving fingerprint, and hashes the rating guide.</p></div>
+    <div class="card"><b>Every decision can be re-checked.</b><p>The exact request is stored by hash. Anyone, including a claimant, can re-run it on the same open weights and compare. Press “Re-check” on any quote or claim.</p></div>
+    <div class="card"><b>The model estimates; code does the money.</b><p>Dolphin returns per-peril probabilities with cited evidence. Bonded's code prices: cover × p(loss) × 1.4, declines above 10%, and never bonds more than 25% of free pool capital.</p></div>
+    <div class="card"><b>Two lines of defence from SERV.</b><p>SERV Prompt Guard screens every untrusted document; a SERV Shadow Agent audits each quote and claim against the rating rules. Either can veto.</p></div>
+  </div>
+</section>
+
+<section id="backtestsec" hidden>
+  <h2>Backtest</h2>
+  <div class="card" id="backtest"></div>
+</section>
+
+<section>
+  <h2>Ledger</h2>
+  <div class="card scroll" id="ledger"></div>
+</section>
+</main>
+<footer class="wrap" id="foot">Bonded is a hackathon demo of an action guarantee pool on Base Sepolia test USDC. It is not insurance. <a href="https://github.com/nice-bills/bonded">Code</a> · <a href="/api/pool">API</a></footer>
+<dialog id="dlg"><div id="dlgbody"></div><form method="dialog"><button class="btn secondary">Close</button></form></dialog>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const usd = (n) => "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const pct = (p) => (p * 100).toFixed(p < 0.01 ? 2 : 1) + "%";
+const short = (h) => h ? h.slice(0, 10) + "…" + h.slice(-6) : "";
+let DATA, current, lastQuote, lastBond;
+
+async function ndjson(url, body, onStep) {
+  const res = await fetch(url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok && !res.body) throw new Error("HTTP " + res.status);
+  if (res.headers.get("content-type")?.includes("application/json")) { const j = await res.json(); throw new Error(j.error || "HTTP " + res.status); }
+  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+  let buf = "", result;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += value;
+    const lines = buf.split("\n"); buf = lines.pop();
+    for (const l of lines) {
+      if (!l.trim()) continue;
+      const ev = JSON.parse(l);
+      if (ev.type === "step") onStep(ev);
+      if (ev.type === "error") throw new Error(ev.error);
+      if (ev.type === "result") result = ev.result;
+    }
+  }
+  return result;
+}
+
+async function loadPool() {
+  try {
+    const p = await (await fetch("/api/pool")).json();
+    const s = [["Pool capital", usd(p.capitalUsd)], ["Reserved", usd(p.reservedUsd)], ["Free", usd(p.freeUsd)], ["Quotes", p.quotes], ["Declined", p.declined], ["Bonds", p.bonds], ["Premiums", usd(p.premiumsUsd)], ["Paid out", usd(p.paidUsd)]];
+    $("#stats").innerHTML = s.map(([k, v]) => `<div class="stat"><b>${v}</b><span>${k}</span></div>`).join("");
+    $("#poolline").innerHTML = `Pool <a href="${p.explorer}">${short(p.address)}</a> · Base Sepolia test USDC at 1 USDC = ${usd(1 / p.scale)} of cover · rating guide <span title="${p.ratingGuideHash}">${p.ratingGuideHash.slice(0, 12)}</span>`;
+  } catch { $("#poolline").textContent = "Pool status unavailable."; }
+}
+
+function docTile(d, i, group) {
+  return `<button class="doc ${d.source}" data-g="${group}" data-i="${i}">${d.image ? `<img src="${d.image}" alt="${esc(d.name)}" loading="lazy">` : ""}<b>${esc(d.name)}</b><br><span class="src">${d.source === "untrusted" ? "untrusted · from outside" : "insured's records"}</span></button>`;
+}
+function openDoc(d) {
+  $("#dlgbody").innerHTML = `<h2>${esc(d.name)}</h2>${d.image ? `<img src="${d.image}" alt="">` : ""}${d.text ? `<pre>${esc(d.text)}</pre>` : ""}`;
+  $("#dlg").showModal();
+}
+document.addEventListener("click", (e) => {
+  const t = e.target.closest(".doc"); if (!t) return;
+  const docs = t.dataset.g === "case" ? current.docs : DATA.claims[t.dataset.g].evidence;
+  openDoc(docs[+t.dataset.i]);
+});
+
+function renderCase() {
+  const a = current.action;
+  $("#casecard").innerHTML = `<p class="action"><b>${esc(a.description)}</b></p>
+  <dl class="kv"><dt>Amount</dt><dd>${usd(a.amountUsd)}</dd><dt>Pay to</dt><dd class="mono">${esc(a.payTo)}</dd><dt>Cover asked</dt><dd>${usd(current.coverUsd)}</dd></dl>
+  <div class="docs">${current.docs.map((d, i) => docTile(d, i, "case")).join("")}</div>`;
+  $("#quotecard").innerHTML = `<p class="muted">The underwriter reads all ${current.docs.length} documents in one call, images included, and prices the action.</p><button class="btn" id="quoteBtn">Request cover</button>`;
+  $("#quoteBtn").onclick = runQuote;
+}
+
+const STEP_TEXT = {
+  dolphin: (e) => `Dolphin · DeepSeek-V4.1-Flash reads ${e.docs} documents (${e.images} image${e.images === 1 ? "" : "s"}) in one call`,
+  priced: (e) => `Estimated p(loss) ${pct(e.pLoss)} from ${e.inTokens.toLocaleString()} tokens in ${(e.latencyMs / 1000).toFixed(1)} s`,
+  serv: () => "SERV Reasoning · Prompt Guard screens the documents, Shadow Agent audits the estimate",
+  decided: (e) => `Decision: ${e.decision}`,
+  judged: (e) => `Claims judge decided: ${e.decision} (${(e.latencyMs / 1000).toFixed(1)} s)`,
+  payout: (e) => `Paying ${usd(e.usd)} from the pool on Base Sepolia`,
+};
+function stepper(el) {
+  const ul = document.createElement("ul"); ul.className = "steps"; el.appendChild(ul);
+  return (e) => { ul.querySelectorAll("li.run").forEach((li) => { li.className = "done"; }); const li = document.createElement("li"); li.className = e.name === "decided" || e.name === "judged" ? "done" : "run"; li.textContent = (STEP_TEXT[e.name] || ((x) => x.name))(e); ul.appendChild(li); };
+}
+const finish = (el) => el.querySelectorAll("li.run").forEach((li) => (li.className = "done"));
+
+function perilRows(perils) {
+  return Object.entries(perils).map(([k, v]) => `<div class="peril"><span>${k.replaceAll("_", " ")}</span><div class="bar"><i class="${v.p >= 0.1 ? "hot" : ""}" style="width:${Math.max(1, Math.min(100, v.p * 100))}%"></i></div><span class="mono">${pct(v.p)}</span></div>${v.p >= 0.05 && v.evidence ? `<p class="ev">${esc(v.evidence)}</p>` : ""}`).join("");
+}
+function provenance(d, serv) {
+  return `<dl class="kv"><dt>Underwriter</dt><dd>${esc(d.model)} · <a href="${d.weights}">open weights</a>${d.fallbackSuspect ? ' · <b style="color:var(--amber)">served by fallback</b>' : ""}</dd>
+  <dt>Serving build</dt><dd class="mono">${esc(d.fingerprint || "n/a")}</dd><dt>Request hash</dt><dd class="mono">${esc(d.requestHash)}</dd>
+  <dt>Cost</dt><dd>${d.inTokens.toLocaleString()} in / ${d.outTokens.toLocaleString()} out tokens · ${usd(d.costUsd.toFixed(5))} · ${(d.latencyMs / 1000).toFixed(1)} s</dd>
+  <dt>SERV review</dt><dd>${esc(serv.verdict)} · ${esc(serv.reason)}</dd></dl>`;
+}
+
+async function runQuote() {
+  const card = $("#quotecard");
+  card.innerHTML = `<b>Underwriting…</b>`;
+  const step = stepper(card);
+  try {
+    const q = await ndjson("/api/quote", { caseId: current.id }, step);
+    finish(card); lastQuote = q;
+    const ok = q.decision === "insure";
+    card.insertAdjacentHTML("beforeend", `<div class="slip">
+      <div class="row" style="justify-content:space-between"><span class="verdict ${q.decision}">${ok ? "INSURED" : "DECLINED"}</span>
+      <span>${ok ? `premium <span class="big">${usd(q.premiumUsd)}</span>` : `p(loss) <span class="big">${pct(q.pLoss)}</span>`}</span></div>
+      <p>${esc(q.underwriting.summary)}</p>
+      ${ok ? `<div class="note ok">Cover ${usd(q.case.coverUsd)} at p(loss) ${pct(q.pLoss)}: premium = cover × p × 1.4. Payrun may act once the premium is paid.</div>` : `<div class="note bad"><b>Uninsurable: Payrun must not pay.</b> ${esc(q.reason)}</div>`}
+      ${perilRows(q.underwriting.perils)}
+      ${provenance(q.dolphin, q.serv)}
+      <div class="row">${ok ? `<button class="btn" id="payBtn">Payrun pays ${usd(q.premiumUsd)} premium and binds</button>` : ""}<button class="btn secondary" id="reBtn">Re-check on the same weights</button></div>
+      <div id="after"></div></div>`);
+    $("#reBtn").onclick = () => recheck(q.id, $("#after"));
+    if (ok) $("#payBtn").onclick = payPremium;
+  } catch (e) { finish(card); card.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div><button class="btn" onclick="runQuote()">Try again</button>`); }
+  loadPool(); loadLedger();
+}
+
+async function recheck(id, el) {
+  el.innerHTML = `<p class="muted">Re-running the stored request (same bytes, same weights)…</p>`;
+  try {
+    const r = await ndjson(`/api/recheck/${id}`, {}, () => {});
+    const sameBuild = r.fingerprint === r.originalFingerprint;
+    el.innerHTML = `<div class="note ${r.sameDecision ? "ok" : "bad"}"><b>${r.sameDecision ? "Same decision" : "Different decision"}</b> on re-run: ${r.kind === "quote" ? `p(loss) ${pct(r.original.pLoss)} then ${pct(r.rerun.pLoss)}, ${r.original.decision} then ${r.rerun.decision}` : `${r.original.decision} (${r.original.peril}) then ${r.rerun.decision} (${r.rerun.peril})`}. Serving build ${sameBuild ? "unchanged" : "changed"}.</div>`;
+  } catch (e) { el.innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
+}
+
+async function payPremium() {
+  const btn = $("#payBtn"); btn.disabled = true; btn.textContent = "Paying premium on Base Sepolia…";
+  try {
+    const r = await (await fetch("/api/demo/pay-premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteId: lastQuote.id }) })).json();
+    if (r.error) throw new Error(r.error);
+    lastBond = r.bond;
+    $("#after").innerHTML = `<div class="note ok"><b>Bonded.</b> ${esc(r.bond.id)}: premium tx <a href="${r.bond.premiumTxUrl}">${short(r.tx)}</a> verified on chain. Cover ${usd(r.bond.coverUsd)} is reserved in the pool. Payrun pays the invoice.</div>`;
+    btn.remove();
+    showClaims();
+  } catch (e) { btn.disabled = false; btn.textContent = "Try again"; $("#after").innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
+  loadPool(); loadLedger();
+}
+
+function showClaims() {
+  $("#claimsec").hidden = false;
+  $("#claimpick").innerHTML = `<p>Bond <b>${esc(lastBond.id)}</b> · cover ${usd(lastBond.coverUsd)}</p>` + Object.entries(DATA.claims).map(([k, c]) => `<div style="margin:14px 0"><b>${esc(c.title)}</b><p class="muted" style="margin:4px 0">${esc(c.statement)}</p><div class="docs">${c.evidence.map((d, i) => docTile(d, i, k)).join("")}</div><button class="btn" style="margin-top:10px" data-claim="${k}">File this claim</button></div>`).join("");
+  document.querySelectorAll("[data-claim]").forEach((b) => (b.onclick = () => runClaim(b.dataset.claim)));
+  $("#claimsec").scrollIntoView({ behavior: "smooth" });
+}
+
+async function runClaim(id) {
+  const card = $("#claimcard");
+  card.innerHTML = `<b>Judging the claim…</b>`;
+  const step = stepper(card);
+  try {
+    const c = await ndjson("/api/claim", { bondId: lastBond.id, claimId: id }, step);
+    finish(card);
+    const pay = c.decision === "pay";
+    card.insertAdjacentHTML("beforeend", `<div class="slip"><div class="row" style="justify-content:space-between"><span class="verdict ${c.decision}">${pay ? "PAID" : "DENIED"}</span>${pay ? `<span class="big">${usd(c.payoutUsd)}</span>` : ""}</div>
+      <div class="note ${pay ? "ok" : "bad"}">${esc(c.reason)}</div>
+      ${pay && c.payoutTxUrl ? `<p>Payout tx <a href="${c.payoutTxUrl}">${short(c.payoutTx)}</a> to ${short(lastBond.beneficiary)}</p>` : ""}
+      <dl class="kv"><dt>Peril</dt><dd>${esc(c.judgment.peril)}</dd><dt>Bonded action</dt><dd>${c.judgment.action_matches_bond ? "matches" : "does not match"}</dd><dt>Third-party evidence</dt><dd>${c.judgment.third_party_evidence ? "yes" : "no"}</dd><dt>Exclusion</dt><dd>${esc(c.judgment.exclusion)}</dd></dl>
+      ${provenance(c.dolphin, c.serv)}<button class="btn secondary" id="reClaim">Re-check on the same weights</button><div id="afterClaim"></div></div>`);
+    $("#reClaim").onclick = () => recheck(c.id, $("#afterClaim"));
+  } catch (e) { finish(card); card.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div>`); }
+  loadPool(); loadLedger();
+}
+
+async function loadLedger() {
+  const l = await (await fetch("/api/ledger")).json();
+  const rows = l.quotes.slice(0, 12).map((q) => `<tr><td class="mono">${esc(q.id)}</td><td>${esc(q.case.action.description)}</td><td>${pct(q.pLoss)}</td><td><b style="color:var(${q.decision === "insure" ? "--green" : "--red"})">${q.decision}</b></td><td>${q.decision === "insure" ? usd(q.premiumUsd) : ""}</td><td class="muted">${new Date(q.createdAt).toLocaleString()}</td></tr>`).join("");
+  const claims = l.claims.slice(0, 8).map((c) => `<tr><td class="mono">${esc(c.id)}</td><td>${esc(c.bondId)}</td><td><b style="color:var(${c.decision === "pay" ? "--green" : "--red"})">${c.decision}</b></td><td>${c.payoutUsd ? usd(c.payoutUsd) : ""}</td><td>${c.payoutTxUrl ? `<a href="${c.payoutTxUrl}">tx</a>` : ""}</td></tr>`).join("");
+  $("#ledger").innerHTML = `<table><tr><th>Quote</th><th>Action</th><th>p(loss)</th><th>Decision</th><th>Premium</th><th>When</th></tr>${rows || '<tr><td colspan="6" class="muted">No quotes yet.</td></tr>'}</table>${claims ? `<h3 style="margin-top:18px">Claims</h3><table><tr><th>Claim</th><th>Bond</th><th>Decision</th><th>Payout</th><th></th></tr>${claims}</table>` : ""}`;
+}
+
+async function loadBacktest() {
+  const r = await fetch("/backtest.json").catch(() => null);
+  if (!r?.ok) return;
+  const b = await r.json();
+  $("#backtestsec").hidden = false;
+  $("#backtest").innerHTML = b.html;
+}
+
+(async () => {
+  DATA = await (await fetch("/api/cases")).json();
+  $("#tabs").innerHTML = DATA.cases.map((c, i) => `<button class="tab" role="tab" aria-selected="${i === 0}" data-id="${c.id}">${esc(c.title)}</button>`).join("");
+  document.querySelectorAll(".tab").forEach((t) => (t.onclick = () => { document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", x === t)); current = DATA.cases.find((c) => c.id === t.dataset.id); renderCase(); }));
+  current = DATA.cases[0]; renderCase();
+  loadPool(); loadLedger(); loadBacktest();
+})();
+</script>
+</body>
+</html>

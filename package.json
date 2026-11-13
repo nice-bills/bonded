@@ -1,0 +1,37 @@
+{
+  "name": "bonded",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "render": "tsx scripts/render-cases.ts",
+    "fund": "tsx scripts/fund.ts",
+    "backtest": "tsx scripts/backtest.ts",
+    "openserv": "tsx openserv/agent.ts",
+    "openserv:build": "tsx scripts/build-openserv.mts",
+    "openserv:deploy": "npm run openserv:build && tsx scripts/deploy-openserv.mts",
+    "start": "tsx src/server.ts",
+    "seal": "tsx scripts/seal-env.ts"
+  },
+  "dependencies": {
+    "@openserv-labs/client": "^2.5.3",
+    "@openserv-labs/sdk": "^2.4.1",
+    "dotenv": "^18.0.3",
+    "express": "^4.21.2",
+    "viem": "^2.56.8",
+    "zod": "^4.6.5",
+    "tsx": "^4.23.15"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

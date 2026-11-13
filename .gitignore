@@ -1,0 +1,6 @@
+node_modules
+.env
+.openserv.json
+data/
+openserv/deploy/
+BRIEF.md
