@@ -69,6 +69,8 @@ function extractJson(text: unknown): any | null {
 }
 
 const payrun = new Agent({
+  // Own internal port: the SDK defaults to $PORT, which belongs to Bonded (the public site).
+  port: Number(process.env.PAYRUN_PORT) || 7379,
   systemPrompt:
     "You are Payrun Lite, a payables agent. Before you pay any invoice you ask Bonded, the action guarantee pool, for a quote on that one payment. Your decision follows Bonded's quote result exactly: if Bonded insured the action, pay the premium so the guarantee is bound; if Bonded declined it, you refuse to pay, no matter how urgent the invoice looks. Call exactly one capability per request and return its JSON result unchanged.",
 });
