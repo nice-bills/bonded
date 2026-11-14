@@ -21,7 +21,7 @@ html{background:var(--paper)}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 a{color:var(--link);text-underline-offset:2px}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
-.sc{text-transform:uppercase;letter-spacing:.07em;color:var(--dim);font-size:11px;font-weight:500}
+.sc{text-transform:uppercase;letter-spacing:.07em;color:var(--dim);font-size:11px;font-weight:500;overflow-wrap:anywhere}
 .num{font-variant-numeric:lining-nums tabular-nums}
 nav{display:flex;align-items:baseline;gap:20px;padding:16px 0 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 nav .brand{font-style:italic;font-size:26px;margin-right:4px}
@@ -41,9 +41,12 @@ h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6p
 .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
 .tab:focus-visible,.btn:focus-visible,.doc:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 .row{display:grid;grid-template-columns:1fr 1.12fr;gap:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px 18px}
+/* Grid children default to min-width:auto, so one long address or evidence line
+   can push the whole page wider than the viewport. Let them shrink and wrap. */
+.row>*,.trio>*,.slipgrid>*,.claim>div{min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px 18px;min-width:0;overflow-wrap:anywhere}
 .action{font-size:21px;margin:2px 0 6px}
-.facts{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--soft);margin-bottom:10px}
+.facts{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--soft);margin-bottom:10px;overflow-wrap:anywhere;min-width:0}
 .facts code{font:13px "JetBrains Mono",ui-monospace,monospace;color:var(--soft)}
 .inv{width:100%;aspect-ratio:820/360;object-fit:cover;object-position:top;border:1px solid var(--line);display:block;background:var(--img);cursor:zoom-in}
 .docs{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:10px}
@@ -51,18 +54,21 @@ h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6p
 .doc.u{border-color:color-mix(in srgb,var(--red) 45%,var(--line));color:var(--red)}
 .slip{display:flex;flex-direction:column;min-height:100%}
 .slip h2{font-weight:400;font-size:26px;margin:2px 0 6px}
-.verdict{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:2px 0 4px}
+.verdict{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:2px 0 4px;overflow-wrap:anywhere;min-width:0}
 .verdict h2{font-style:italic;font-size:34px;margin:0}
 .verdict .fig{font-size:15px;color:var(--dim)}
 .verdict number-flow{font-size:34px;color:var(--ink);margin-left:4px;font-variant-numeric:lining-nums}
 .green{color:var(--green)}.red{color:var(--red)}
-.summary{color:var(--soft);margin:4px 0 8px;font-size:16px}
+.summary{color:var(--soft);margin:4px 0 8px;font-size:16px;overflow-wrap:anywhere}
 .slipgrid{display:grid;grid-template-columns:1fr 200px;gap:18px}
 table{width:100%;border-collapse:collapse;font-size:15px}
 td{padding:3px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.slipgrid table td:first-child{width:58%}
+/* Rough Notation positions its <svg> against the nearest positioned ancestor. */
+#slip table td{position:relative}
 td.r{text-align:right;white-space:nowrap}
 tr.hot td{color:var(--red)}
-.ev{font-size:13px;color:var(--dim);display:block;line-height:1.3;padding-bottom:2px}
+.ev{font-size:13px;color:var(--dim);display:block;line-height:1.3;padding-bottom:2px;overflow-wrap:anywhere}
 .notes{font-size:14px;line-height:1.4;color:var(--soft)}
 .notes p{margin:0 0 9px;overflow-wrap:anywhere}
 .notes .sc{font-size:14px;color:var(--red)}
@@ -193,13 +199,17 @@ async function loadPool() {
   } catch { $("#poolline").textContent = "pool status unavailable"; }
 }
 
-function renderCase() {
+function renderCaseCard() {
   const a = current.action, img = current.docs.findIndex((d) => d.image);
   $("#casecard").innerHTML = `<div class="sc">the action</div>
     <div class="action">${esc(a.description)}</div>
     <div class="facts num"><span>${usd(a.amountUsd)}</span><span>to <code>${short(a.payTo)}</code></span><span>cover asked ${usd(current.coverUsd)}</span></div>
     ${img >= 0 ? `<img class="inv" src="${current.docs[img].image}" alt="${esc(current.docs[img].name)}" data-doc="case:${img}">` : ""}
     <div class="docs">${current.docs.map((d, i) => `<button class="doc ${d.source === "untrusted" ? "u" : ""}" data-doc="case:${i}">${esc(d.name)}</button>`).join("")}</div>`;
+}
+
+function renderCase() {
+  renderCaseCard();
   clearMarks($("#slip"));
   $("#slip").innerHTML = `<div class="sc">guarantee quote</div><h2>Ask the pool to guarantee this payment.</h2>
     <p class="summary">The underwriter reads all ${current.docs.length} documents in one call, images included, and prices five perils. SERV Reasoning screens the documents and audits the estimate. Bonded's code sets the price.</p>
@@ -211,6 +221,7 @@ const STEP = {
   dolphin: (e) => `Dolphin reads ${e.docs} documents (${e.images} image${e.images === 1 ? "" : "s"}) in one call`,
   priced: (e) => `Estimated chance of loss ${pct(e.pLoss)} · ${e.inTokens.toLocaleString()} tokens · ${(e.latencyMs / 1000).toFixed(1)} s`,
   serv: () => "SERV Reasoning: Prompt Guard screens the documents, Shadow Agent audits",
+  shadow: (e) => `SERV Shadow Agent audit (advisory): ${e.verdict}`,
   multipath: () => "SERV Multipath weighs the bond wording, payment policy and vendor contract",
   decided: (e) => `Decision: ${e.decision}`,
   judged: (e) => `Claims judge: ${e.decision} · ${(e.latencyMs / 1000).toFixed(1)} s`,
@@ -232,11 +243,42 @@ function notes(d, serv, extra = "") {
 }
 
 // Second open model on Dolphin: higher estimate per peril wins; disagreement raises the price or declines.
+// "single" is the default (panel off), not a failure: say nothing. Only "single-fallback" means the
+// second model was expected and did not answer.
 function panelNote(q) {
   const p = q.panel; if (!p) return "";
-  if (p.mode !== "panel") return `<p><span class="sc">panel.</span> second model unavailable, priced by one model${p.fallbackReason ? ` (${esc(p.fallbackReason.slice(0, 60))})` : ""}.</p>`;
+  if (p.mode === "single") return "";
+  if (p.mode === "single-fallback") return `<p><span class="sc">panel.</span> second model unavailable, priced by one model${p.fallbackReason ? ` (${esc(p.fallbackReason.slice(0, 60))})` : ""}.</p>`;
   return `<p><span class="sc">panel.</span> ${p.members.map((m, i) => `${esc(m.model.split("/").pop())} ${pct(p.pLossList[i])}`).join(" · ")}${p.conflict ? ", models disagree on insurability" : p.disagreementLoading ? `, disagreement loading +${p.disagreementLoading}` : ", in agreement"}.</p>`;
 }
+
+// One renderer for a quote result, used by runQuote and by #q_… deep links.
+function renderQuoteResult(q) {
+  const slip = $("#slip");
+  lastQuote = q; lastBond = null;
+  clearMarks(slip);
+  const ok = q.decision === "insure";
+  const perils = Object.entries(q.underwriting.perils);
+  slip.innerHTML = `<div class="sc">guarantee quote · ${esc(q.id)}</div>
+    <div class="verdict"><h2 id="vword" class="${ok ? "green" : "red"}">${ok ? "Insured" : "Not insurable"}</h2>
+      <span class="fig">${ok ? `premium<number-flow id="prem"></number-flow>` : `chance of loss<number-flow id="prem"></number-flow>`}</span></div>
+    <p class="summary"><span id="sum">${esc(q.underwriting.summary)}</span></p>
+    <div class="slipgrid"><div>
+      <table class="num">${perils.map(([k, v]) => `<tr class="${v.p >= 0.1 ? "hot" : ""}"><td><span>${k.replaceAll("_", " ")}</span>${v.p >= 0.1 && v.evidence ? `<span class="ev">${esc(v.evidence)}</span>` : ""}</td><td class="r">${pct(v.p)}</td></tr>`).join("")}
+      <tr><td><b>combined</b></td><td class="r"><b>${pct(q.pLoss)}</b></td></tr></table>
+      ${ok ? "" : `<div class="note bad">${esc(q.reason)} Payrun must not pay.</div>`}
+      <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on the same weights</button></div>
+      <div id="after"></div>
+    </div>${notes(q.dolphin, q.serv, panelNote(q) + (ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × ${(1.4 + (q.panel?.disagreementLoading || 0)).toFixed(2)} = ${usd(q.premiumUsd, 2)}</p>` : ""))}</div>`;
+  flow($("#prem"), ok ? q.premiumUsd : q.pLoss, ok ? money2 : { style: "percent", maximumFractionDigits: 1 });
+  mark($("#vword"), ok ? { type: "circle", color: css("--green"), padding: 8 } : { type: "underline", color: css("--red"), strokeWidth: 2 });
+  // Annotate the text span, not the <td>: Rough Notation inserts its <svg> into the
+  // target's parent, and an <svg> directly inside a <tr> becomes a phantom table column.
+  if (!ok) document.querySelectorAll("#slip tr.hot td:first-child > span:first-child").forEach((s) => mark(s, { type: "highlight", color: css("--hl"), multiline: true }));
+  $("#reBtn").onclick = () => recheck(q.id, $("#after"));
+  if (ok) $("#payBtn").onclick = payPremium;
+}
+
 async function runQuote() {
   const slip = $("#slip");
   clearMarks(slip);
@@ -244,25 +286,7 @@ async function runQuote() {
   const step = stepper(slip);
   try {
     const q = await ndjson("/api/quote", { caseId: current.id }, step);
-    lastQuote = q; lastBond = null;
-    const ok = q.decision === "insure";
-    const perils = Object.entries(q.underwriting.perils);
-    slip.innerHTML = `<div class="sc">guarantee quote · ${esc(q.id)}</div>
-      <div class="verdict"><h2 id="vword" class="${ok ? "green" : "red"}">${ok ? "Insured" : "Not insurable"}</h2>
-        <span class="fig">${ok ? `premium<number-flow id="prem"></number-flow>` : `chance of loss<number-flow id="prem"></number-flow>`}</span></div>
-      <p class="summary"><span id="sum">${esc(q.underwriting.summary)}</span></p>
-      <div class="slipgrid"><div>
-        <table class="num">${perils.map(([k, v]) => `<tr class="${v.p >= 0.1 ? "hot" : ""}"><td>${k.replaceAll("_", " ")}${v.p >= 0.1 && v.evidence ? `<span class="ev">${esc(v.evidence)}</span>` : ""}</td><td class="r">${pct(v.p)}</td></tr>`).join("")}
-        <tr><td><b>combined</b></td><td class="r"><b>${pct(q.pLoss)}</b></td></tr></table>
-        ${ok ? "" : `<div class="note bad">${esc(q.reason)} Payrun must not pay.</div>`}
-        <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on the same weights</button></div>
-        <div id="after"></div>
-      </div>${notes(q.dolphin, q.serv, panelNote(q) + (ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × ${(1.4 + (q.panel?.disagreementLoading || 0)).toFixed(2)} = ${usd(q.premiumUsd, 2)}</p>` : ""))}</div>`;
-    flow($("#prem"), ok ? q.premiumUsd : q.pLoss, ok ? money2 : { style: "percent", maximumFractionDigits: 1 });
-    mark($("#vword"), ok ? { type: "circle", color: css("--green"), padding: 8 } : { type: "underline", color: css("--red"), strokeWidth: 2 });
-    if (!ok) document.querySelectorAll("#slip tr.hot td:first-child").forEach((td) => mark(td.firstChild?.nodeType === 3 ? td : td, { type: "highlight", color: css("--hl"), multiline: true }));
-    $("#reBtn").onclick = () => recheck(q.id, $("#after"));
-    if (ok) $("#payBtn").onclick = payPremium;
+    renderQuoteResult(q);
   } catch (e) {
     finish(slip);
     slip.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div><div class="btns"><button class="btn" id="retry">Try again</button></div>`);
@@ -275,9 +299,34 @@ async function recheck(id, el) {
   el.innerHTML = `<div class="note">Re-running the stored request: same bytes, same weights…</div>`;
   try {
     const r = await ndjson(`/api/recheck/${id}`, {}, () => {});
-    const same = r.fingerprint === r.originalFingerprint;
+    // Newer results carry fingerprint/originalFingerprint; older ones only the lists.
+    const was = r.originalFingerprint ?? r.originalFingerprints?.[0];
+    const now = r.fingerprint ?? r.fingerprints?.[0];
+    const same = !was || !now ? true : was === now;
     el.innerHTML = `<div class="note ${r.sameDecision ? "ok" : "bad"}"><b>${r.sameDecision ? "Same decision" : "Different decision"}</b> on re-run: ${r.kind === "quote" ? `${pct(r.original.pLoss)} then ${pct(r.rerun.pLoss)}, ${r.original.decision} then ${r.rerun.decision}` : `${r.original.decision} then ${r.rerun.decision}`}. Serving build ${same ? "unchanged" : "changed"}.</div>`;
   } catch (e) { el.innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
+}
+
+// One renderer for a bond certificate, used by payPremium and by #bond_… deep links.
+function renderBond(bond, quote = lastQuote) {
+  lastBond = bond;
+  if (quote) lastQuote = quote;
+  const slip = $("#slip"); clearMarks(slip);
+  slip.innerHTML = `<div class="sc">bond certificate · ${esc(bond.id)}</div>
+    <h2>Guarantee of one payment</h2>
+    <p class="summary">${esc(bond.action.description)}, ${usd(bond.action.amountUsd)} to <code style="font-size:13px">${short(bond.action.payTo)}</code>.</p>
+    <div class="slipgrid"><div>
+      <table class="num"><tr><td>cover</td><td class="r"><number-flow id="cov"></number-flow></td></tr><tr><td>premium paid</td><td class="r">${usd(bond.premiumUsd, 2)}</td></tr>
+      <tr><td>chance of loss</td><td class="r">${quote ? pct(quote.pLoss) : "—"}</td></tr>
+      <tr><td>premium tx</td><td class="r">${bond.premiumTxUrl ? `<a href="${bond.premiumTxUrl}">${short(bond.premiumTx)}</a>` : esc(short(bond.premiumTx) || "—")}</td></tr>
+      <tr><td>claims window</td><td class="r">30 days</td></tr></table>
+      <div id="sig" aria-label="Signed: Bonded"></div><div class="sigline">signed by the underwriter · re-checkable on the same weights</div>
+      <div class="note ok">Cover is reserved in the pool. Payrun may now pay the invoice.</div>
+      ${quote ? "" : `<div class="note">The original quote is not on this server; the claim buttons below still read the bond's stored case.</div>`}
+    </div>${quote ? notes(quote.dolphin, quote.serv) : ""}</div>`;
+  flow($("#cov"), bond.coverUsd, money);
+  if (window.Vara) new Vara("#sig", "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json", [{ text: "Bonded", fontSize: 30, strokeWidth: 1.3, color: css("--ink"), duration: 1600, textAlign: "left" }]);
+  renderClaims();
 }
 
 async function payPremium() {
@@ -285,21 +334,7 @@ async function payPremium() {
   try {
     const r = await (await fetch("/api/demo/pay-premium", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ quoteId: lastQuote.id }) })).json();
     if (r.error) throw new Error(r.error);
-    lastBond = r.bond;
-    const slip = $("#slip"); clearMarks(slip);
-    slip.innerHTML = `<div class="sc">bond certificate · ${esc(r.bond.id)}</div>
-      <h2>Guarantee of one payment</h2>
-      <p class="summary">${esc(r.bond.action.description)}, ${usd(r.bond.action.amountUsd)} to <code style="font-size:13px">${short(r.bond.action.payTo)}</code>.</p>
-      <div class="slipgrid"><div>
-        <table class="num"><tr><td>cover</td><td class="r"><number-flow id="cov"></number-flow></td></tr><tr><td>premium paid</td><td class="r">${usd(r.bond.premiumUsd, 2)}</td></tr>
-        <tr><td>chance of loss</td><td class="r">${pct(lastQuote.pLoss)}</td></tr><tr><td>premium tx</td><td class="r"><a href="${r.bond.premiumTxUrl}">${short(r.tx)}</a></td></tr>
-        <tr><td>claims window</td><td class="r">30 days</td></tr></table>
-        <div id="sig" aria-label="Signed: Bonded"></div><div class="sigline">signed by the underwriter · re-checkable on the same weights</div>
-        <div class="note ok">Cover is reserved in the pool. Payrun may now pay the invoice.</div>
-      </div>${notes(lastQuote.dolphin, lastQuote.serv)}</div>`;
-    flow($("#cov"), r.bond.coverUsd, money);
-    if (window.Vara) new Vara("#sig", "https://raw.githubusercontent.com/akzhy/Vara/master/fonts/Satisfy/SatisfySL.json", [{ text: "Bonded", fontSize: 30, strokeWidth: 1.3, color: css("--ink"), duration: 1600, textAlign: "left" }]);
-    renderClaims();
+    renderBond(r.bond, lastQuote);
   } catch (e) { btn.disabled = false; btn.textContent = "Try again"; $("#after").innerHTML = `<div class="note bad">${esc(e.message)}</div>`; }
   loadPool(); loadLedger();
 }
@@ -329,7 +364,8 @@ async function runClaim(id) {
       <p>${esc(c.reason.length > 260 ? c.reason.slice(0, 260) + "…" : c.reason)}</p>
       ${pay && c.payoutTxUrl ? `<p>Payout <a href="${c.payoutTxUrl}">${short(c.payoutTx)}</a> on Base Sepolia.</p>` : ""}
       ${c.multipath ? `<table class="num" style="margin:6px 0">${c.multipath.rulebooks.map((r) => `<tr><td>${r.rulebook.replaceAll("_", " ")}${r.clause ? `<span class="ev">${esc(r.clause.length > 90 ? r.clause.slice(0, 90) + "…" : r.clause)}</span>` : ""}</td><td class="r ${r.finding === "covered" ? "green" : "red"}">${r.finding}</td></tr>`).join("")}</table>` : ""}
-      <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}${c.multipath ? ` · multipath ${esc(c.multipath.verdict)}` : ""}</p>
+      ${c.shadow ? `<p><span class="sc">shadow agent.</span> ${c.shadow.verdict === "agree" ? "Agrees with the decision" : c.shadow.verdict === "object" ? "Objected (advisory, not a veto)" : c.shadow.verdict === "blocked" ? "Prompt Guard refused its copy" : "Unavailable"}${c.shadow.reason && c.shadow.verdict !== "agree" ? `: ${esc(c.shadow.reason.length > 180 ? c.shadow.reason.slice(0, 180) + "…" : c.shadow.reason)}` : ""}</p>` : ""}
+      <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}${c.shadow ? ` · shadow ${esc(c.shadow.verdict)}` : ""}${c.multipath ? ` · multipath ${esc(c.multipath.verdict)}` : ""}</p>
       <button class="btn sm g" id="reClaim">Re-check on the same weights</button><div id="afterClaim"></div>`;
     mark($("#cword"), pay ? { type: "circle", color: css("--green"), padding: 6 } : { type: "strike-through", color: css("--red"), strokeWidth: 2 });
     $("#reClaim").onclick = () => recheck(c.id, $("#afterClaim"));
@@ -372,6 +408,55 @@ async function loadLedger() {
   } catch { $("#ledger").innerHTML = `<div class="sc">ledger</div><p>Not available.</p>`; }
 }
 
+function setActiveTab(id) {
+  document.querySelectorAll(".tab").forEach((x) => x.setAttribute("aria-selected", String(x.dataset.id === id)));
+}
+function showMissing(what, id) {
+  const slip = $("#slip"); clearMarks(slip);
+  slip.innerHTML = `<div class="sc">guarantee quote</div><h2>That link points nowhere.</h2>
+    <p class="summary">No ${what} <code>${esc(id)}</code> on this server. Ledgers are per-instance, so a link to one made on another deploy will not resolve here.</p>
+    <div class="btns"><a class="btn g" href="#console" style="text-decoration:none">Back to the console</a></div>`;
+}
+function showCase(caseId) {
+  const c = DATA?.cases?.find((x) => x.id === caseId);
+  if (!c) return;
+  current = c; setActiveTab(c.id); renderCaseCard();
+}
+
+// Deep links: /#q_… (a stored quote) and /#bond_… (a bond certificate). #console and
+// #backtest stay ordinary anchors, so they fall through to the browser.
+async function routeHash() {
+  const h = location.hash.slice(1);
+  if (!h.startsWith("q_") && !h.startsWith("bond_")) return;
+  if (!DATA) return;
+  try {
+    if (h.startsWith("q_")) {
+      const res = await fetch(`/api/quotes/${encodeURIComponent(h)}`);
+      if (res.status === 404) return showMissing("quote", h);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const q = await res.json();
+      showCase(q.case?.id);
+      renderQuoteResult(q);
+    } else {
+      const res = await fetch(`/api/bonds/${encodeURIComponent(h)}`);
+      if (res.status === 404) return showMissing("bond", h);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const b = await res.json();
+      let q = null;
+      if (b.quoteId) {
+        const qr = await fetch(`/api/quotes/${encodeURIComponent(b.quoteId)}`);
+        if (qr.ok) q = await qr.json();
+      }
+      showCase(q?.case?.id);
+      renderBond(b, q);
+    }
+    loadPool(); loadLedger();
+  } catch (e) {
+    const slip = $("#slip"); clearMarks(slip);
+    slip.innerHTML = `<div class="sc">guarantee quote</div><div class="note bad">Could not load that link: ${esc(e.message)}</div>`;
+  }
+}
+
 const themeBtn = $("#theme");
 const setTheme = (t) => { document.documentElement.dataset.theme = t; themeBtn.textContent = t === "dark" ? "Light" : "Dark"; try { localStorage.setItem("theme", t); } catch {} };
 try { setTheme(localStorage.getItem("theme") || "light"); } catch { setTheme("light"); }
@@ -385,6 +470,8 @@ themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "da
   }));
   current = DATA.cases[0]; renderCase(); renderClaims();
   loadPool(); loadLedger(); loadBacktest();
+  routeHash();
+  window.addEventListener("hashchange", routeHash);
   window.addEventListener("load", () => document.fonts.ready.then(() => mark($("#mark"), { type: "underline", color: css("--red"), strokeWidth: 2 })));
 })();
 </script>

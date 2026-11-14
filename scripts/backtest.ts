@@ -1,12 +1,15 @@
 /**
- * Backtest the underwriting PANEL (DeepSeek-V4.1-Flash + Gemma-4-26B on the same rating
- * guide and documents, combined per-peril max, disagreement loading, panel-disagreement
- * decline) on Payrun's 40 labelled invoices (16 clean, 24 traps), one run.
- * Dolphin only (SERV's veto is left out so the panel is measured on its own).
- *   npm run backtest            -> backtest/results-panel.json (+ public/backtest.json
- *                                  only if the panel is at least as good as the recorded
- *                                  single-model run in backtest/results.json on traps
- *                                  declined AND clean invoices insured)
+ * Backtest Payrun's 40 labelled invoices (16 clean, 24 traps), one run by default.
+ * The default is ONE open model (DeepSeek-V4.1-Flash), plus the code arithmetic check;
+ * SERV's veto is left out so the underwriter is measured on its own.
+ * Set BONDED_PANEL=on to measure the optional two-model panel (DeepSeek-V4.1-Flash +
+ * Gemma-4-26B on the same rating guide and documents, combined per-peril max,
+ * disagreement loading, panel-disagreement decline). The panel is not the default.
+ *   npm run backtest                 -> backtest/results-check.json (+ public/backtest.json
+ *                                       only if at least as good as the recorded single-model
+ *                                       run in backtest/results.json on traps declined AND
+ *                                       clean invoices insured)
+ *   BONDED_PANEL=on npm run backtest -> backtest/results-panel.json
  */
 import "dotenv/config";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -131,13 +134,13 @@ try {
   const base = JSON.parse(readFileSync("backtest/results.json", "utf8")).summary;
   if (summary.trapsDeclined >= base.trapsDeclined && summary.cleanInsured >= base.cleanInsured) {
     const S = summary;
-    const html = `<p><b>${S.trapsDeclined} of ${S.traps} traps priced out</b> (declined) and <b>${S.cleanInsured} of ${S.cleanTotal} clean invoices insured</b> at a mean premium of ${pct(S.meanCleanPremiumRate)} of cover, on Payrun's ${S.cases} labelled invoices — underwritten by ${PANEL_ON ? `a panel of two open models (${Object.keys(fingerprints).join(" + ")}), combined per-peril max with a disagreement loading` : `${Object.keys(fingerprints).join("")}, with invoice arithmetic recomputed in code (${S.arithmeticFlags} flagged)`}. Run ${S.ranAt.slice(0, 10)} on Dolphin.</p>
+    const html = `<p><b>${S.trapsDeclined} of ${S.traps} traps priced out</b> (declined) and <b>${S.cleanInsured} of ${S.cleanTotal} clean invoices insured on run 0</b>${S.runs > 1 ? ` — <b>${ok.filter((r) => !r.loss && r.decision === "insure").length} of ${ok.filter((r) => !r.loss).length} clean underwrites insured across both runs</b>` : ""} — at a mean premium of ${pct(S.meanCleanPremiumRate)} of cover, on Payrun's ${S.cases} labelled invoices. Underwritten by ${PANEL_ON ? `a panel of two open models (${Object.keys(fingerprints).join(" + ")}), combined per-peril max with a disagreement loading` : `${Object.keys(fingerprints).join("")}, with invoice arithmetic recomputed in code (${S.arithmeticFlags} flagged)`}. Run ${S.ranAt.slice(0, 10)} on Dolphin.</p>
 <table><tr><th>Trap kind</th><th>Cases</th><th>Declined</th><th>Mean p(loss)</th></tr>${byKind.map((k) => `<tr><td>${k.kind.replaceAll("_", " ")}</td><td>${k.n}</td><td>${k.declined}</td><td>${pct(k.meanPLoss)}</td></tr>`).join("")}</table>
 <dl class="kv"><dt>Book</dt><dd>premiums $${S.premiumsUsd.toLocaleString()} · losses $${S.lossesUsd.toLocaleString()} · loss ratio ${S.lossRatio == null ? "n/a" : pct(S.lossRatio)} · exposure declined $${S.exposureAvoidedUsd.toLocaleString()}</dd>
-<dt>Panel</dt><dd>${S.panelDisagreements} disagreement loadings · ${S.panelConflicts} panel-conflict declines · mean |Δp(loss)| between models ${S.meanAbsDeltaPLoss?.toFixed(4)}</dd>
-<dt>Ranking</dt><dd>AUC ${S.auc.toFixed(3)} · Brier ${S.brier.toFixed(3)}</dd>
-<dt>Speed, cost</dt><dd>p50 ${(S.latencyP50Ms / 1000).toFixed(1)} s · p95 ${(S.latencyP95Ms / 1000).toFixed(1)} s · $${S.costUsdTotal.toFixed(4)} for ${ok.length} panel underwrites (both models)</dd></dl>
-<p class="muted">Dolphin alone, SERV veto off, so the panel is measured on its own. Test set has far more traps than real life (${S.traps}/${S.cases}); the loss ratio is a stress test, not a forecast. Reproduce: <code>npm run backtest</code>.</p>`;
+${PANEL_ON ? `<dt>Panel</dt><dd>${S.panelDisagreements} disagreement loadings · ${S.panelConflicts} panel-conflict declines · mean |Δp(loss)| between models ${S.meanAbsDeltaPLoss?.toFixed(4)}</dd>` : ""}
+<dt>Ranking</dt><dd>AUC ${S.auc.toFixed(3)} · Brier ${S.brier.toFixed(3)} (run 0 only)</dd>
+<dt>Speed, cost</dt><dd>p50 ${(S.latencyP50Ms / 1000).toFixed(1)} s · p95 ${(S.latencyP95Ms / 1000).toFixed(1)} s · $${S.costUsdTotal.toFixed(4)} for ${ok.length} ${PANEL_ON ? "panel underwrites (both models)" : "underwriting calls (one model)"}</dd></dl>
+<p class="muted">${PANEL_ON ? "Dolphin panel" : "Dolphin alone"}, SERV veto off, so the underwriter is measured on its own. Clean-insured and ranking figures are run 0; the across-both-runs line counts every run. Test set has far more traps than real life (${S.traps}/${S.cases}); the loss ratio is a stress test, not a forecast. Reproduce: <code>npm run backtest</code>.</p>`;
     writeFileSync("public/backtest.json", JSON.stringify({ summary, html }));
     published = true;
   }

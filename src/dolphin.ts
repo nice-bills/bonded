@@ -95,6 +95,8 @@ export async function callDolphin(body: Record<string, unknown>, timeoutMs = 150
     } catch (e) {
       lastErr = e;
       if ((e as Error).name !== "AbortError" && !String(e).includes("fetch failed")) throw e;
+      // Same backoff as a 429: three back-to-back retries all landed inside one short network blip.
+      if (attempt < 2) await new Promise((r) => setTimeout(r, (2 + attempt * 3) * 1000));
     } finally {
       clearTimeout(timer);
     }

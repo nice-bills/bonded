@@ -3,9 +3,12 @@
  *
  * Usage: npx tsx openserv/a2a-run.ts <clean|wallet-swap|injection|all>
  *
- * Fires the "Payrun Lite: guaranteed payrun" trigger with the case; the platform runs
- * Bonded (quote) -> Payrun Lite (decide + pay premium) -> Bonded (bind) in one workspace, and
- * this script polls the tasks and records the run in data/a2a-runs.json for GET /api/a2a/runs.
+ * Fires the "Payrun Lite: guaranteed payrun" trigger with the stored case's ID (Bonded
+ * underwrites the full stored case server-side — relaying the documents JSON through the
+ * runtime's LLM truncated it and once made Bonded decline the clean case on ledger
+ * excerpts); the platform runs Bonded (quote) -> Payrun Lite (decide + pay premium) ->
+ * Bonded (bind) in one workspace, and this script polls the tasks and records the run in
+ * data/a2a-runs.json for GET /api/a2a/runs.
  */
 import "../src/sealed";
 import { readFileSync } from "node:fs";
@@ -76,8 +79,9 @@ const mergedJson = (t: unknown) => Object.assign({}, ...allJson(t));
 
 async function runOne(id: string) {
   const c = CASES[id];
-  const docs = c.docs.map((d) => d.image && !d.image.startsWith("http") ? { ...d, image: `${PUBLIC_URL}/${d.image}` } : d);
-  const input = { action: c.action.description, amountUsd: c.action.amountUsd, payee: c.action.payee, payTo: c.action.payTo, documents: JSON.stringify(docs) };
+  // caseId, not a documents blob: Bonded resolves the full stored case server-side, so the
+  // platform runtime cannot truncate it on the way through.
+  const input = { caseId: id, action: c.action.description, amountUsd: c.action.amountUsd, payee: c.action.payee, payTo: c.action.payTo };
   console.log(`\n=== ${id}: firing trigger (workflow ${wf.workspaceId}) ===`);
   await retry(() => client.put(`/workspaces/${wf.workspaceId}/triggers/${wf.triggerId}/trigger`, { input: JSON.stringify(input) }), "fire");
 

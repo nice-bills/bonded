@@ -44,6 +44,15 @@ const docs: Record<string, string> = {
 <tr style="background:#fff8d0"><td>2026-10-30</td><td>TRANSFER · KWAME MENSAH · INV-0929 · PAYMENTS API WEBHOOKS PH2 OCT</td><td class="r">$1,800.00</td><td class="r">$36,910.18</td></tr>
 <tr><td>2026-10-31</td><td>FEE · MONTHLY ACCOUNT FEE</td><td class="r">$12.00</td><td class="r">$36,898.18</td></tr></table>
 <p class="muted">Statement generated 2026-11-01. GCB Bank PLC.</p></div>`,
+  "claim-usdc": `<div class="p"><div style="display:flex;justify-content:space-between"><div><h1 style="color:#1a56db">USDC · Base</h1><div class="muted">Token transfer record</div></div>
+<div style="text-align:right"><span style="color:#0a7d38;font-weight:700">✔ Success</span><br><span class="muted">2026-11-02 14:06:11 UTC</span></div></div>
+<div class="box" style="word-break:break-all">tx 0x8f3a1c94b2d7e650f4a1c3b8d9e2067a5c4b3f2e1d0a9b8c7d6e5f4a3b2c1d0e9<br>Block 24,118,402 · confirmed</div>
+<table><tr><th></th><th>Address</th><th>Label</th></tr>
+<tr><td style="width:70px;color:#6b6b70">From</td><td class="mono">0x8C4f2E9a1B7d5C3e6F8a9B0c1D2e3F4a5B6C7D89</td><td>Tetteh &amp; Co. (Payrun)</td></tr>
+<tr><td style="color:#6b6b70">To</td><td class="mono">0x5a3B9e0C1f2d4E6a7B8c9D0e1F2a3b4C5d6E7f81</td><td>Kwame Mensah</td></tr></table>
+<table><tr><th>Token</th><th class="r">Amount</th></tr>
+<tr><td>USDC (Base)</td><td style="text-align:right;font-weight:700">$1,800.00</td></tr></table>
+<p class="muted">Reference: INV-0931 — Payments API webhooks, phase 2, October 2026.</p></div>`,
 };
 
 mkdirSync("demo/html", { recursive: true });

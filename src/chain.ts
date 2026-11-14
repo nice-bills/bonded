@@ -31,12 +31,26 @@ export async function poolUsd(): Promise<number> {
   return fromUnits(await usdcBalance(poolAddress()));
 }
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** The public RPC can lag a mined tx; retry with backoff (under ~45 s total) before calling it missing. */
+async function receipt(hash: Hex) {
+  for (const wait of [0, 1_000, 2_500, 5_000, 9_000]) {
+    if (wait) await sleep(wait);
+    const r = await pub.waitForTransactionReceipt({ hash, timeout: 5_000 }).catch(() => null);
+    if (r) return r;
+  }
+  return null;
+}
+
 /** Send USDC from a key (the pool for payouts, the demo agent for premiums). */
 export async function sendUsdc(key: Hex, to: Hex, units: bigint): Promise<Hex> {
   const account = privateKeyToAccount(key);
   const wallet = createWalletClient({ account, chain: baseSepolia, transport: rpc });
   const hash = await wallet.writeContract({ address: USDC, abi: ABI, functionName: "transfer", args: [to, units] });
-  const r = await pub.waitForTransactionReceipt({ hash, timeout: 60_000 });
+  const r = await receipt(hash);
+  // Broadcast but unconfirmed: money may still move, so the hash travels with the error.
+  if (!r) throw Object.assign(new Error(`transfer ${hash} not confirmed on Base Sepolia`), { hash });
   if (r.status !== "success") throw new Error(`transfer ${hash} reverted`);
   return hash;
 }
@@ -49,7 +63,7 @@ export const payout = (to: Hex, units: bigint) => sendUsdc(process.env.BONDED_PO
  */
 export async function verifyPremium(tx: Hex, units: bigint, notBefore: Date): Promise<{ ok: true; from: Hex } | { ok: false; reason: string }> {
   if (!/^0x[0-9a-fA-F]{64}$/.test(tx)) return { ok: false, reason: "not a transaction hash" };
-  const r = await pub.waitForTransactionReceipt({ hash: tx, timeout: 30_000 }).catch(() => null);
+  const r = await receipt(tx);
   if (!r) return { ok: false, reason: "transaction not found on Base Sepolia" };
   if (r.status !== "success") return { ok: false, reason: "transaction reverted" };
   const block = await pub.getBlock({ blockNumber: r.blockNumber });

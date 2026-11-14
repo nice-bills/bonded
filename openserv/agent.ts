@@ -19,7 +19,8 @@ import { mount } from "../src/routes";
 import { attachBond } from "../src/a2a";
 import { bind, claim, quote } from "../src/service";
 import { publicView } from "../src/service";
-import type { Doc } from "../src/case";
+import { CASES } from "../demo/cases";
+import { parseDocs, resolveStoredCase } from "./docs";
 
 const PUBLIC_URL = process.env.BONDED_PUBLIC_URL ?? "";
 const EARNINGS = process.env.BONDED_EARNINGS_WALLET?.trim();
@@ -37,12 +38,9 @@ const docSchema = z.object({
   image: z.string().optional().describe("https URL or data: URL of an image"),
 });
 
-/** Parse documents given either as an array or as JSON text (x402 form fields are strings). */
-function docs(v: unknown, fallbackText?: string): Doc[] {
-  if (Array.isArray(v)) return v as Doc[];
-  if (typeof v === "string" && v.trim().startsWith("[")) { try { return JSON.parse(v); } catch { /* fall through */ } }
-  return fallbackText ? [{ name: "case.txt", source: "untrusted", text: fallbackText }] : [];
-}
+// Caller documents are parsed and validated by openserv/docs.ts: images must be
+// data:image/ or https:// URLs. A repo/local path here would make src/case.ts toDataUrl()
+// read files from this server's disk (agent keys, sealed env) and ship them to the model.
 const out = (x: unknown) => JSON.stringify(publicView(x), null, 2);
 
 agent.addCapability({
@@ -50,21 +48,36 @@ agent.addCapability({
   description:
     "Before your agent acts (e.g. pays an invoice), get a guarantee quote for that one action. Bonded's open-weight underwriter (DeepSeek-V4.1-Flash on Dolphin) reads the whole case, including images, and returns a premium, or declines: a decline means the action is uninsurable and should not happen.",
   inputSchema: z.object({
+    caseId: z.string().optional().describe("A stored case in Bonded's ledger (e.g. 'clean', 'wallet-swap', 'injection'). When set, Bonded underwrites the FULL stored case server-side; documents is ignored. Use this instead of pasting long documents."),
     action: z.string().describe("What the agent is about to do, e.g. 'Pay invoice INV-0931 from Kwame Mensah'"),
     amountUsd: z.coerce.number().describe("Amount at risk in USD"),
     payee: z.string().describe("Who receives the money"),
     payTo: z.string().describe("Destination address or account"),
     coverUsd: z.coerce.number().optional().describe("Cover wanted, up to the amount; defaults to the amount"),
-    documents: z.union([z.array(docSchema), z.string()]).describe("The case file: invoice, emails, vendor records, contract, policy. JSON array of {name, source, text|image}, or plain text."),
+    documents: z.union([z.array(docSchema), z.string()]).describe("The case file: invoice, emails, vendor records, contract, policy. JSON array of {name, source, text|image}, or plain text. Ignored when caseId is set."),
     insured: z.string().optional(),
   }),
   async run({ args }) {
-    const q = await quote({
-      insured: args.insured ?? "OpenServ caller",
-      action: { kind: "pay", description: args.action, amountUsd: args.amountUsd, payee: args.payee, payTo: args.payTo },
-      coverUsd: args.coverUsd ?? args.amountUsd,
-      docs: docs(args.documents, typeof args.documents === "string" ? args.documents : undefined),
-    });
+    // caseId resolves to the FULL stored case server-side: the platform relay (an LLM) can
+    // truncate long free-form documents fields, which once made the underwriter judge the
+    // clean demo case on 275-char ledger excerpts instead of the full 9,000-char history.
+    // resolveStoredCase() uses Object.hasOwn (inherited keys can't match) and intentionally
+    // bypasses the image-URL rule for stored demo cases (their docs use local demo/img paths
+    // only this server may read); caller-supplied documents still go through parseDocs().
+    const stored = resolveStoredCase(args.caseId, CASES) as (typeof CASES)[keyof typeof CASES] | null;
+    if (typeof args.caseId === "string" && args.caseId.length > 0 && !stored) {
+      throw new Error(`unknown caseId "${args.caseId}"; stored cases: ${Object.keys(CASES).join(", ")}. For a case outside the stored ones, send the full case as documents.`);
+    }
+    const q = await quote(
+      stored ?? {
+        insured: args.insured ?? "OpenServ caller",
+        action: { kind: "pay", description: args.action, amountUsd: args.amountUsd, payee: args.payee, payTo: args.payTo },
+        coverUsd: args.coverUsd ?? args.amountUsd,
+        docs: parseDocs(args.documents, typeof args.documents === "string" ? args.documents : undefined),
+      },
+    );
+    // Console links are `${PUBLIC_URL}/#${id}`; hash handling is being added to the console
+    // by another agent, so keep this link shape unchanged.
     return out({ quoteId: q.id, decision: q.decision, reason: q.reason, premiumUsd: q.premiumUsd, pLoss: q.pLoss, payment: q.payment, expiresAt: q.expiresAt, summary: q.underwriting.summary, perils: q.underwriting.perils, serv: q.serv, dolphin: q.dolphin, console: PUBLIC_URL ? `${PUBLIC_URL}/#${q.id}` : undefined });
   },
 });
@@ -86,7 +99,7 @@ agent.addCapability({
   description: "File a claim on a bond. Bonded's claims judge (DeepSeek-V4.1-Flash on Dolphin) reads the original case, the quote and your evidence together; SERV Reasoning audits the decision; approved claims are paid from the pool in USDC.",
   inputSchema: z.object({ bondId: z.string(), statement: z.string(), evidence: z.union([z.array(docSchema), z.string()]) }),
   async run({ args }) {
-    return out(await claim(args.bondId, args.statement, docs(args.evidence, typeof args.evidence === "string" ? args.evidence : undefined)));
+    return out(await claim(args.bondId, args.statement, parseDocs(args.evidence, typeof args.evidence === "string" ? args.evidence : undefined)));
   },
 });
 

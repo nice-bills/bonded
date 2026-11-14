@@ -18,21 +18,21 @@ An insurer's loss history only means something while the underwriter stays the s
 2. **Price in code, not in the model.** p(loss) = 1 − Π(1 − p_peril). Premium = cover × p(loss) × 1.4 (min $0.50). Above 10% it is uninsurable: the agent must not act. One bond may use at most 25% of free pool capital; every active bond's cover is reserved (fully funded pool).
 3. **SERV second line.** One SERV Reasoning call (`gpt-6-luna`) with `serv_prompt_guard` on the transcribed untrusted documents and `serv_shadow_agent` auditing the estimate against the rating rules. A guard block or an objection vetoes the bond.
 4. **Bind.** The agent pays the premium in USDC to the pool; Bonded verifies the transfer log on chain (amount, recipient, after the quote, never reused) and issues the bond.
-5. **Claim.** A separate Dolphin call (the claims judge) reads the original case, the quote and the claim evidence together, against a published wording (covered perils, exclusions). Code gates enforce the wording; SERV audits; approved claims are paid from the pool on chain.
+5. **Claim.** A separate Dolphin call (the claims judge) reads the original case, the quote and the claim evidence together, against a published wording (covered perils, exclusions). Code gates enforce the wording; SERV Prompt Guard, a SERV reviewer and Multipath (three rulebooks) can each veto; the Shadow Agent audits each decision as advisory; approved claims are paid from the pool on chain.
 6. **Re-check.** `POST /api/recheck/:id` replays the byte-identical stored request on the same weights and compares the decision.
 
 ## Backtest (Payrun's 40 labelled invoices, 24 traps, 2 runs each)
 | | |
 |---|---|
 | Traps priced out (declined) | **24 / 24** (wallet swaps, duplicates, over-cap, bad arithmetic, unapproved expenses, prompt injection) |
-| Clean invoices insured | **16 / 16**, mean premium 1.75% of cover |
-| Ranking | AUC 1.000, Brier 0.009 |
+| Clean invoices insured | **31 of 32 across both runs** (16 / 16 on run 0; one clean invoice declined on the re-run at p 0.186), mean premium 1.75% of cover |
+| Ranking (run 0) | AUC 1.000, Brier 0.009 |
 | Arithmetic | recomputed in code from the figures the model reads; 3 / 3 bad-arithmetic invoices flagged on every run |
 | Same decision on re-run | 97.5% (39/40) |
 | Book | $783 premiums, $0 losses, $81,290 of trap exposure declined |
 | Speed, cost | p50 7.0 s, p95 134 s (Dolphin long tail), $0.0075 for all 80 calls |
 
-Finding: during one 80-call run Dolphin served from two vLLM builds (0.33.0rc1 for 62 calls, 0.32.0rc1 for 18). Same weights, different serving stack: Bonded records the fingerprint so drift is visible, which closed APIs never expose. Reproduce with `npm run backtest` (Dolphin only, SERV veto off). Full rows: `backtest/results-check.json` (current), `backtest/results.json` (before the arithmetic check), `backtest/results-panel.json` (two-model panel, now opt-in with `BONDED_PANEL=on`; see docs/DOLPHIN.md).
+Finding: during one 80-call run Dolphin served from two vLLM builds (0.33.0rc1 for 68 calls, 0.32.0rc1 for 12). Same weights, different serving stack: Bonded records the fingerprint so drift is visible, which closed APIs never expose. Reproduce with `npm run backtest` (Dolphin only, SERV veto off). Full rows: `backtest/results-check.json` (current), `backtest/results.json` (before the arithmetic check), `backtest/results-panel.json` (two-model panel, now opt-in with `BONDED_PANEL=on`; see docs/DOLPHIN.md).
 
 ## Run it
 ```bash
