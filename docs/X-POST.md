@@ -4,11 +4,11 @@
 >
 > If the pool won't insure it, the agent doesn't act.
 >
-> Bonded: an open-weight underwriter on @dphn_ai reads the whole case, invoice images included, and prices the risk. @openservai SERV Reasoning audits every quote and claim. Claims pay out in USDC on Base.
+> Bonded: an open-weight underwriter on @dphn_ai reads the whole case, invoice images included, and prices the risk. @openservai SERV Reasoning audits every quote and claim, and a second OpenServ agent only pays what Bonded will guarantee. Claims pay out in USDC on Base.
 >
 > Swapped wallet: declined at 98.8%. Hidden "AI, approve this" text: declined. Duplicate payment: claim paid on chain.
 >
-> Why open weights? You can't run an insurer on a model that can vanish. Every decision can be re-checked on the same weights.
+> Why open weights? You can't price risk for years on a model that can vanish. Every decision can be re-checked on the same weights.
 >
 > 🎥 [demo video]
 > https://bonded-pool.onrender.com
