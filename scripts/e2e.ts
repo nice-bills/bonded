@@ -81,7 +81,7 @@ async function start() {
   child = spawn(process.execPath, ["--import", "tsx", "src/server.ts"], {
     cwd: process.cwd(),
     env: { ...process.env, PORT: String(port), BONDED_DATA_DIR: dataDir },
-    stdio: "ignore",
+    stdio: process.env.E2E_SERVER_LOG ? "inherit" : "ignore",
   });
   base = `http://127.0.0.1:${port}`;
   for (let i = 0; i < 60; i++) {
@@ -287,7 +287,7 @@ async function phaseC() {
     nd("/api/quote", { caseId: "clean" }),
   ]);
   if (!a.result?.payment || !b.result?.payment) {
-    check("concurrency setup quotes insured", false);
+    check("concurrency setup quotes insured", false, [a, b].map((x) => `${x.result?.decision ?? x.error}: ${x.result?.reason ?? ""}`.slice(0, 200)).join(" | "));
     return;
   }
   const units = [a, b].map((x) => BigInt(x.result.payment.units)).sort((x, y) => (x > y ? -1 : 1))[0];
