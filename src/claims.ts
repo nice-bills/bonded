@@ -164,8 +164,14 @@ ${BOND_WORDING}`,
 export async function judgeClaim(bond: any, quote: any, c: Case, statement: string, evidence: Doc[], step: Step = () => {}) {
   const body = await claimRequest(bond, quote, c, statement, evidence);
   step("dolphin", { docs: c.docs.length + evidence.length, images: [...c.docs, ...evidence].filter((d) => d.image).length });
-  const run = await callDolphin(body);
-  const j = readJudgment(run.content);
+  // Dolphin sometimes returns malformed JSON (seen on statement-only claims): ask once more, then
+  // treat an unreadable reply as an empty judgment, which every gate denies.
+  let run = await callDolphin(body);
+  let j: Judgment;
+  try { j = readJudgment(run.content); } catch {
+    run = await callDolphin(body);
+    try { j = readJudgment(run.content); } catch { j = readJudgment("{}"); j.reasons = ["The claims judge's reply could not be read twice; denied."]; }
+  }
   step("judged", { decision: j.decision, latencyMs: run.latencyMs, inTokens: run.inTokens });
 
   step("serv", {});
