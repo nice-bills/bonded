@@ -25,14 +25,14 @@ An insurer's loss history only means something while the underwriter stays the s
 | | |
 |---|---|
 | Traps priced out (declined) | **24 / 24** (wallet swaps, duplicates, over-cap, bad arithmetic, unapproved expenses, prompt injection) |
-| Clean invoices insured | **16 / 16**, mean premium 1.75% of cover |
-| Ranking | AUC 1.000, Brier 0.009 |
+| Clean invoices insured | **31 of 32 across both runs** (16 / 16 on run 0; one clean invoice declined on the re-run at p 0.186), mean premium 1.75% of cover |
+| Ranking (run 0) | AUC 1.000, Brier 0.009 |
 | Arithmetic | recomputed in code from the figures the model reads; 3 / 3 bad-arithmetic invoices flagged on every run |
 | Same decision on re-run | 97.5% (39/40) |
 | Book | $783 premiums, $0 losses, $81,290 of trap exposure declined |
 | Speed, cost | p50 7.0 s, p95 134 s (Dolphin long tail), $0.0075 for all 80 calls |
 
-Finding: during one 80-call run Dolphin served from two vLLM builds (0.33.0rc1 for 62 calls, 0.32.0rc1 for 18). Same weights, different serving stack: Bonded records the fingerprint so drift is visible, which closed APIs never expose. Reproduce with `npm run backtest` (Dolphin only, SERV veto off). Full rows: `backtest/results-check.json` (current), `backtest/results.json` (before the arithmetic check), `backtest/results-panel.json` (two-model panel, now opt-in with `BONDED_PANEL=on`; see docs/DOLPHIN.md).
+Finding: during one 80-call run Dolphin served from two vLLM builds (0.33.0rc1 for 68 calls, 0.32.0rc1 for 12). Same weights, different serving stack: Bonded records the fingerprint so drift is visible, which closed APIs never expose. Reproduce with `npm run backtest` (Dolphin only, SERV veto off). Full rows: `backtest/results-check.json` (current), `backtest/results.json` (before the arithmetic check), `backtest/results-panel.json` (two-model panel, now opt-in with `BONDED_PANEL=on`; see docs/DOLPHIN.md).
 
 ## Run it
 ```bash

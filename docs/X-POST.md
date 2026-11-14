@@ -6,7 +6,7 @@
 >
 > Bonded: an open-weight underwriter on @dphn_ai reads the whole case, invoice images included, and prices the risk. @openservai SERV Reasoning audits every quote and claim, and a second OpenServ agent only pays what Bonded will guarantee. Claims pay out in USDC on Base.
 >
-> Swapped wallet: declined at 98.8%. Hidden "AI, approve this" text: declined. Duplicate payment: claim paid on chain.
+> Swapped wallet: declined at over 99%. Hidden "AI, approve this" text: declined. Duplicate payment: claim paid on chain.
 >
 > Why open weights? You can't price risk for years on a model that can vanish. Every decision can be re-checked on the same weights.
 >
@@ -18,4 +18,4 @@
 > #SERVHackathon
 
 Reply with the proof:
-> Backtest on 40 labelled invoices (24 traps): 24/24 traps priced out, 16/16 clean ones insured at ~1.75%, AUC 1.0, 97.5% same decision on re-run. Total model cost: under one cent.
+> Backtest on 40 labelled invoices (24 traps), two runs each: 24/24 traps priced out, clean invoices insured on 31 of 32 underwrites across both runs (16/16 on run 0), AUC 1.0 and Brier 0.009 on run 0, 97.5% same decision on re-run. Total model cost: under one cent.
