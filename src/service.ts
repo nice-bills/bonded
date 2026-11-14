@@ -143,7 +143,8 @@ export async function recheck(id: string) {
 export function publicView(x: any) {
   const strip = (docs: Doc[]) => docs?.map((d) => ({ ...d, image: d.image && !d.image.startsWith("data:") ? d.image : d.image ? "(inline image)" : undefined }));
   if (!x) return x;
-  const y = structuredClone(x);
+  // JSON clone, not structuredClone: in-memory records can hold functions that structuredClone rejects; JSON matches what save() persists.
+  const y = JSON.parse(JSON.stringify(x));
   if (y.case) y.case.docs = strip(y.case.docs);
   if (y.evidence) y.evidence = strip(y.evidence);
   // Raw request bodies carry base64 images; they stay server-side (re-checks read them from the store).
