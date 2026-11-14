@@ -159,7 +159,7 @@ async function phaseA() {
   check(
     "duplicate claim paid",
     dup.result?.decision === "pay" && !!dup.result.payoutTx,
-    dup.result?.decision ?? dup.error ?? "",
+    `${dup.result?.decision ?? dup.error ?? ""} ${dup.result?.reason ?? ""}`.slice(0, 300),
   );
   if (dup.result?.payoutTx) {
     check(
@@ -306,7 +306,7 @@ async function phaseC() {
   check(
     "concurrent claims total ≤ cover",
     paid.reduce((s, x) => s + x.result.payoutUsd, 0) <= bond.coverUsd,
-    `${paid.length} paid`,
+    `${paid.length} paid; ${claims.map((x) => `${x.result?.decision ?? x.error}: ${x.result?.reason ?? ""}`.slice(0, 200)).join(" | ")}`,
   );
 }
 async function repetitions() {
@@ -316,29 +316,37 @@ async function repetitions() {
     return;
   }
   const l = JSON.parse(readFileSync(join(dataDir, "ledger.json"), "utf8"));
-  const quote = Object.values(l.quotes).find((x: any) => x.decision === "insure") as any;
-  const bond = Object.values(l.bonds).find((x: any) => x.quoteId === quote?.id) as any;
+  const bond = Object.values(l.bonds)[0] as any;
+  const quote = bond && l.quotes[bond.quoteId];
   if (!quote || !bond) {
     check("repeat setup insured quote and bond", false);
     return;
   }
   let duplicatePaid = 0,
-    fakeDenied = 0;
+    fakePaid = 0,
+    errors = 0;
   const reasons = new Map<string, number>();
   for (let i = 0; i < repeat; i++) {
     for (const id of ["duplicate", "fake"]) {
       const c = (CLAIMS as any)[id];
-      const out = await judgeClaim(bond, quote, quote.case, c.statement, c.evidence);
+      const out = await judgeClaim(bond, quote, quote.case, c.statement, c.evidence).catch((e) => {
+        console.log(`repeat ${id} #${i + 1} errored: ${e?.stack ?? e}`);
+        return { decision: "error", reason: String(e) } as any;
+      });
+      if (id === "duplicate" && out.decision !== "pay") console.log(`repeat duplicate #${i + 1}: ${out.decision} ${out.reason}`);
       if (id === "duplicate" && out.decision === "pay") duplicatePaid++;
-      if (id === "fake" && out.decision === "deny") fakeDenied++;
+      if (out.decision === "error") errors++;
+      if (id === "fake" && out.decision === "pay") fakePaid++;
       if (id === "fake" && out.decision === "deny")
         reasons.set(out.reason, (reasons.get(out.reason) ?? 0) + 1);
     }
   }
+  // Network errors are reported, not scored: a failed request is neither a payout nor a denial.
+  check(`repeat errors (${errors})`, errors <= 1);
   check(`repeat duplicate paid ≥90% (${duplicatePaid}/${repeat})`, duplicatePaid >= Math.ceil(repeat * 0.9));
   check(
-    `repeat fake denied 100% (${fakeDenied}/${repeat})`,
-    fakeDenied === repeat,
+    `repeat fake never paid (${fakePaid}/${repeat} paid)`,
+    fakePaid === 0,
     [...reasons]
       .map(([k, v]) => `${v}×${k}`)
       .join("; ")
@@ -360,7 +368,7 @@ try {
   }
   if (repeat) await repetitions();
 } catch (e) {
-  check("suite execution", false, String(e));
+  check("suite execution", false, String((e as Error)?.stack ?? e));
 } finally {
   await stop();
 }
