@@ -84,10 +84,11 @@ agent.addCapability({
 
 agent.addCapability({
   name: "bind",
-  description: "Bind a quote: after paying the premium in USDC (Base Sepolia) to the pool address in the quote, send the quote id and the transaction hash. Returns the bond.",
-  inputSchema: z.object({ quoteId: z.string(), tx: z.string(), beneficiary: z.string().optional() }),
+  description: "Bind a quote: after paying the premium in USDC (Base Sepolia) to the pool address in the quote, send the quote id and the transaction hash. Returns the bond. The bond pays out to the wallet that paid the premium.",
+  inputSchema: z.object({ quoteId: z.string(), tx: z.string() }),
   async run({ args }) {
-    const b = await bind(args.quoteId, args.tx as Hex, args.beneficiary as Hex | undefined);
+    // No beneficiary argument: it is always the premium payer, and the platform LLM filled it with a name.
+    const b = await bind(args.quoteId, args.tx as Hex);
     // If this quote came from an agent-to-agent run (Payrun Lite), complete that run's record with the bond.
     attachBond(args.quoteId, { id: b.id, consoleUrl: PUBLIC_URL ? `${PUBLIC_URL}/#${b.id}` : undefined });
     return out(b);
