@@ -25,7 +25,7 @@ Three tracks with specific constraints (Dolphin, Kite, Reppo), published criteri
 2. **Pushes the tech.** One 1M-context multimodal call reads the whole case (invoice image incl. faint hidden text, emails, records, contract, policy) at $0.0001 per quote; the backtest measures calibration, rerun agreement and serving-build drift.
 3. **Theme fit.** Dolphin track: open models doing work closed models structurally cannot (stable, auditable underwriting). SERV Reasoning is the second line (Prompt Guard + Shadow Agent).
 4. **One line.** "Before an AI agent pays, it buys a guarantee. If the pool won't insure it, the agent doesn't act."
-5. **Visible in a minute.** Clean invoice insured at $25; wallet-swap invoice declined; hidden-instruction invoice declined; duplicate-payment claim paid on chain.
+5. **Visible in a minute.** Clean invoice insured for about $23; wallet-swap invoice declined; hidden-instruction invoice declined; duplicate-payment claim paid on chain.
 6. **Early.** Open-weight 1M multimodal model with a hosted API (DeepSeek-V4.1-Flash on Dolphin) + x402 agent markets: both 2026.
 7. **Edge.** Won Edition 01 (Coinbase track) with Payrun, an invoice pay/hold/block agent: domain data (40 labelled invoices, 24 traps) and the first insured customer.
 8. **Buildable.** Built and deployed in the window; scope cut: testnet USDC, JSON ledger.
