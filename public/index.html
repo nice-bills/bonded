@@ -62,7 +62,10 @@ h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6p
 .summary{color:var(--soft);margin:4px 0 8px;font-size:16px;overflow-wrap:anywhere}
 .slipgrid{display:grid;grid-template-columns:1fr 200px;gap:18px}
 table{width:100%;border-collapse:collapse;font-size:15px}
-td{padding:3px 0;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+td{padding:3px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.slipgrid table td:first-child{width:58%}
+/* Rough Notation positions its <svg> against the nearest positioned ancestor. */
+#slip table td{position:relative}
 td.r{text-align:right;white-space:nowrap}
 tr.hot td{color:var(--red)}
 .ev{font-size:13px;color:var(--dim);display:block;line-height:1.3;padding-bottom:2px;overflow-wrap:anywhere}
@@ -260,7 +263,7 @@ function renderQuoteResult(q) {
       <span class="fig">${ok ? `premium<number-flow id="prem"></number-flow>` : `chance of loss<number-flow id="prem"></number-flow>`}</span></div>
     <p class="summary"><span id="sum">${esc(q.underwriting.summary)}</span></p>
     <div class="slipgrid"><div>
-      <table class="num">${perils.map(([k, v]) => `<tr class="${v.p >= 0.1 ? "hot" : ""}"><td>${k.replaceAll("_", " ")}${v.p >= 0.1 && v.evidence ? `<span class="ev">${esc(v.evidence)}</span>` : ""}</td><td class="r">${pct(v.p)}</td></tr>`).join("")}
+      <table class="num">${perils.map(([k, v]) => `<tr class="${v.p >= 0.1 ? "hot" : ""}"><td><span>${k.replaceAll("_", " ")}</span>${v.p >= 0.1 && v.evidence ? `<span class="ev">${esc(v.evidence)}</span>` : ""}</td><td class="r">${pct(v.p)}</td></tr>`).join("")}
       <tr><td><b>combined</b></td><td class="r"><b>${pct(q.pLoss)}</b></td></tr></table>
       ${ok ? "" : `<div class="note bad">${esc(q.reason)} Payrun must not pay.</div>`}
       <div class="btns">${ok ? `<button class="btn" id="payBtn">Pay premium and bind</button>` : ""}<button class="btn g" id="reBtn">Re-check on the same weights</button></div>
@@ -268,7 +271,9 @@ function renderQuoteResult(q) {
     </div>${notes(q.dolphin, q.serv, panelNote(q) + (ok ? `<p><span class="sc">price.</span> ${usd(q.case.coverUsd)} × ${pct(q.pLoss)} × ${(1.4 + (q.panel?.disagreementLoading || 0)).toFixed(2)} = ${usd(q.premiumUsd, 2)}</p>` : ""))}</div>`;
   flow($("#prem"), ok ? q.premiumUsd : q.pLoss, ok ? money2 : { style: "percent", maximumFractionDigits: 1 });
   mark($("#vword"), ok ? { type: "circle", color: css("--green"), padding: 8 } : { type: "underline", color: css("--red"), strokeWidth: 2 });
-  if (!ok) document.querySelectorAll("#slip tr.hot td:first-child").forEach((td) => mark(td.firstChild?.nodeType === 3 ? td : td, { type: "highlight", color: css("--hl"), multiline: true }));
+  // Annotate the text span, not the <td>: Rough Notation inserts its <svg> into the
+  // target's parent, and an <svg> directly inside a <tr> becomes a phantom table column.
+  if (!ok) document.querySelectorAll("#slip tr.hot td:first-child > span:first-child").forEach((s) => mark(s, { type: "highlight", color: css("--hl"), multiline: true }));
   $("#reBtn").onclick = () => recheck(q.id, $("#after"));
   if (ok) $("#payBtn").onclick = payPremium;
 }
