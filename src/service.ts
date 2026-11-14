@@ -1,13 +1,16 @@
 import type { Hex } from "viem";
 import { validateCase, type Case, type Doc } from "./case";
 import { callDolphin } from "./dolphin";
-import { ledger, loadRequest, newId, save, saveRequest } from "./store";
+import { ledger, loadRequest, newId, own, save, saveRequest } from "./store";
 import { readUnderwriting, underwrite, type Step, RATING_GUIDE_HASH } from "./underwrite";
 import { judgeClaim, readJudgment } from "./claims";
 import { panelVerdict, PERILS, price, RULES } from "./pricing";
 import { EXPLORER, payout, poolAddress, poolUsd, SCALE, toUnits, verifyPremium } from "./chain";
 
-const activeCover = () => Object.values(ledger().bonds).filter((b: any) => b.status === "active").reduce((s: number, b: any) => s + b.coverUsd, 0);
+/** Cover still reservable: a bond releases its capital once its claim window has closed. */
+export const activeCover = () => Object.values(ledger().bonds)
+  .filter((b: any) => b.status === "active" && Date.now() - Date.parse(b.boundAt) <= RULES.claimWindowDays * 86_400_000)
+  .reduce((s: number, b: any) => s + b.coverUsd, 0);
 
 export async function poolStatus() {
   const capital = await poolUsd();
@@ -46,24 +49,47 @@ export async function quote(c: Case, step?: Step) {
   return q;
 }
 
-export async function bind(quoteId: string, tx: Hex, beneficiary?: Hex) {
+/** In-flight guards: quote/tx ids are public, so no lock is held across the chain wait (anyone could block a quote).
+ *  A claim's judge call is expensive and bond ids are public too, so the claim lock is released in a finally block. */
+const inflightBond = new Set<string>();
+function hold(set: Set<string>, key: string, what: string) {
+  if (set.has(key)) throw new Error(`${what} is being processed: retry when it finishes`);
+  set.add(key);
+}
+
+/** Chain checks are injectable so the concurrency rules can be tested without network. */
+type BindDeps = { verify?: typeof verifyPremium; capital?: typeof poolUsd };
+type ClaimDeps = { judge?: typeof judgeClaim; pay?: typeof payout };
+
+export async function bind(quoteId: string, tx: Hex, beneficiary?: Hex, deps: BindDeps = {}) {
+  if (typeof tx !== "string" || !/^0x[0-9a-fA-F]{64}$/.test(tx)) throw new Error("tx must be a 0x-prefixed 64-hex transaction hash");
+  if (beneficiary !== undefined && (typeof beneficiary !== "string" || !/^0x[0-9a-fA-F]{40}$/.test(beneficiary))) throw new Error("beneficiary must be an address");
   const l = ledger();
-  const q = l.quotes[quoteId];
+  const q = own(l.quotes, quoteId);
   if (!q) throw new Error("unknown quote");
   if (q.decision !== "insure") throw new Error("this action was declined: it cannot be bonded");
+  if (!q.payment?.units) throw new Error("this quote has no premium to pay");
+  const txKey = tx.toLowerCase();
+  // Cheap fail-fast checks; the authoritative ones re-run after the chain wait.
   if (Date.now() > Date.parse(q.expiresAt)) throw new Error("quote expired: request a new one");
   if (Object.values(l.bonds).some((b: any) => b.quoteId === quoteId)) throw new Error("quote already bound");
-  if (l.usedTx.includes(tx.toLowerCase())) throw new Error("this premium transaction was already used");
-  if (q.case.coverUsd > (await poolUsd()) - activeCover()) throw new Error("pool capacity changed: request a new quote");
-  const v = await verifyPremium(tx, BigInt(q.payment.units), new Date(q.createdAt));
+  if (l.usedTx.includes(txKey)) throw new Error("this premium transaction was already used");
+  const v = await (deps.verify ?? verifyPremium)(tx, BigInt(q.payment.units), new Date(q.createdAt));
   if (!v.ok) throw new Error(`premium not accepted: ${v.reason}`);
-  if (beneficiary && !/^0x[0-9a-fA-F]{40}$/.test(beneficiary)) throw new Error("beneficiary must be an address");
+  // The premium payer is the beneficiary: otherwise a stranger's payment could be claimed by whoever names themselves.
+  if (beneficiary && beneficiary.toLowerCase() !== v.from.toLowerCase()) throw new Error("beneficiary must be the premium payer");
+  const capital = await (deps.capital ?? poolUsd)();
+  // Atomic claim (no await to save()): two concurrent binds of one tx/quote cannot both get here.
+  if (Date.now() > Date.parse(q.expiresAt)) throw new Error("quote expired: request a new one");
+  if (Object.values(l.bonds).some((b: any) => b.quoteId === quoteId)) throw new Error("quote already bound");
+  if (l.usedTx.includes(txKey)) throw new Error("this premium transaction was already used");
+  if (q.case.coverUsd > capital - activeCover()) throw new Error("pool capacity changed: request a new quote");
   const b = {
     id: newId("bond"), quoteId, boundAt: new Date().toISOString(), coverUsd: q.case.coverUsd, premiumUsd: q.premiumUsd,
-    premiumTx: tx, premiumTxUrl: `${EXPLORER}/tx/${tx}`, beneficiary: beneficiary ?? v.from, action: q.case.action, insured: q.case.insured,
+    premiumTx: tx, premiumTxUrl: `${EXPLORER}/tx/${tx}`, beneficiary: v.from, action: q.case.action, insured: q.case.insured,
     status: "active", claims: [] as string[],
   };
-  l.usedTx.push(tx.toLowerCase());
+  l.usedTx.push(txKey);
   l.bonds[b.id] = b;
   save();
   return b;
@@ -73,38 +99,49 @@ let payQueue: Promise<unknown> = Promise.resolve();
 /** One payout at a time: a single pool key, so transfers never race for a nonce. */
 const serial = <T,>(work: () => Promise<T>) => { const next = payQueue.then(work, work); payQueue = next.catch(() => undefined); return next; };
 
-export async function claim(bondId: string, statement: string, evidence: Doc[], step?: Step) {
+export async function claim(bondId: string, statement: string, evidence: Doc[], step?: Step, deps: ClaimDeps = {}) {
   const l = ledger();
-  const b = l.bonds[bondId];
+  const b = own(l.bonds, bondId);
   if (!b) throw new Error("unknown bond");
   if (b.status === "paid") throw new Error("this bond has already paid out");
-  if (b.claims.length >= 2) throw new Error("this bond has no claims left");
+  // A reviewer veto is not the insured's claim attempt to spend: only judge denials and payouts use a slot.
+  const used = (b.claims ?? []).filter((id: string) => own(l.claims, id)?.counts !== false).length;
+  if (used >= 2) throw new Error("this bond has no claims left");
   if (Date.now() - Date.parse(b.boundAt) > RULES.claimWindowDays * 86_400_000) throw new Error("claim window closed");
   if (!evidence?.length || evidence.length > 20) throw new Error("send 1 to 20 evidence documents");
   if (typeof statement !== "string" || !statement.trim()) throw new Error("a claim statement is required");
-  const q = l.quotes[b.quoteId];
-  const r = await judgeClaim(b, q, q.case, statement, evidence, step);
-  saveRequest(r.dolphin.requestHash, r.body);
-  const { body, ...rest } = r;
-  const c: any = { id: newId("claim"), bondId, filedAt: new Date().toISOString(), statement, evidence, ...rest, payoutTx: null };
-  if (r.decision === "pay") {
-    step?.("payout", { usd: r.payoutUsd });
-    const tx = await serial(() => payout(b.beneficiary, toUnits(r.payoutUsd)));
-    c.payoutTx = tx;
-    c.payoutTxUrl = `${EXPLORER}/tx/${tx}`;
-    b.status = "paid";
+  const q = own(l.quotes, b.quoteId);
+  if (!q) throw new Error("unknown quote for this bond");
+  // Held until the claim is saved, so two concurrent filings cannot both judge and pay.
+  hold(inflightBond, bondId, "a claim on this bond");
+  try {
+    const r = await (deps.judge ?? judgeClaim)(b, q, q.case, statement, evidence, step);
+    saveRequest(r.dolphin.requestHash, r.body);
+    const { body, ...rest } = r;
+    const vetoed = r.serv?.verdict === "blocked" || r.serv?.verdict === "object" || (r.multipath && r.multipath.verdict !== "covered");
+    const c: any = { id: newId("claim"), bondId, filedAt: new Date().toISOString(), statement, evidence, ...rest, counts: !vetoed, payoutTx: null };
+    if (r.decision === "pay") {
+      if (b.status === "paid") throw new Error("this bond has already paid out"); // re-check under the lock, right before money moves
+      step?.("payout", { usd: r.payoutUsd });
+      const tx = await serial(() => (deps.pay ?? payout)(b.beneficiary, toUnits(r.payoutUsd)));
+      c.payoutTx = tx;
+      c.payoutTxUrl = `${EXPLORER}/tx/${tx}`;
+      b.status = "paid";
+    }
+    b.claims.push(c.id);
+    l.claims[c.id] = c;
+    save();
+    return c;
+  } finally {
+    inflightBond.delete(bondId);
   }
-  b.claims.push(c.id);
-  l.claims[c.id] = c;
-  save();
-  return c;
 }
 
 /** Re-run a stored decision on the same open weights, byte-identical requests, and compare.
  *  A quote is re-run through the whole panel (both models), combined exactly as at quote time. */
 export async function recheck(id: string) {
   const l = ledger();
-  const q = l.quotes[id], c = l.claims[id];
+  const q = own(l.quotes, id), c = own(l.claims, id);
   const rec = q ?? c;
   if (!rec) throw new Error("unknown quote or claim");
   const body = loadRequest(rec.dolphin.requestHash);
@@ -133,6 +170,8 @@ export async function recheck(id: string) {
       missing: stored.map((b, i) => (b ? null : members[i].model)).filter(Boolean),
       conflict: v.conflict, disagreementLoading: v.disagreementLoading,
     },
+    // `fingerprint`/`originalFingerprint` match the claim shape the console compares.
+    fingerprint: ok[0].fingerprint, originalFingerprint: q.dolphin.fingerprint,
     fingerprints: ok.map((r) => r.fingerprint), originalFingerprints: [...new Set([q.dolphin.fingerprint, ...(q.panel?.members ?? []).map((m: any) => m.fingerprint)].filter(Boolean))],
     original: { pLoss: q.pLoss, decision: priced, final: original }, rerun: { pLoss: v.pLoss, decision: p.decision },
     sameDecision: v.conflict ? p.decision === "decline" : p.decision === priced, pLossDelta: v.pLoss - q.pLoss, latencyMs: Math.max(...ok.map((r) => r.latencyMs)),

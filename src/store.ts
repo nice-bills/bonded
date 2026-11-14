@@ -22,6 +22,9 @@ export function ledger(): Ledger {
   return cache!;
 }
 
+/** Own-property lookup: ids come from callers, so "constructor" must not hit Object.prototype. */
+export const own = <T>(o: Record<string, T>, key: string): T | undefined => (Object.hasOwn(o, key) ? o[key] : undefined);
+
 export function save() {
   const tmp = `${FILE}.tmp`;
   writeFileSync(tmp, JSON.stringify(ledger(), null, 1));
