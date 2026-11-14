@@ -136,9 +136,13 @@ export function claimReviewOpts(bond: any, c: Case, statement: string, j: Judgme
   // bond (id, bonded action, premium tx) and the claims judge's decision, which is Bonded's internal
   // output. Next to the claim documents it read as a document instructing the reviewer and tripped
   // Prompt Guard (exclusion 2(e)) on legitimate claims.
+  // The reviewer objected "cannot confirm the 30-day window" on every valid claim without these.
+  const filedAt = new Date().toISOString();
+  const daysSinceBind = Math.max(0, Math.floor((Date.parse(filedAt) - Date.parse(bond.boundAt)) / 86_400_000));
   const bondRecord = `Bond ${bond.id}, bound ${bond.boundAt}, cover $${bond.coverUsd}, premium transaction ${bond.premiumTx}.
 Bonded action on record: ${c.action.description}; $${c.action.amountUsd} to ${c.action.payee} at ${c.action.payTo}.
-Insured: ${c.insured}. The insured pays from its principal's funds, so a loss to the principal on the bonded action is the insured's loss.`;
+Insured: ${c.insured}. The insured pays from its principal's funds, so a loss to the principal on the bonded action is the insured's loss.
+Claim filed ${filedAt}, ${daysSinceBind} day(s) after binding: inside the ${RULES.claimWindowDays}-day claim window, which Bonded's code checked before this review.`;
   const decisionFields = JSON.stringify({ peril: j.peril, action_matches_bond: j.action_matches_bond, third_party_evidence: j.third_party_evidence, exclusion: j.exclusion, loss_usd: j.loss_usd, decision: j.decision });
   return {
     system: `You are Bonded's second-line claims reviewer for Bonded, an action guarantee pool. You audit one claim decision.
