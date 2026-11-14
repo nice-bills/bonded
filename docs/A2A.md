@@ -16,15 +16,19 @@ independent agents, each with its own capabilities and its own tunnel, chained i
 | Object | Value |
 |---|---|
 | Workflow / workspace | 14078 — "Payrun Lite: guaranteed payrun" — <https://platform.openserv.ai/workspace/14078> |
-| Trigger | "Invoice to pay" (webhook; input: `action`, `amountUsd`, `payee`, `payTo`, `documents`) |
+| Trigger | "Invoice to pay" (webhook; input: `caseId`, `action`, `amountUsd`, `payee`, `payTo`, `documents` — for stored demo cases send **only** `caseId` + `amountUsd`) |
 | Agent 4958 | **bonded** — underwrites the action, issues the guarantee |
 | Agent 4959 | **payrun-lite** — the payables agent; pays premiums from its demo wallet |
 
 Task chain (dependencies auto-derived from the workflow edges):
 
-1. **quote** → Bonded (4958): call the `quote` capability once with the trigger input, verbatim.
-2. **decide** → Payrun Lite (4959): call its `pay-invoice` capability with Bonded's quote JSON.
-   Insured → pay the premium with `sendUsdc` and return `payTx`; declined → refuse, pay nothing.
+1. **quote** → Bonded (4958): call the `quote` capability once. When the trigger input has a
+   `caseId`, pass it and **do not pass `documents`** — Bonded reads the full stored case
+   server-side. Otherwise pass the trigger input's fields verbatim.
+2. **decide** → Payrun Lite (4959): call its `pay-invoice` capability with **only the `quoteId`**
+   from Bonded's quote result. Payrun Lite re-reads the quote from Bonded's own API and decides
+   from that record alone: insured → pay the premium with `sendUsdc` and return `payTx`;
+   declined / unverifiable / expired / wrong destination → refuse, pay nothing.
 3. **bind** → Bonded (4958): bind the guarantee with `quoteId` + `payTx`. On refusal, the task
    completes immediately with `{"bind":"skipped",…}` — it never asks for human help.
 
@@ -32,12 +36,14 @@ Task chain (dependencies auto-derived from the workflow edges):
 
 | File | Role |
 |---|---|
-| `openserv/payrun.ts` | Payrun Lite agent, `pay-invoice` capability, `provisionPayrun()` (agent reuse + workflow sync) |
+| `openserv/payrun.ts` | Payrun Lite agent, `pay-invoice` capability + pure `decidePayment` decision, `provisionPayrun()` (agent reuse + workflow sync) |
+| `openserv/docs.ts` | Caller-document parsing + the image rule: only `data:image/` or `https://` URLs — never local paths |
 | `src/a2a.ts` | Runs ledger `data/a2a-runs.json`, `GET /api/a2a/runs`, `attachBond` |
 | `openserv/a2a-run.ts` | CLI runner: fires the webhook trigger, polls tasks, records the run |
 | `openserv/payrun-provision.ts` | Provisions and keeps Payrun Lite's tunnel up (local testing) |
 | `openserv/agent.ts` | Boots both agents in one process; the `bind` capability completes the run record |
 | `src/routes.ts` | One added line mounting `/api/a2a/runs` |
+| `test/openserv.test.ts` | Offline tests for the image rule and the `decidePayment` refusal logic |
 
 Both agents run in **one Node process** in production (each with its own OpenServ tunnel), so one
 Render service hosts both. `provisionPayrun()` is idempotent: it reuses the platform agent found by
@@ -54,6 +60,30 @@ completes the matching record with the bond id. The latest runs are served at:
 ```
 GET /api/a2a/runs
 ```
+
+## Integrity of the agent-to-agent path
+
+Three things between the two agents are untrusted, and each is now handled:
+
+- **Relayed quote text** (run `a2a_220f5637be` era): the runtime relays Bonded's quote result to
+  Payrun Lite as LLM text, which could be garbled — or forged — before `pay-invoice` saw it.
+  Previously the capability paid `payment.to`/`payment.units` straight out of that text. Now it
+  takes **only the `quoteId`** from the text, then `GET /api/quotes/:id` and `GET /api/pool`
+  (`.address`) from Bonded, and decides from the server record alone (`decidePayment` in
+  `openserv/payrun.ts`, pure and unit-tested): refuse unless decision = `insure`, the quote is
+  unexpired, and the record's `payment.to` equals Bonded's pool address.
+- **Truncated case files** (root cause of the clean-case refusal in run `a2a_220f5637be`): the
+  runner used to send the whole case as a JSON string in the trigger's `documents` field, and the
+  runtime's LLM relay shortened long fields — Bonded's ledger for quote `q_81e49449d7` held
+  275-character `vendor-invoice-ledger.csv` excerpts instead of the full 9,048-character history,
+  so the second-line reviewer correctly objected that the ledgers were "truncated". The trigger
+  now takes a `caseId` (e.g. `"clean"`), and Bonded's quote capability resolves the **full stored
+  case server-side** (`CASES[caseId]` in `openserv/agent.ts`); the free-form `documents` path
+  remains for callers outside the demo cases.
+- **Local file reads through caller documents**: capability callers could pass a repo path as a
+  doc's `image`, which `src/case.ts` `toDataUrl()` would read from the server's disk (agent keys,
+  sealed env). `openserv/docs.ts` now rejects any image that is not a `data:image/…` or
+  `https://…` URL, matching the check the HTTP route already applied.
 
 ## Demo cases and proof
 
