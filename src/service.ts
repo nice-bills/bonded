@@ -104,9 +104,10 @@ export async function claim(bondId: string, statement: string, evidence: Doc[], 
   const b = own(l.bonds, bondId);
   if (!b) throw new Error("unknown bond");
   if (b.status === "paid") throw new Error("this bond has already paid out");
-  // A reviewer veto is not the insured's claim attempt to spend: only judge denials and payouts use a slot.
+  // A reviewer veto of a judge "pay" does not use one of the 2 counted claims; 5 filings in total bound re-files.
   const used = (b.claims ?? []).filter((id: string) => own(l.claims, id)?.counts !== false).length;
   if (used >= 2) throw new Error("this bond has no claims left");
+  if ((b.claims ?? []).length >= 5) throw new Error("this bond has no claims left");
   if (Date.now() - Date.parse(b.boundAt) > RULES.claimWindowDays * 86_400_000) throw new Error("claim window closed");
   if (!evidence?.length || evidence.length > 20) throw new Error("send 1 to 20 evidence documents");
   if (typeof statement !== "string" || !statement.trim()) throw new Error("a claim statement is required");
@@ -118,12 +119,25 @@ export async function claim(bondId: string, statement: string, evidence: Doc[], 
     const r = await (deps.judge ?? judgeClaim)(b, q, q.case, statement, evidence, step);
     saveRequest(r.dolphin.requestHash, r.body);
     const { body, ...rest } = r;
-    const vetoed = r.serv?.verdict === "blocked" || r.serv?.verdict === "object" || (r.multipath && r.multipath.verdict !== "covered");
-    const c: any = { id: newId("claim"), bondId, filedAt: new Date().toISOString(), statement, evidence, ...rest, counts: !vetoed, payoutTx: null };
+    const c: any = { id: newId("claim"), bondId, filedAt: new Date().toISOString(), statement, evidence, ...rest, counts: r.reviewVeto !== true, payoutTx: null };
     if (r.decision === "pay") {
       if (b.status === "paid") throw new Error("this bond has already paid out"); // re-check under the lock, right before money moves
       step?.("payout", { usd: r.payoutUsd });
-      const tx = await serial(() => (deps.pay ?? payout)(b.beneficiary, toUnits(r.payoutUsd)));
+      let tx: Hex;
+      try {
+        tx = await serial(() => (deps.pay ?? payout)(b.beneficiary, toUnits(r.payoutUsd)));
+      } catch (e: any) {
+        if (!e?.hash) throw e; // nothing broadcast or reverted: the bond stays claimable
+        // Broadcast but unconfirmed: record it as paid so a re-file cannot pay a second time.
+        c.payoutTx = e.hash;
+        c.payoutTxUrl = `${EXPLORER}/tx/${e.hash}`;
+        c.payoutUnconfirmed = true;
+        b.status = "paid";
+        b.claims.push(c.id);
+        l.claims[c.id] = c;
+        save();
+        throw new Error(`payout sent but not yet confirmed: ${c.payoutTxUrl}`);
+      }
       c.payoutTx = tx;
       c.payoutTxUrl = `${EXPLORER}/tx/${tx}`;
       b.status = "paid";

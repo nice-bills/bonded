@@ -47,8 +47,15 @@ export async function servReview(opts: { system: string; untrusted: string; shad
   };
   let json: any, res: Response | undefined;
   for (let attempt = 0; attempt < 3; attempt++) {
-    res = await fetch(URL, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
-    json = await res.json().catch(() => null);
+    try {
+      res = await fetch(URL, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body), signal: AbortSignal.timeout(90_000) });
+      json = await res.json().catch(() => null);
+    } catch (e) {
+      // Network error or timeout: retried like a 5xx, so a hung call cannot hold the claim lock.
+      if (attempt === 2) throw new Error(`SERV unreachable: ${(e as Error).message}`);
+      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+      continue;
+    }
     if (res.ok || (res.status < 500 && res.status !== 429)) break;
     await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
   }
@@ -155,8 +162,15 @@ export async function servMultipath(opts: { system: string; facts: string }): Pr
   };
   let json: any, res: Response | undefined;
   for (let attempt = 0; attempt < 3; attempt++) {
-    res = await fetch(URL, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body) });
-    json = await res.json().catch(() => null);
+    try {
+      res = await fetch(URL, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${key}` }, body: JSON.stringify(body), signal: AbortSignal.timeout(90_000) });
+      json = await res.json().catch(() => null);
+    } catch (e) {
+      // Network error or timeout: retried like a 5xx, so a hung call cannot hold the claim lock.
+      if (attempt === 2) throw new Error(`SERV unreachable: ${(e as Error).message}`);
+      await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+      continue;
+    }
     if (res.ok || (res.status < 500 && res.status !== 429)) break;
     await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
   }

@@ -195,11 +195,15 @@ export async function judgeClaim(bond: any, quote: any, c: Case, statement: stri
   for (let k = 0; k < 2 && serv.verdict === "blocked" && decision === "pay"; k++) serv = await servReview(reviewOpts);
   // Same for a Multipath reply that addressed no rulebook: ask up to twice more; all-empty still denies.
   for (let k = 0; k < 2 && !multipath.answered && decision === "pay"; k++) multipath = await reviewClaimMultipath(bond, c, statement, j, evidence);
-  if (serv.verdict === "blocked") { decision = "deny"; reason = `${serv.reason} (exclusion 2e)`; }
-  else if (serv.verdict === "object" && decision === "pay") { decision = "deny"; reason = `Second-line reviewer objected: ${serv.reason}`; }
+  // reviewVeto: a reviewer flipped a "pay" that survived the code gates. Only those filings skip a
+  // claim slot; a judge or wording-gate denial always counts.
+  let reviewVeto = false;
+  if (serv.verdict === "blocked") { if (decision === "pay") reviewVeto = true; decision = "deny"; reason = `${serv.reason} (exclusion 2e)`; }
+  else if (serv.verdict === "object" && decision === "pay") { reviewVeto = true; decision = "deny"; reason = `Second-line reviewer objected: ${serv.reason}`; }
   // Multipath: the judge's "pay" also needs every rulebook to say the bond bears this loss.
   if (decision === "pay" && multipath.verdict !== "covered") {
     const excluded = multipath.rulebooks.filter((r) => r.finding === "excluded");
+    reviewVeto = true;
     decision = "deny";
     reason = `Multipath review excluded the claim: ${excluded.map((r) => `${r.rulebook}${r.clause ? ` ("${r.clause}")` : ""}: ${r.reason}`).join("; ") || multipath.reason}. ${reason}`;
   }
@@ -209,7 +213,7 @@ export async function judgeClaim(bond: any, quote: any, c: Case, statement: stri
   if (decision === "pay" && payoutUsd <= 0) { decision = "deny"; reason = `No loss amount evidenced. ${reason}`; }
 
   return {
-    judgment: j, decision, reason, payoutUsd, serv, multipath, shadow,
+    judgment: j, decision, reason, payoutUsd, serv, multipath, shadow, reviewVeto,
     dolphin: { model: run.model, fingerprint: run.fingerprint, weights: WEIGHTS_URL, requestHash: run.requestHash, inTokens: run.inTokens, outTokens: run.outTokens, costUsd: run.costUsd, latencyMs: run.latencyMs, fallbackSuspect: run.fallbackSuspect },
     body,
   };

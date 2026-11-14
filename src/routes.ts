@@ -23,6 +23,9 @@ function limited(key: string, max: number, windowMs: number) {
 const ip = (req: Request) => {
   const peer = String(req.socket.remoteAddress ?? "?");
   if (/^(127\.|::1$|::ffff:127\.)/.test(peer)) return peer;
+  // Render sits behind Cloudflare, which sets CF-Connecting-IP to the client on every request.
+  const cf = req.headers["cf-connecting-ip"];
+  if (typeof cf === "string" && cf.trim()) return cf.trim();
   const hops = String(req.headers["x-forwarded-for"] ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   return hops.length ? hops[hops.length - 1] : peer;
 };

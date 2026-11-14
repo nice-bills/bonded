@@ -49,7 +49,8 @@ export async function sendUsdc(key: Hex, to: Hex, units: bigint): Promise<Hex> {
   const wallet = createWalletClient({ account, chain: baseSepolia, transport: rpc });
   const hash = await wallet.writeContract({ address: USDC, abi: ABI, functionName: "transfer", args: [to, units] });
   const r = await receipt(hash);
-  if (!r) throw new Error(`transfer ${hash} not confirmed on Base Sepolia`);
+  // Broadcast but unconfirmed: money may still move, so the hash travels with the error.
+  if (!r) throw Object.assign(new Error(`transfer ${hash} not confirmed on Base Sepolia`), { hash });
   if (r.status !== "success") throw new Error(`transfer ${hash} reverted`);
   return hash;
 }

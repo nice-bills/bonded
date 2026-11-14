@@ -96,29 +96,57 @@ test("expired bonds stop reserving capital but still reject claims", async () =>
   await assert.rejects(() => claim("b_old", "loss", [DOC]), /claim window closed/);
 });
 
-test("claim: a reviewer-vetoed denial does not use one of the bond's two claim slots", async () => {
+test("claim: only a reviewer veto of a judge pay skips a slot; 5 filings in total", async () => {
   const l = ledger();
   l.quotes.q_slot = quote("q_slot");
   l.bonds.b_slot = { id: "b_slot", quoteId: "q_slot", status: "active", coverUsd: 1800, premiumUsd: 2, boundAt: new Date().toISOString(), beneficiary: PAYER, claims: [] };
-  const result = (decision: "pay" | "deny", serv: string, multipath: string) => ({
+  const result = (decision: "pay" | "deny", serv: string, multipath: string, reviewVeto?: boolean) => ({
     judgment: { decision, peril: "duplicate" }, decision, payoutUsd: decision === "pay" ? 100 : 0,
-    serv: { verdict: serv }, multipath: { verdict: multipath, rulebooks: [], reason: "" },
+    serv: { verdict: serv }, multipath: { verdict: multipath, rulebooks: [], reason: "" }, reviewVeto,
     dolphin: { requestHash: "e".repeat(64) }, body: {},
   });
   const judge = (r: unknown) => (async () => r) as any;
 
-  const vetoed = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "object", "covered")) });
-  assert.equal(vetoed.counts, false);
-  const vetoed2 = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "excluded")) });
-  assert.equal(vetoed2.counts, false);
+  // A judge denial counts even when Multipath also excluded it (no reviewVeto flag).
+  const junk = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "excluded")) });
+  assert.equal(junk.counts, true);
+  l.bonds.b_slot.claims = [];
 
-  // Two judge denials do use the slots, so a third filing is refused.
-  const denied = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "covered")) });
-  assert.equal(denied.counts, true);
-  const denied2 = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "covered")) });
-  assert.equal(denied2.counts, true);
-  const msg = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "covered")) }).then(() => null, (e: Error) => e.message);
-  assert.match(String(msg), /no claims left/);
+  // Reviewer vetoes of a judge "pay" skip a slot, but filings stop at 5 in total.
+  for (let i = 0; i < 5; i++) {
+    const v = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "object", "covered", true)) });
+    assert.equal(v.counts, false);
+  }
+  const sixth = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "object", "covered", true)) }).then(() => null, (e: Error) => e.message);
+  assert.match(String(sixth), /no claims left/);
+
+  // Two counted denials use both slots.
+  l.bonds.b_slot.claims = [];
+  for (let i = 0; i < 2; i++) assert.equal((await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "covered")) })).counts, true);
+  const third = await claim("b_slot", "loss", [DOC], undefined, { judge: judge(result("deny", "agree", "covered")) }).then(() => null, (e: Error) => e.message);
+  assert.match(String(third), /no claims left/);
+});
+
+test("claim: a broadcast but unconfirmed payout marks the bond paid; a reverted one does not", async () => {
+  const l = ledger();
+  const pays = { judgment: { decision: "pay", peril: "duplicate" }, decision: "pay", payoutUsd: 300, dolphin: { requestHash: "f".repeat(64) }, body: {} };
+  const judge = (async () => pays) as any;
+  for (const id of ["b_unconf", "b_revert"]) {
+    l.quotes[`q_${id}`] = quote(`q_${id}`);
+    l.bonds[id] = { id, quoteId: `q_${id}`, status: "active", coverUsd: 1800, premiumUsd: 2, boundAt: new Date().toISOString(), beneficiary: PAYER, claims: [] };
+  }
+
+  const pending = (async () => { throw Object.assign(new Error("x"), { hash: tx("f") }); }) as any;
+  await assert.rejects(() => claim("b_unconf", "paid twice", [DOC], undefined, { judge, pay: pending }), /not yet confirmed/);
+  assert.equal(l.bonds.b_unconf.status, "paid");
+  const rec = l.claims[l.bonds.b_unconf.claims[0]];
+  assert.equal(rec.payoutTx, tx("f"));
+  assert.equal(rec.payoutUnconfirmed, true);
+  await assert.rejects(() => claim("b_unconf", "paid twice", [DOC], undefined, { judge, pay: pending }), /already paid out/);
+
+  const reverted = (async () => { throw new Error("reverted"); }) as any;
+  await assert.rejects(() => claim("b_revert", "paid twice", [DOC], undefined, { judge, pay: reverted }), /reverted/);
+  assert.equal(l.bonds.b_revert.status, "active");
 });
 
 test("claim: concurrent claims on one bond judge and pay once", async () => {
