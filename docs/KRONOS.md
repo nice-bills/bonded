@@ -50,4 +50,4 @@ Findings we are **not** acting on: the peril labels being "not defined" is partl
 ## Why nothing changed now
 
 `RATING_GUIDE_HASH` is the backtest's pin: the 40-invoice result in `README.md` was produced with these exact bytes. Editing the guide invalidates that hash and the published re-check story. The right sequence is: v2 guide with the two underwriter lines, new hash, re-run the backtest, publish both. The wording changes need a wording v2, which also moves `BOND_WORDING` and every archived claim's interpretation — a deliberate versioning step, not an audit side effect.
-Note: since Nov 13 the underwriter's reply format also asks for the invoice figures, so the underwriter system prompt hash in public/kronos.json predates that change; RATING_GUIDE (and RATING_GUIDE_HASH) is unchanged.
+The audit was re-run on Nov 14 against the current prompts (including the invoice-figures reply format); RATING_GUIDE_HASH is unchanged.
