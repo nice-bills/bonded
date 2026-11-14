@@ -21,7 +21,7 @@ The backtest found something closed APIs hide: within one run Dolphin served fro
 
 ## SERV Reasoning, deeply
 - **Prompt Guard** screens every untrusted document (the underwriter's verbatim transcript, including hidden text) before a bond is issued.
-- **Shadow Agent** audits every quote and every claim decision against the rating rules and the wording; an objection vetoes the bond or the payout.
+- **Shadow Agent** audits every quote against the rating rules, and an objection vetoes the bond. It also audits every claim decision against the wording; on claims that audit is advisory: recorded on the claim and shown in the console, while Prompt Guard, the SERV reviewer and Multipath hold the veto.
 - **Multipath** reads each claim against three rulebooks in parallel (bond wording, payment policy, vendor contract) and shows the clause each one turns on; a payout needs Multipath to agree it is covered.
 - **Kronos** audits the underwriter and claims prompts themselves; the report is public at `/api/kronos`.
 - Bonded is an **OpenServ agent** (`quote`, `bind`, `claim`) sold on the **x402 Agent Market**: any agent can buy a quote per call in USDC on Base.

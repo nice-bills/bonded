@@ -18,10 +18,10 @@ export interface ServReview {
   requestId: string | null;
 }
 
-export async function servReview(opts: { system: string; untrusted: string; shadowHint: string }): Promise<ServReview> {
+export async function servReview(opts: { system: string; untrusted: string; shadowHint?: string }): Promise<ServReview> {
   const key = process.env.SERV_API_KEY;
   if (!key) throw new Error("SERV_API_KEY is not set");
-  if (opts.shadowHint.length > 2000) throw new Error("shadow hint over 2000 chars"); // SERV answers 400 above this
+  if (opts.shadowHint && opts.shadowHint.length > 2000) throw new Error("shadow hint over 2000 chars"); // SERV answers 400 above this
   const started = Date.now();
   const body = {
     model: SERV_MODEL,
@@ -39,9 +39,10 @@ export async function servReview(opts: { system: string; untrusted: string; shad
         schema: { type: "object", additionalProperties: false, required: ["verdict", "reason"], properties: { verdict: { type: "string", enum: ["agree", "object"] }, reason: { type: "string" } } },
       },
     },
+    // No hint means no Shadow Agent: Prompt Guard and the reviewer model only.
     tools: [
       { type: "function", function: { name: "serv_prompt_guard" } },
-      { type: "function", function: { name: "serv_shadow_agent", parameters: { type: "object", properties: { hint: { type: "string", default: opts.shadowHint }, max_iterations: { type: "integer", default: 1 } } } } },
+      ...(opts.shadowHint ? [{ type: "function", function: { name: "serv_shadow_agent", parameters: { type: "object", properties: { hint: { type: "string", default: opts.shadowHint }, max_iterations: { type: "integer", default: 1 } } } } }] : []),
     ],
   };
   let json: any, res: Response | undefined;
