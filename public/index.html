@@ -354,12 +354,21 @@ async function loadBacktest() {
   } catch { el.innerHTML = `<div class="sc">backtest</div><p>Not available.</p>`; }
 }
 
+async function a2aRows() {
+  try {
+    const { runs } = await (await fetch("/api/a2a/runs")).json();
+    if (!runs.length) return "";
+    const tr = runs.slice(0, 3).map((r) => `<tr><td>${esc(r.invoice.title || r.invoice.payee || r.bonded.quoteId)}</td><td class="r ${r.outcome === "bound" ? "green" : "red"}">${r.outcome === "bound" ? (r.bondUrl ? `<a href="${r.bondUrl}">bonded</a>` : "bonded") : "refused"}</td><td class="r">${r.payTxUrl ? `<a href="${r.payTxUrl}">tx</a>` : ""}</td></tr>`).join("");
+    return `<div class="sc" style="margin-top:12px">agent to agent · Payrun Lite on OpenServ</div><table class="ledger num">${tr}</table>`;
+  } catch { return ""; }
+}
+
 async function loadLedger() {
   try {
     const l = await (await fetch("/api/ledger")).json();
     const rows = l.quotes.slice(0, 6).map((q) => `<tr><td>${esc(q.case.action.payee || q.case.action.description)}</td><td class="r ${q.decision === "insure" ? "green" : "red"}">${q.decision === "insure" ? usd(q.premiumUsd, 2) : "declined"}</td><td class="r">${pct(q.pLoss)}</td></tr>`).join("");
     const claims = l.claims.slice(0, 3).map((c) => `<tr><td>claim ${esc(c.bondId.slice(-4))}</td><td class="r ${c.decision === "pay" ? "green" : "red"}">${c.decision === "pay" ? usd(c.payoutUsd) : "denied"}</td><td class="r">${c.payoutTxUrl ? `<a href="${c.payoutTxUrl}">tx</a>` : ""}</td></tr>`).join("");
-    $("#ledger").innerHTML = `<div class="sc">ledger · latest</div><h3>${l.quotes.length ? `${l.quotes.length} quote${l.quotes.length > 1 ? "s" : ""} this session` : "No quotes yet"}</h3><table class="ledger num">${rows}${claims}</table>`;
+    $("#ledger").innerHTML = `<div class="sc">ledger · latest</div><h3>${l.quotes.length ? `${l.quotes.length} quote${l.quotes.length > 1 ? "s" : ""} this session` : "No quotes yet"}</h3><table class="ledger num">${rows}${claims}</table>${await a2aRows()}`;
   } catch { $("#ledger").innerHTML = `<div class="sc">ledger</div><p>Not available.</p>`; }
 }
 

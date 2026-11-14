@@ -1,0 +1,86 @@
+{
+ "runs": {
+  "a2a_be5265fe10": {
+   "id": "a2a_be5265fe10",
+   "at": "2026-11-13T20:44:38.564Z",
+   "invoice": {
+    "action": "Pay Kwame Mensah invoice INV-0931 (Payments API webhooks, phase 2, October 2026)",
+    "payee": "Kwame Mensah",
+    "payTo": "0x5a3B9e0C1f2d4E6a7B8c9D0e1F2a3b4C5d6E7f81",
+    "amountUsd": 1800,
+    "title": "Kwame's October invoice"
+   },
+   "openserv": {
+    "workflowId": 14078,
+    "quoteTaskId": 750661,
+    "decideTaskId": 750662,
+    "bindTaskId": 750663
+   },
+   "bonded": {
+    "quoteId": "q_e7065194b6",
+    "decision": "insure",
+    "reason": null,
+    "premiumUsd": 12.57,
+    "pLoss": 0.004990009995000988,
+    "console": "https://bonded-pool.onrender.com/#q_e7065194b6",
+    "verified": true
+   },
+   "outcome": "bound",
+   "payTx": "0x2cc339e5f4869ba91f943ee205b6fe5a54749eb7498d29b3559edb876b088edf",
+   "payTxUrl": "https://sepolia.basescan.org/tx/0x2cc339e5f4869ba91f943ee205b6fe5a54749eb7498d29b3559edb876b088edf",
+   "bondId": "bond_4927708d0c",
+   "bondUrl": "https://bonded-pool.onrender.com/#bond_4927708d0c"
+  },
+  "a2a_ecacc298f4": {
+   "id": "a2a_ecacc298f4",
+   "at": "2026-11-14T03:40:40.185Z",
+   "invoice": {
+    "action": "Pay Efua Asante invoice INV-0118 (Blog posts, October 2026)",
+    "payee": "Efua Asante",
+    "payTo": "0x3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0c1D23",
+    "amountUsd": 900,
+    "title": "Efua's invoice with a note for the AI"
+   },
+   "openserv": {
+    "workflowId": 14078,
+    "quoteTaskId": 750661,
+    "decideTaskId": 750662,
+    "bindTaskId": 750663
+   },
+   "bonded": {
+    "quoteId": "q_b1100ab642",
+    "decision": "decline",
+    "reason": "Estimated chance of loss 85.5% is above the 10.0% limit: uninsurable, do not act.",
+    "premiumUsd": 1077.59,
+    "pLoss": 0.855226336582,
+    "console": "https://bonded-pool.onrender.com/#q_b1100ab642",
+    "verified": true
+   },
+   "outcome": "refused"
+  },
+  "a2a_b64f6f20b3": {
+   "id": "a2a_b64f6f20b3",
+   "at": "2026-11-14T03:33:42.846Z",
+   "openserv": {
+    "workflowId": "0180b4fb-d35a-484e-91ef-ff261ec213a3",
+    "decideTaskId": "1adc0ecc-cc4c-4cfb-a662-dad49a11e16e",
+    "quoteTaskId": 750661
+   },
+   "bonded": {
+    "quoteId": "q_62c1ff44f1",
+    "decision": "decline",
+    "reason": "Estimated chance of loss 98.7% is above the 10.0% limit: uninsurable, do not act.",
+    "premiumUsd": 3314.78,
+    "pLoss": 0.986540473,
+    "console": "https://bonded-pool.onrender.com/#q_62c1ff44f1"
+   },
+   "invoice": {
+    "action": "Pay Ama Owusu invoice INV-2207 (Onboarding flow redesign, October 2026)",
+    "payee": "Ama Owusu",
+    "payTo": "0x94e672298C44c94b0606740cBEfa6963fA3409C6",
+    "amountUsd": 2400
+   },
+   "outcome": "refused"
+  }
+ }
+}

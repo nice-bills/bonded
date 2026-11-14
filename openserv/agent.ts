@@ -12,9 +12,11 @@ import "../src/sealed";
 import { existsSync, writeFileSync } from "node:fs";
 import { Agent, run } from "@openserv-labs/sdk";
 import { provision, triggers } from "@openserv-labs/client";
+import { provisionPayrun } from "./payrun";
 import { z } from "zod";
 import type { Hex } from "viem";
 import { mount } from "../src/routes";
+import { attachBond } from "../src/a2a";
 import { bind, claim, quote } from "../src/service";
 import { publicView } from "../src/service";
 import type { Doc } from "../src/case";
@@ -72,7 +74,10 @@ agent.addCapability({
   description: "Bind a quote: after paying the premium in USDC (Base Sepolia) to the pool address in the quote, send the quote id and the transaction hash. Returns the bond.",
   inputSchema: z.object({ quoteId: z.string(), tx: z.string(), beneficiary: z.string().optional() }),
   async run({ args }) {
-    return out(await bind(args.quoteId, args.tx as Hex, args.beneficiary as Hex | undefined));
+    const b = await bind(args.quoteId, args.tx as Hex, args.beneficiary as Hex | undefined);
+    // If this quote came from an agent-to-agent run (Payrun Lite), complete that run's record with the bond.
+    attachBond(args.quoteId, { id: b.id, consoleUrl: PUBLIC_URL ? `${PUBLIC_URL}/#${b.id}` : undefined });
+    return out(b);
   },
 });
 
@@ -137,6 +142,15 @@ async function main() {
     },
   });
   console.log(`Quote paywall: ${quoteWf.paywallUrl ?? "(see platform)"}\nClaim paywall: ${claimWf.paywallUrl ?? "(see platform)"}`);
+  // Payrun Lite: the payables agent, in the same process. It asks Bonded for a guarantee before
+  // it pays an invoice, pays the premium if insured, and refuses to pay what Bonded declines.
+  try {
+    const payrunInfo = await provisionPayrun();
+    run(payrunInfo.agent).catch((e) => console.error("Payrun Lite failed to start:", e.message));
+    console.log(`Payrun Lite agent: ${payrunInfo.agentId}${payrunInfo.workflowId ? ` · payrun workflow: ${payrunInfo.workflowId}` : ""}`);
+  } catch (e) {
+    console.error(`Payrun Lite not started: ${(e as Error).message}`);
+  }
   await run(agent);
 }
 

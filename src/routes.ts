@@ -4,6 +4,7 @@ import { bind, claim, poolStatus, publicView, quote, recheck } from "./service";
 import { ledger } from "./store";
 import { CASES, CLAIMS } from "../demo/cases";
 import { sendUsdc } from "./chain";
+import { mountA2a } from "./a2a";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 
@@ -46,6 +47,7 @@ async function stream(res: Response, work: (step: (name: string, detail?: Record
 const caseView = (c: any) => ({ ...c, docs: c.docs.map((d: any) => ({ ...d, image: d.image ? `/${d.image}` : undefined })) });
 
 export function mount(app: Express) {
+  mountA2a(app); // GET /api/a2a/runs (agent-to-agent runs)
   app.use("/api", express.json({ limit: "8mb" }));
   app.use((req, res, next) => {
     res.setHeader("access-control-allow-origin", "*");
