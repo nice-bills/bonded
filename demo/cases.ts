@@ -96,6 +96,15 @@ export const CLAIMS = {
     statement: "At month-end reconciliation our bank statement showed Kwame was already paid $1,800 for the same October webhooks work on invoice INV-0929, settled by bank transfer on 2026-10-30 before Payrun paid INV-0931. Kwame has refused to refund (email attached).",
     evidence: [
       { name: "bank-statement-oct.png", source: "untrusted", image: "demo/img/claim-bank.png" },
+      { name: "usdc-transfer-inv0931.png", source: "untrusted", image: "demo/img/claim-usdc.png" },
+      { name: "usdc-transfer-inv0931.txt", source: "untrusted", text: `TOKEN TRANSFER RECORD (public ledger, verifiable on the chain explorer)
+tx 0x8f3a1c94b2d7e650f4a1c3b8d9e2067a5c4b3f2e1d0a9b8c7d6e5f4a3b2c1d0e9
+Token: USDC (Base)          Status: Success (confirmed, block 24,118,402)
+Date: 2026-11-02 14:06:11 UTC
+From: 0x8C4f2E9a1B7d5C3e6F8a9B0c1D2e3F4a5B6C7D89 (Tetteh & Co. treasury, Payrun)
+To:   0x5a3B9e0C1f2d4E6a7B8c9D0e1F2a3b4C5d6E7f81 (Kwame Mensah, wallet on file)
+Amount: 1,800.00 USDC
+Reference: INV-0931 — Payments API webhooks, phase 2, October 2026` },
       { name: "email-kwame-refund.txt", source: "untrusted", text: `From: Kwame Mensah <kwame@mensah.dev>\nDate: 2026-11-12\nSubject: Re: INV-0931 paid twice\n\nI sent INV-0929 to your accountant and INV-0931 to the payments inbox by mistake, both for the October webhooks work. The money has already gone to my tax bill, so I can't refund it this year. Sorry. Kwame` },
     ] as Doc[],
   },

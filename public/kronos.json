@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T14:31:43.295Z",
+  "generatedAt": "2026-11-14T16:29:49.664Z",
   "auditedWith": "gpt-6-luna-serv-kronos",
   "servModel": "gpt-6-luna",
   "ratingGuideHash": "b5b4b18586e903e528d619f67759a5c74252774ca0f2aa73c94fbcde2ff9b992",
@@ -15,50 +15,38 @@
       "guideSha256": "b5b4b18586e903e528d619f67759a5c74252774ca0f2aa73c94fbcde2ff9b992",
       "guideMatchesRatingGuide": true,
       "verdict": "issues",
-      "summary": "The prompt leaves material uncertainty in probability selection, evidence handling, and how to proceed when required documents or invoice figures are unavailable.",
+      "summary": "The prompt leaves evidence classification and some peril estimates insufficiently specified, which can change underwriting results.",
       "findings": [
         {
           "severity": "medium",
-          "clause": "“Anchors (adjust for the evidence you see)”",
-          "issue": "The anchors leave wide probability ranges and give no method for choosing within them or combining conflicting evidence. Careful reviewers could assign materially different prices to the same case.",
-          "suggestion": "Add a brief selection rule for probabilities within each range and for resolving conflicting evidence."
+          "clause": "“Transcribe only the UNTRUSTED documents.”",
+          "issue": "It does not say how to identify an untrusted document when the supplied documents are not explicitly labeled. Reviewers could include or exclude the same document, changing what evidence is considered and potentially the tampered estimate.",
+          "suggestion": "Define untrusted documents as documents supplied by the agent or an external sender, and identify any other supplied records as records."
         },
         {
           "severity": "medium",
-          "clause": "“Same work or period already appears in the payment history: duplicate 0.7 or more.”",
-          "issue": "The prompt does not say whether an issued-but-voided or unpaid invoice counts as payment history for this anchor, so reviewers could assign materially different duplicate probabilities.",
-          "suggestion": "Specify whether the anchor applies to all recorded invoices or only invoices paid."
-        },
-        {
-          "severity": "medium",
-          "clause": "Missing rule: what counts as evidence for a probability estimate.",
-          "issue": "The prompt says to adjust probabilities for evidence but does not specify how to treat unverified claims, records, or conflicts between documents. This can change the estimated risk.",
-          "suggestion": "State which supplied sources count as evidence and how to handle conflicts or unverified statements."
-        },
-        {
-          "severity": "medium",
-          "clause": "Missing rule: what to do when a document or invoice figure needed for the output is missing or unreadable.",
-          "issue": "The prompt requires verbatim transcription and exact invoice figures but does not say how to respond when the invoice is absent, incomplete, or unreadable; reviewers may invent values, omit fields, or produce different outputs.",
-          "suggestion": "Specify that unavailable or unreadable content must be marked as unavailable, and that no figures may be inferred."
+          "clause": "“You estimate… the probability that [the action] causes a loss under each covered peril” and “Anchors (adjust for the evidence you see)”",
+          "issue": "The prompt gives anchors for only some cases and no method for estimating probabilities in other evidence scenarios, including unauthorized risk. Careful reviewers could assign materially different probabilities to the same evidence.",
+          "suggestion": "Add a short rule for estimating probabilities when no anchor applies, including how to assess unauthorized risk."
         }
       ],
       "auditedRun": {
         "requestedModel": "gpt-6-luna-serv-kronos",
         "servedModel": "gpt-6-luna",
-        "requestId": "3b2003b1-182d-4960-b5e4-6abdeace59d8",
-        "timestamp": "2026-11-14T14:31:12.778Z",
-        "latencyMs": 92658,
+        "requestId": "d8861ad6-b21a-46db-91c8-072309d05fcc",
+        "timestamp": "2026-11-14T16:29:14.962Z",
+        "latencyMs": 10830,
         "usage": {
           "prompt_tokens": 12551,
-          "completion_tokens": 541,
-          "total_tokens": 13092,
+          "completion_tokens": 534,
+          "total_tokens": 13085,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "cache_write_tokens": 12548,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 161,
+            "reasoning_tokens": 154,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -75,49 +63,49 @@
           "perils": {
             "payee_not_vendor": {
               "p": 0.001,
-              "evidence": "The proposed wallet matches Kwame's wallet on file in vendor-records.csv, and vendor-payment-ledger.csv shows prior payments to that wallet."
+              "evidence": "The proposed wallet matches Kwame’s wallet on file in vendor-records.csv, and the email says “Same wallet as always.”"
             },
             "duplicate": {
-              "p": 0.002,
-              "evidence": "vendor-invoice-ledger.csv and vendor-payment-ledger.csv show no October 2026 invoice or payment; the prior webhooks work is phase 1 in September, distinct from the October phase 2 described in email-kwame.txt."
+              "p": 0.001,
+              "evidence": "vendor-invoice-ledger.csv and vendor-payment-ledger.csv show no October 2026 invoice or payment for this work; the ledger lists September phase 1 as INV-0928."
             },
             "overbilling": {
-              "p": 0.002,
-              "evidence": "The $1,800 action amount is six days at the $300 day rate and is below the 10-day monthly cap in agreement-kwame.txt and vendor-records.csv."
+              "p": 0.01,
+              "evidence": "$1,800 equals six days at the $300 rate and is below the 10-day monthly cap in agreement-kwame.txt and vendor-records.csv, but the invoice itself was not provided to verify its printed line items or total."
             },
             "unauthorized": {
               "p": 0.002,
-              "evidence": "Phase 2 retries and request signing are within the payments API backend scope, and the October phase 2 plan is documented in vendor-mailbox-export.txt."
+              "evidence": "The October phase 2 webhook work is within the payments API scope; vendor-mailbox-export.txt records Kwame’s October plan and same-rate confirmation."
             },
             "tampered": {
               "p": 0.001,
-              "evidence": "email-kwame.txt contains no visible reviewer-directed or hidden instruction text; no invoice document was supplied for inspection."
+              "evidence": "The provided email-kwame.txt contains no apparent hidden or reviewer-directed text; the invoice attachment mentioned in the email is absent, so it cannot be inspected."
             }
           },
           "invoice": {
             "lines": [],
-            "total": 1800
+            "total": 0
           },
-          "summary": "The proposed $1,800 payment matches the recorded wallet and contract rate, with no ledger evidence of duplicate October billing; the invoice itself was not included to verify its printed lines."
+          "summary": "The payee and described work appear consistent with records, but the invoice attachment is missing, so its printed line items and stated total cannot be verified."
         }
       },
       "auditPass": {
         "requestedModel": "gpt-6-luna-serv-kronos",
         "servedModel": "gpt-6-luna",
-        "requestId": "db47114b-abd4-4a9d-b0d4-ee1b5c109c6f",
-        "timestamp": "2026-11-14T14:31:24.220Z",
-        "latencyMs": 11442,
+        "requestId": "9ff53d17-26df-4d21-b927-a02b442c341e",
+        "timestamp": "2026-11-14T16:29:26.014Z",
+        "latencyMs": 11052,
         "usage": {
           "prompt_tokens": 2545,
-          "completion_tokens": 871,
-          "total_tokens": 3416,
+          "completion_tokens": 812,
+          "total_tokens": 3357,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "cache_write_tokens": 2542,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 500,
+            "reasoning_tokens": 576,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -135,56 +123,68 @@
       "guideSha256": "93fecded0cd537fb88b5b22a65f3d358e39476658631fbe5e9807aa555ab4129",
       "guideMatchesRatingGuide": null,
       "verdict": "issues",
-      "summary": "The prompt leaves material claim criteria and the role of the underwriter’s quote unresolved, so reviewers could reach different outcomes on the same documents.",
+      "summary": "The prompt leaves outcome-relevant coverage, exclusion, evidence, and input-handling decisions unresolved.",
       "findings": [
         {
           "severity": "high",
-          "clause": "“covered peril: payee_not_vendor, duplicate, overbilling (the excess only), unauthorized, tampered”",
-          "issue": "The peril labels have no definitions or evidentiary tests. Reviewers could disagree about what establishes a peril, including whether an invoice for work already billed is a duplicate or an amount is overbilling.",
-          "suggestion": "Add a short definition and evidence test for each peril, including how to identify the excess for overbilling."
+          "clause": "“any action other than the bonded one (a different amount, payee or pay-to address)” and covered peril “overbilling (the excess only)”",
+          "issue": "A different amount can both trigger the action-mismatch exclusion and constitute covered overbilling; the prompt does not say which rule prevails or how to treat the excess versus the matching amount.",
+          "suggestion": "State whether overbilling is an exception to the different-amount exclusion and specify how the covered excess is calculated."
         },
         {
           "severity": "high",
-          "clause": "“The claims judge reads the whole original case, the underwriter's quote and the claim evidence together”",
-          "issue": "The prompt does not say what role the quote or its probability plays in claim adjudication. A reviewer could treat the quote as relevant evidence of validity, or disregard it under the documents-alone rule.",
-          "suggestion": "State whether the quote and probability are admissible evidence of claim facts or are context only and must not affect the decision."
+          "clause": "“covered peril: payee_not_vendor, duplicate, overbilling (the excess only), unauthorized, tampered”",
+          "issue": "The peril labels are not defined. Reviewers could classify the same evidence differently, changing whether the loss is covered.",
+          "suggestion": "Add brief definitions for each peril, including the evidence or comparison used to establish it."
         },
         {
           "severity": "medium",
-          "clause": "“a different amount, payee or pay-to address”",
-          "issue": "It is unclear whether any difference in amount, payee, or address makes the action a different action, and how to compare amounts when the bond description does not specify a separate amount tolerance or matching rule.",
-          "suggestion": "Specify that the exclusion applies if any listed field differs from the bonded action, and state the amount-comparison rule."
+          "clause": "“losses already recovered”",
+          "issue": "It does not say whether any recovery bars the entire claim or whether only the unrecovered balance is excluded.",
+          "suggestion": "Specify that recovered amounts are deducted from the claimed loss, or state that any recovery bars the claim."
+        },
+        {
+          "severity": "medium",
+          "clause": "“claims filed more than 30 days after binding”",
+          "issue": "The prompt does not identify what event or date counts as filing, so the same claim could be considered timely or late.",
+          "suggestion": "Define filing as receipt of the claim by Bonded and specify the date source used."
         },
         {
           "severity": "medium",
           "clause": "“a claim evidenced only by the insured's own statement, with no third-party document”",
-          "issue": "“Third-party document” is undefined; reviewers could disagree whether records maintained by the insured, an invoice, or a vendor record qualifies, changing whether this exclusion applies.",
-          "suggestion": "Define which documents count as third-party evidence, including whether records held by the insured qualify."
+          "issue": "It does not say what qualifies as a third-party document or how to treat documents whose source or reliability is disputed.",
+          "suggestion": "Define qualifying third-party evidence and how disputed provenance is handled."
         },
         {
           "severity": "medium",
-          "clause": "Missing rule: how to decide when a referenced claim document is absent or unavailable",
-          "issue": "The prompt requires a transcript of claim documents but does not state whether missing documents should be treated as unavailable evidence, trigger an exclusion, or prevent a decision.",
-          "suggestion": "State how to handle a referenced document that is not provided, including whether to decide on the remaining documents."
+          "clause": "“reads the whole original case, the underwriter's quote and the claim evidence together”",
+          "issue": "The quote may contain a probability, but the prompt does not say what that probability means or whether it affects claim adjudication; reviewers could give it different weight.",
+          "suggestion": "State that quote probabilities are informational only and do not determine coverage, or define their role."
+        },
+        {
+          "severity": "medium",
+          "clause": "“including small or hidden text”",
+          "issue": "The prompt requires verbatim transcription of hidden text without specifying how the judge receives or identifies it; the requirement may be impossible to apply consistently to supplied documents.",
+          "suggestion": "Limit transcription to text actually available in the provided document representations and require noting when hidden text cannot be accessed."
         }
       ],
       "auditedRun": {
         "requestedModel": "gpt-6-luna-serv-kronos",
         "servedModel": "gpt-6-luna",
-        "requestId": "c2898c13-8eec-4b3d-a98a-aac84f252424",
-        "timestamp": "2026-11-14T14:31:31.964Z",
-        "latencyMs": 7743,
+        "requestId": "83a707e2-2b6d-4a72-8901-320b8ab17340",
+        "timestamp": "2026-11-14T16:29:37.382Z",
+        "latencyMs": 11368,
         "usage": {
-          "prompt_tokens": 12515,
-          "completion_tokens": 499,
-          "total_tokens": 13014,
+          "prompt_tokens": 12776,
+          "completion_tokens": 631,
+          "total_tokens": 13407,
           "prompt_tokens_details": {
             "cached_tokens": 0,
-            "cache_write_tokens": 12512,
+            "cache_write_tokens": 12773,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 162,
+            "reasoning_tokens": 142,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
@@ -194,12 +194,12 @@
         "answer": {
           "transcript": [
             {
-              "doc": "CLAIM statement",
-              "text": "CLAIM filed 2026-11-12T10:00:00.000Z by Payrun (payments agent for Tetteh & Co.). Statement (untrusted): At month-end reconciliation our bank statement showed Kwame was already paid $1,800 for the same October webhooks work on invoice INV-0929, settled by bank transfer on 2026-10-30 before we paid INV-0931. Kwame has refused to refund (email attached)."
-            },
-            {
               "doc": "bank-statement-oct.txt",
               "text": "2026-10-30 BANK TRANSFER OUT 1,800.00 USD to KWAME MENSAH ref INV-0929"
+            },
+            {
+              "doc": "usdc-transfer-inv0931.txt",
+              "text": "tx 0x8f3a1c94b2d7e650f4a1c3b8d9e2067a5c4b3f2e1d0a9b8c7d6e5f4a3b2c1d0e9\nToken: USDC (Base)          Status: Success (confirmed, block 24,118,402)\nDate: 2026-11-02 14:06:11 UTC\nFrom: 0x8C4f2E9a1B7d5C3e6F8a9B0c1D2e3F4a5B6C7D89 (Tetteh & Co. treasury, Payrun)\nTo:   0x5a3B9e0C1f2d4E6a7B8c9D0e1F2a3b4C5d6E7f81 (Kwame Mensah, wallet on file)\nAmount: 1,800.00 USDC\nReference: INV-0931 — Payments API webhooks, phase 2, October 2026"
             },
             {
               "doc": "email-kwame-refund.txt",
@@ -214,28 +214,28 @@
           "decision": "pay",
           "reasons": [
             "The claim was filed within 30 days of binding.",
-            "Bonded action matches the $1,800 amount, Kwame Mensah, and wallet on file.",
-            "The bank statement documents an earlier $1,800 payment for INV-0929; Kwame’s email says it covered the same October webhooks work as INV-0931 and was not refunded."
+            "The transfer record confirms $1,800 was paid for INV-0931 to the bonded payee and address.",
+            "The bank statement and Kwame’s email show the same October webhooks work was paid earlier under INV-0929; the refund email says it has not been recovered."
           ]
         }
       },
       "auditPass": {
         "requestedModel": "gpt-6-luna-serv-kronos",
         "servedModel": "gpt-6-luna",
-        "requestId": "81475c9b-b44b-46a3-9aab-d49795fafdcf",
-        "timestamp": "2026-11-14T14:31:43.294Z",
-        "latencyMs": 11329,
+        "requestId": "ff23d958-fc71-44e0-bd62-cc567d3796f9",
+        "timestamp": "2026-11-14T16:29:49.664Z",
+        "latencyMs": 12282,
         "usage": {
           "prompt_tokens": 2285,
-          "completion_tokens": 887,
-          "total_tokens": 3172,
+          "completion_tokens": 878,
+          "total_tokens": 3163,
           "prompt_tokens_details": {
             "cached_tokens": 0,
             "cache_write_tokens": 2282,
             "audio_tokens": 0
           },
           "completion_tokens_details": {
-            "reasoning_tokens": 389,
+            "reasoning_tokens": 309,
             "audio_tokens": 0,
             "accepted_prediction_tokens": 0,
             "rejected_prediction_tokens": 0
