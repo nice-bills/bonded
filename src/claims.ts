@@ -184,11 +184,11 @@ export async function judgeClaim(bond: any, quote: any, c: Case, statement: stri
   if (decision === "pay" && (j.peril === "none" || !j.action_matches_bond || !j.third_party_evidence || !/^none$/i.test(j.exclusion.trim()))) {
     decision = "deny"; reason = `Wording gate: ${j.peril === "none" ? "no covered peril" : !j.action_matches_bond ? "not the bonded action" : !j.third_party_evidence ? "no third-party evidence" : `exclusion ${j.exclusion}`}. ${reason}`;
   }
-  // Prompt Guard false-positives on about 1 in 10 legitimate claims. Re-screen once, only after every
-  // code gate passed: the claim is still denied if the second screen blocks it too.
-  if (serv.verdict === "blocked" && decision === "pay") serv = await servReview(reviewOpts);
-  // Same for a Multipath reply that addressed no rulebook: ask once more, a second empty reply still denies.
-  if (!multipath.answered && decision === "pay") multipath = await reviewClaimMultipath(bond, c, statement, j, evidence);
+  // Prompt Guard false-positives on about 1 in 10 legitimate claims, sometimes twice running. Re-screen up
+  // to twice, only after every code gate passed: the claim is still denied if every screen blocks it.
+  for (let k = 0; k < 2 && serv.verdict === "blocked" && decision === "pay"; k++) serv = await servReview(reviewOpts);
+  // Same for a Multipath reply that addressed no rulebook: ask up to twice more; all-empty still denies.
+  for (let k = 0; k < 2 && !multipath.answered && decision === "pay"; k++) multipath = await reviewClaimMultipath(bond, c, statement, j, evidence);
   if (serv.verdict === "blocked") { decision = "deny"; reason = `${serv.reason} (exclusion 2e)`; }
   else if (serv.verdict === "object" && decision === "pay") { decision = "deny"; reason = `Second-line reviewer objected: ${serv.reason}`; }
   // Multipath: the judge's "pay" also needs every rulebook to say the bond bears this loss.
