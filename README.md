@@ -2,6 +2,8 @@
 
 **Before an AI agent pays, it buys a guarantee for that one action. If the pool won't insure it, the agent doesn't act.**
 
+**Sponsor tech used:** **Dolphin** (open-weight DeepSeek-V4.1-Flash: the underwriter and the claims judge) · **SERV Reasoning** (Prompt Guard, Shadow Agent, Multipath, Kronos) · **OpenServ** agents, workflow and x402 Agent Market · USDC on Base Sepolia.
+
 Bonded is an action guarantee pool for AI agents, built for the OpenServ SERV Hackathon 02 (Dolphin track). An open-weight underwriter (DeepSeek-V4.1-Flash on [Dolphin](https://dphn.ai)) reads the whole case in one multimodal call and prices the risk. SERV Reasoning screens and audits every decision. Premiums come in and claims go out in USDC on Base Sepolia. Other agents buy cover through OpenServ's x402 Agent Market.
 
 It is a demo of an action guarantee pool on testnet funds, not an insurance product.
@@ -9,6 +11,19 @@ It is a demo of an action guarantee pool on testnet funds, not an insurance prod
 - Live console: https://bonded-pool.onrender.com
 - x402 Agent Market: [Bonded Quote](https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1) ($0.02) · [Bonded Claim](https://platform.openserv.ai/workspace/paywall/97f6b7afdca343cf9a99317f2104019a) ($0.01) · OpenServ agent #4958
 - Pool: [`0x4D94…0BED` on Base Sepolia](https://sepolia.basescan.org/address/0x4D948Ed7a54061e8474612C98420Ae9b91400BED)
+
+## What it looks like
+**Insured.** A clean invoice gets a bond: cover, premium, chance of loss, the premium transaction on chain.
+
+![Bond certificate for Kwame's invoice: $1,800 cover, $22.60 premium, 0.90% chance of loss](docs/img/console-bond.png)
+
+**Declined.** An invoice with hidden text aimed at the AI reviewer: the underwriter transcribes it and prices it out at 90.1%. The agent does not pay.
+
+![Declined quote: hidden instructions in the invoice, tampered 90%, not insurable](docs/img/console-declined.png)
+
+**Claim paid.** A duplicate payment surfaces later; the claims judge, SERV and three Multipath rulebooks agree, and the pool pays $1,800 in USDC on Base Sepolia.
+
+<img src="docs/img/console-claim-paid.png" alt="Paid claim: $1,800 payout, bond wording, payment policy and vendor contract all covered" width="380">
 
 ## Why open weights are the point
 An insurer's loss history only means something while the underwriter stays the same. Closed models get swapped or pulled (OpenServ's own changelog: Qwen removed Aug 21, 13 models trimmed Sep 11, 2026). Bonded pins open MIT weights, records Dolphin's serving fingerprint on every decision, hashes its rating guide, and stores the exact request so anyone, a claimant included, can **re-check** a quote or claim on the same weights.

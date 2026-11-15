@@ -2,6 +2,12 @@
 
 **Track:** Dolphin · **Live:** https://bonded-pool.onrender.com · **Code:** https://github.com/nice-bills/bonded · **x402:** [quote](https://platform.openserv.ai/workspace/paywall/0ae26100d76340369a7759f84ce13cd1), [claim](https://platform.openserv.ai/workspace/paywall/97f6b7afdca343cf9a99317f2104019a)
 
+**Sponsor tech used**
+- **Dolphin** (track sponsor): open-weight DeepSeek-V4.1-Flash served by Dolphin is the underwriter and the claims judge. Every quote and every claim is one multimodal Dolphin call.
+- **SERV Reasoning** (`gpt-6-luna`): Prompt Guard, Shadow Agent, Multipath and Kronos, on every quote and claim.
+- **OpenServ platform**: two OpenServ agents (Bonded #4958 and Payrun Lite), one OpenServ workflow between them, and two listings on the x402 Agent Market.
+- Settlement: USDC on Base Sepolia, premiums in and claims out.
+
 ## Problem
 AI agents now move money: they pay invoices, top up accounts, settle bills. When one gets it wrong (a swapped wallet, a duplicate invoice, a prompt injection hidden in a PDF), the loss is final. Agent cover today (Klaimee, Corgi, Armilla) is a yearly enterprise policy written by humans. Nothing prices the one action an agent is about to take.
 
