@@ -21,4 +21,4 @@ Reply with the proof:
 > Backtest on 40 labelled invoices (24 traps), two runs each: 24/24 traps priced out, clean invoices insured on 31 of 32 underwrites across both runs (16/16 on run 0), AUC 1.0 and Brier 0.009 on run 0, 97.5% same decision on re-run. Total model cost: under one cent.
 
 Second reply:
-> Does the underwriter stay the same? Same 40 invoices through four Claude Opus generations: each priced a different book, premiums moved up to 4.3x between releases. Pinned open weights on @dphn_ai: 24/24 traps, 16/16 clean, about 450x cheaper per decision, and anyone can re-run a decision with their own key. https://bonded-pool.onrender.com/benchmark
+> Does the underwriter stay the same? Same 40 invoices through four Claude Opus generations: every release flipped 1 to 3 insure/decline decisions, while one version run twice flipped none. Pinned open weights on @dphn_ai: 24/24 traps, 16/16 clean, about 450x cheaper per decision, and anyone can re-run a decision with their own key. https://bonded-pool.onrender.com/benchmark

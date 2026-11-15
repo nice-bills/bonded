@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-15T19:15:07.813Z",
+ "generatedAt": "2026-11-15T19:20:37.178Z",
  "cases": 40,
  "traps": 24,
  "clean": 16,
@@ -1486,7 +1486,8 @@
   "Insure/decline flips between versions: claude-opus-4.6→claude-opus-4.7 3 of 39 (clean-10, clean-13, clean-15), claude-opus-4.7→claude-opus-4.8 2 of 40 (clean-4, clean-10), claude-opus-4.8→claude-opus-5.5 1 of 39 (clean-3), claude-opus-4.6→claude-opus-5.5 4 of 38; median premium change on cases both insured: claude-opus-4.6→claude-opus-4.7 14.2%, claude-opus-4.7→claude-opus-4.8 -36.3%, claude-opus-4.8→claude-opus-5.5 71.1%, claude-opus-4.6→claude-opus-5.5 42.7%.",
   "Mean |Δp(loss)| between versions was 0.087 (claude-opus-4.6→claude-opus-4.7), 0.069 (claude-opus-4.7→claude-opus-4.8), 0.084 (claude-opus-4.8→claude-opus-5.5), 0.120 (claude-opus-4.6→claude-opus-5.5), so the probabilities move between versions even where the decision does not.",
   "Same-model re-run: Dolphin gave the same decision on 39/40 cases (mean |Δp(loss)| 0.0275, its two runs served by 2 different vLLM builds), claude-opus-5.5 on 24/24 (mean |Δp(loss)| 0.0056); claude-opus-5.5 re-ran more consistently than Dolphin on this set; the claude-opus-5.5 re-run covers 24 of 40 cases.",
-  "Each version ran once with 40 cases, so one or two flips are within same-model re-run noise and are not evidence of drift; claude-opus-4.6 also kept temperature 0 while later versions rejected it, a confound on any 4.6 comparison.",
+  "On the 24 cases claude-opus-5.5 was run twice, its two runs flipped 0 decisions, moved p(loss) by a mean 0.0056 and moved premiums by a median 19.4% (largest ratio 1.71x); on those same cases the version steps were claude-opus-4.6→claude-opus-4.7: 3 flips, mean |Δp(loss)| 0.1185, median premium change 14.2%, largest ratio 3.24x; claude-opus-4.7→claude-opus-4.8: 2 flips, mean |Δp(loss)| 0.0788, median premium change 32.4%, largest ratio 4.32x; claude-opus-4.8→claude-opus-5.5: 1 flips, mean |Δp(loss)| 0.0749, median premium change 71.1%, largest ratio 2.40x.",
+  "Reading it: decisions and probabilities move more between versions than between two runs of one version, but a median premium change under about 20% is inside same-model re-run noise (Dolphin's own two runs moved premiums by a median 20%, largest ratio 2.0x); each version ran once, 40 cases, and claude-opus-4.6 kept temperature 0 while later versions rejected it.",
   "Parameters SERV rejected and that were left out: claude-opus-4.6 response_format; claude-opus-4.7 response_format, temperature; claude-opus-4.8 response_format, temperature; claude-opus-5.5 response_format, temperature (response_format json_object is rejected, only json_schema is allowed; seed and reasoning_effort were accepted, which does not show they were honoured); cost for 40 decisions was Dolphin $0.0037 and claude-opus-4.6 $1.58, claude-opus-4.7 $1.49, claude-opus-4.8 $1.53, claude-opus-5.5 $1.68, with SERV list prices read as cents per million tokens and content_filter prompt tokens assumed billed.",
   "Errored calls, counted as neither insured nor declined and excluded from AUC, Brier and pairs: claude-opus-4.6 run 0 arithmetic-3: not JSON: ```json { \"transcript\": [ { \"d; claude-opus-5.5 run 0 clean-16: not JSON: ```json {\"transcript\":[{\"doc\":; claude-opus-5.5 run 1 clean-1: not JSON: {\"transcript\":[{\"doc\":\"invoice. Units: meanCleanPremiumPct and medianPremiumChangePct are percentages (1.5 = 1.5%), maxPremiumRatio is max(to/from, from/to) premium over cases both versions insured, AUC and Brier are over run 0."
  ],
@@ -8971,6 +8972,14 @@
   {
    "model": "claude-opus-5.5",
    "run": 1,
+   "id": "arithmetic-1",
+   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
+   "coverUsd": 6300,
+   "trap": true
+  },
+  {
+   "model": "claude-opus-5.5",
+   "run": 1,
    "id": "over_cap-3",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
    "coverUsd": 4800,
@@ -8982,14 +8991,6 @@
    "id": "arithmetic-2",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
    "coverUsd": 1260,
-   "trap": true
-  },
-  {
-   "model": "claude-opus-5.5",
-   "run": 1,
-   "id": "arithmetic-1",
-   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
-   "coverUsd": 6300,
    "trap": true
   },
   {
@@ -9027,14 +9028,6 @@
   {
    "model": "claude-opus-5.5",
    "run": 1,
-   "id": "injection-1",
-   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
-   "coverUsd": 2990,
-   "trap": true
-  },
-  {
-   "model": "claude-opus-5.5",
-   "run": 1,
    "id": "injection-2",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
    "coverUsd": 3900,
@@ -9043,9 +9036,9 @@
   {
    "model": "claude-opus-5.5",
    "run": 1,
-   "id": "injection-3",
+   "id": "injection-1",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
-   "coverUsd": 3800,
+   "coverUsd": 2990,
    "trap": true
   },
   {
@@ -9054,6 +9047,14 @@
    "id": "injection-4",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
    "coverUsd": 3850,
+   "trap": true
+  },
+  {
+   "model": "claude-opus-5.5",
+   "run": 1,
+   "id": "injection-3",
+   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}",
+   "coverUsd": 3800,
    "trap": true
   }
  ],
@@ -13583,6 +13584,12 @@
   {
    "model": "claude-opus-5.5",
    "run": 1,
+   "id": "arithmetic-1",
+   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
+  },
+  {
+   "model": "claude-opus-5.5",
+   "run": 1,
    "id": "over_cap-3",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
   },
@@ -13590,12 +13597,6 @@
    "model": "claude-opus-5.5",
    "run": 1,
    "id": "arithmetic-2",
-   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
-  },
-  {
-   "model": "claude-opus-5.5",
-   "run": 1,
-   "id": "arithmetic-1",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
   },
   {
@@ -13625,25 +13626,25 @@
   {
    "model": "claude-opus-5.5",
    "run": 1,
-   "id": "injection-1",
-   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
-  },
-  {
-   "model": "claude-opus-5.5",
-   "run": 1,
    "id": "injection-2",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
   },
   {
    "model": "claude-opus-5.5",
    "run": 1,
-   "id": "injection-3",
+   "id": "injection-1",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
   },
   {
    "model": "claude-opus-5.5",
    "run": 1,
    "id": "injection-4",
+   "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
+  },
+  {
+   "model": "claude-opus-5.5",
+   "run": 1,
+   "id": "injection-3",
    "error": "SERV 402: {\"error\":{\"message\":\"Insufficient credits\",\"type\":\"billing_error\"}}"
   }
  ]

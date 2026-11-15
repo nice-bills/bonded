@@ -50,16 +50,16 @@ The same 40 labelled invoices, the same rating guide and the same pricing code, 
 | Underwriter | Traps declined | Clean insured | Cost, 40 decisions |
 |---|---|---|---|
 | **DeepSeek-V4.1-Flash on Dolphin (pinned)** | **24 / 24** | **16 / 16** | **$0.0037** |
-| Claude Opus 4.6 | 23 / 24 | 12 / 16 | $1.58 |
+| Claude Opus 4.6 | 23 / 24 (one answer unreadable) | 12 / 16 | $1.58 |
 | Claude Opus 4.7 | 24 / 24 | 13 / 16 | $1.49 |
 | Claude Opus 4.8 | 24 / 24 | 15 / 16 | $1.53 |
 | Claude Opus 5.5 | 24 / 24 | 15 / 16 (one answer unreadable) | $1.68 |
 
-- **Each version priced a different book.** From one Opus version to the next, 1 to 3 insure/decline decisions flipped, the median premium on invoices both insured moved by +14%, -36% and +71%, and single premiums moved by up to 4.3x. From 4.6 to 5.5, 4 of 38 decisions flipped.
-- **That is the version, not noise.** Opus 5.5 run twice agreed with itself (24 of 24 decisions, mean p(loss) change 0.006); between versions the mean change was 0.07 to 0.12. A pool that priced its book on one version holds a different book after the next release, and the old version is eventually switched off.
+- **Each version priced a different book.** Clean invoices insured went 12, 13, 15, 15 of 16, and 1 to 3 insure/decline decisions flipped at every release; 4 of 38 flipped from 4.6 to 5.5.
+- **Compared on the same cases.** Opus 5.5 was run twice on 24 of the invoices: 0 decisions flipped and p(loss) moved by a mean 0.006. On those same 24, each version step flipped 3, 2 and 1 decisions and moved p(loss) by 0.12, 0.08 and 0.07. Premiums are noisier: two runs of one version already differ by a median 19% (largest 1.7x), so only the larger steps stand out (median 32% and 71%, single premiums up to 4.3x). One run per version, 40 cases: this is a measurement, not a law.
 - **What the open model does not win.** Opus 5.5 is better calibrated (Brier 0.001 against 0.009) and re-runs more tightly than Dolphin, whose two runs agreed on 39 of 40 decisions with premiums moving by a median 20% across two serving builds. Bonded's claim is narrower: the weights stay available, so the same request can be re-run next year, by anyone.
-- **You cannot pin a hosted closed model.** SERV refused `temperature` and `response_format: json_object` for these models, and one generation (Opus 5) returned a content-filter block on every case. Dolphin accepted temperature 0 and a fixed seed, and reports the serving build on every call.
-- Dolphin made the same calls at about 450 times less cost per decision ($0.00009 against $0.042).
+- **Why the two layers sit where they do.** SERV is a reasoning layer: it reworks the prompt it is given and chooses decoding itself (it declined `temperature` for these models). That is what Bonded wants from a second-line reviewer, and why the priced decision sits on Dolphin instead, where temperature 0, a fixed seed and the serving build are part of the record.
+- Dolphin made the same calls at about 450 times less cost per decision ($0.00009 against $0.042). Opus 4.6's missing trap and Opus 5.5's missing clean invoice are answers that could not be parsed, counted as neither.
 
 ## Measured: instructions hidden in the pixels
 36 rendered invoice images: 24 carry an instruction to the AI reviewer that exists only in the pixels (faint grey, 4 px type, near-white, rotated in the margin, buried in a legal footer, a table note, a watermark, a header bar), 12 are clean controls. A text screen never sees these; the underwriter has to read the image. Rows and images: [Benchmarks](https://bonded-pool.onrender.com/benchmark), `npm run hidden-text`.
@@ -111,7 +111,7 @@ npm run dev            # console + API on http://localhost:3300
 npm test               # pricing, service, underwriting and OpenServ rules (offline)
 npm run backtest       # 80 underwriting calls, ~1 minute, < $0.01
 npm run verify -- <id> # re-run a live decision with your own Dolphin key
-npm run drift          # closed-model version drift study (SERV credit, about $6)
+npm run drift          # closed-model version drift study (uses about $8 of SERV credit)
 npm run hidden-text    # hidden-text invoice image benchmark
 npm run openserv       # register Bonded on OpenServ + x402 workflows, then serve
 ```

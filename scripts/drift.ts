@@ -18,7 +18,8 @@ import type { Case } from "../src/case";
 const API = "https://inference-api.openserv.ai/v1";
 const KEY = process.env.SERV_API_KEY;
 if (!KEY) throw new Error("SERV_API_KEY is not set");
-const ALL_MODELS = ["claude-opus-4.6", "claude-opus-4.7", "claude-opus-4.8", "claude-opus-5", "claude-opus-5.5"];
+// claude-opus-5 is left out: SERV answered every prompt for it with finish_reason content_filter (add it with MODELS=...).
+const ALL_MODELS = ["claude-opus-4.6", "claude-opus-4.7", "claude-opus-4.8", "claude-opus-5.5"];
 const MODELS = process.env.MODELS ? process.env.MODELS.split(",") : ALL_MODELS;
 const NEWEST = MODELS[MODELS.length - 1];
 const PILOT = process.env.PILOT === "1";
@@ -305,6 +306,16 @@ const cleanMed = (m: string) => median(Object.entries(cells[m]?.[0] ?? {}).filte
 const live = closed.filter((a) => !dead.includes(a.model));
 const okAnswers = rowsOut.filter((r) => !r.error);
 const premPairs = pairs.filter((p) => p.bothInsured);
+// Version steps measured on the SAME cases the newest model was re-run on, so both numbers share a case set.
+const reIds = Object.keys(cells[NEWEST]?.[1] ?? {}).filter((id) => cells[NEWEST]?.[0]?.[id]);
+const cmp = (a: Record<string, Cell> = {}, b: Record<string, Cell> = {}) => {
+  const ids = reIds.filter((id) => a[id] && b[id]);
+  const ins = ids.filter((id) => a[id].decision === "insure" && b[id].decision === "insure");
+  const ratio = ins.map((id) => Math.max(a[id].premiumUsd, b[id].premiumUsd) / Math.min(a[id].premiumUsd, b[id].premiumUsd));
+  return { n: ids.length, flips: ids.filter((id) => a[id].decision !== b[id].decision).length, dp: mean(ids.map((id) => Math.abs(a[id].pLoss - b[id].pLoss))), maxRatio: ratio.length ? Math.max(...ratio) : null, medChange: median(ins.map((id) => (Math.abs(b[id].premiumUsd - a[id].premiumUsd) / a[id].premiumUsd) * 100)) };
+};
+const same = cmp(cells[NEWEST]?.[0], cells[NEWEST]?.[1]);
+const matched = MODELS.slice(1).map((m, i) => ({ step: `${MODELS[i]}→${m}`, ...cmp(cells[MODELS[i]]?.[0], cells[m]?.[0]) }));
 const notes = [
   `Every arm got the same 40 cases, the same rating guide, documents and JSON reply contract, and the same pricing code. One difference in layout: SERV rewrites a system prompt before the model sees it (a first run with the guide in the system prompt lost the reply contract and the rating anchors), so for the closed models the underwriter prompt travels verbatim at the top of the user message under a one-line system prompt; ${okAnswers.filter((r) => r.verbatim).length} of ${okAnswers.length} closed-model answers then used the contract's keys verbatim.`,
   `Dolphin (${DOLPHIN_MODEL}, recorded run 0) declined ${D.trapsDeclined}/24 traps and insured ${D.cleanInsured}/16 clean invoices; ${closed.map((a) => `${a.model} ${a.trapsDeclined}/24 and ${a.cleanInsured}/16`).join("; ")}.`,
@@ -313,7 +324,8 @@ const notes = [
   `Insure/decline flips between versions: ${okSteps.map((p) => `${p.from}→${p.to} ${p.decisionFlips} of ${p.n}${p.decisionFlips ? ` (${p.flippedCases.join(", ")})` : ""}`).join(", ")}, ${withN.slice(steps.length).map((p) => `${p.from}→${p.to} ${p.decisionFlips} of ${p.n}`).join(", ")}; ${premPairs.length ? `median premium change on cases both insured: ${premPairs.map((p) => `${p.from}→${p.to} ${f(p.medianPremiumChangePct, 1)}%`).join(", ")}` : "no pair has a case both versions insured, so premium change between versions is not measurable here (null)"}.`,
   `Mean |Δp(loss)| between versions was ${withN.filter((p) => p.n).map((p) => `${f(p.meanAbsPLossDelta, 3)} (${p.from}→${p.to})`).join(", ")}, so the probabilities move between versions even where the decision does not.`,
   `Same-model re-run: Dolphin gave the same decision on ${rd.sameDecision}/${rd.n} cases (mean |Δp(loss)| ${f(rd.meanAbsPLossDelta)}, its two runs served by ${dolphin.summary.fingerprints?.length ?? "?"} different vLLM builds), ${NEWEST} on ${rs.sameDecision}/${rs.n} (mean |Δp(loss)| ${f(rs.meanAbsPLossDelta)}); ${rs.n && rd.n && rs.sameDecision / rs.n > rd.sameDecision / rd.n ? `${NEWEST} re-ran more consistently than Dolphin on this set` : rs.n && rd.n && rs.sameDecision / rs.n < rd.sameDecision / rd.n ? `Dolphin re-ran more consistently than ${NEWEST} on this set` : "the two re-ran equally consistently on this set"}; the ${NEWEST} re-run covers ${rs.n} of 40 cases.`,
-  `Each version ran once with 40 cases, so one or two flips are within same-model re-run noise and are not evidence of drift; claude-opus-4.6 also kept temperature 0 while later versions rejected it, a confound on any 4.6 comparison.`,
+  `On the ${same.n} cases ${NEWEST} was run twice, its two runs flipped ${same.flips} decisions, moved p(loss) by a mean ${f(same.dp)} and moved premiums by a median ${f(same.medChange, 1)}% (largest ratio ${f(same.maxRatio, 2)}x); on those same cases the version steps were ${matched.map((x) => `${x.step}: ${x.flips} flips, mean |Δp(loss)| ${f(x.dp)}, median premium change ${f(x.medChange, 1)}%, largest ratio ${f(x.maxRatio, 2)}x`).join("; ")}.`,
+  `Reading it: decisions and probabilities move more between versions than between two runs of one version, but a median premium change under about 20% is inside same-model re-run noise (Dolphin's own two runs moved premiums by a median 20%, largest ratio 2.0x); each version ran once, 40 cases, and claude-opus-4.6 kept temperature 0 while later versions rejected it.`,
   `Parameters SERV rejected and that were left out: ${closed.map((a) => `${a.model} ${a.paramsDropped.join(", ") || "none"}`).join("; ")} (response_format json_object is rejected, only json_schema is allowed; seed and reasoning_effort were accepted, which does not show they were honoured); cost for 40 decisions was Dolphin $${f(D.costUsd)} and ${closed.map((a) => `${a.model} $${f(a.costUsd, 2)}`).join(", ")}, with SERV list prices read as cents per million tokens and content_filter prompt tokens assumed billed.`,
   `${errList.length ? `Errored calls, counted as neither insured nor declined and excluded from AUC, Brier and pairs: ${errList.filter((x) => !dead.some((m) => x.startsWith(m + " "))).join("; ")}${dead.length ? `; plus all 40 of ${dead.join(", ")}` : ""}.` : "No call errored."} Units: meanCleanPremiumPct and medianPremiumChangePct are percentages (1.5 = 1.5%), maxPremiumRatio is max(to/from, from/to) premium over cases both versions insured, AUC and Brier are over run 0.`,
 ];
