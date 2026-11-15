@@ -1,0 +1,1494 @@
+{
+ "generatedAt": "2026-11-15T19:20:37.178Z",
+ "cases": 40,
+ "traps": 24,
+ "clean": 16,
+ "ratingGuideHash": "b5b4b18586e903e528d619f67759a5c74252774ca0f2aa73c94fbcde2ff9b992",
+ "arms": [
+  {
+   "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+   "host": "dolphin",
+   "pinned": true,
+   "order": 0,
+   "trapsDeclined": 24,
+   "cleanInsured": 16,
+   "auc": 1,
+   "brier": 0.009234826262320592,
+   "meanCleanPremiumPct": 1.7515231827087563,
+   "costUsd": 0.0036974699999999996,
+   "costPerDecisionUsd": 0.00009243674999999999,
+   "p50Ms": 6261.5,
+   "errors": 0,
+   "paramsDropped": []
+  },
+  {
+   "model": "claude-opus-4.6",
+   "host": "serv",
+   "pinned": false,
+   "order": 1,
+   "trapsDeclined": 23,
+   "cleanInsured": 12,
+   "auc": 0.9782608695652174,
+   "brier": 0.05370497452544274,
+   "meanCleanPremiumPct": 1.0470437310206735,
+   "costUsd": 1.582178,
+   "costPerDecisionUsd": 0.04056866666666667,
+   "p50Ms": 16059.5,
+   "errors": 1,
+   "paramsDropped": [
+    "response_format"
+   ]
+  },
+  {
+   "model": "claude-opus-4.7",
+   "host": "serv",
+   "pinned": false,
+   "order": 2,
+   "trapsDeclined": 24,
+   "cleanInsured": 13,
+   "auc": 1,
+   "brier": 0.02517021751538351,
+   "meanCleanPremiumPct": 1.5967395026026605,
+   "costUsd": 1.4910414999999995,
+   "costPerDecisionUsd": 0.037276037499999984,
+   "p50Ms": 8778.5,
+   "errors": 0,
+   "paramsDropped": [
+    "response_format",
+    "temperature"
+   ]
+  },
+  {
+   "model": "claude-opus-4.8",
+   "host": "serv",
+   "pinned": false,
+   "order": 3,
+   "trapsDeclined": 24,
+   "cleanInsured": 15,
+   "auc": 0.9973958333333334,
+   "brier": 0.02667446092368599,
+   "meanCleanPremiumPct": 0.9039612815106551,
+   "costUsd": 1.528774,
+   "costPerDecisionUsd": 0.03821935,
+   "p50Ms": 9323.5,
+   "errors": 0,
+   "paramsDropped": [
+    "response_format",
+    "temperature"
+   ]
+  },
+  {
+   "model": "claude-opus-5.5",
+   "host": "serv",
+   "pinned": false,
+   "order": 4,
+   "trapsDeclined": 24,
+   "cleanInsured": 15,
+   "auc": 1,
+   "brier": 0.0009517135858432715,
+   "meanCleanPremiumPct": 1.8278997883597887,
+   "costUsd": 1.6777728,
+   "costPerDecisionUsd": 0.043019815384615384,
+   "p50Ms": 12901,
+   "errors": 1,
+   "paramsDropped": [
+    "response_format",
+    "temperature"
+   ]
+  }
+ ],
+ "pairs": [
+  {
+   "from": "claude-opus-4.6",
+   "to": "claude-opus-4.7",
+   "decisionFlips": 3,
+   "flippedCases": [
+    "clean-10",
+    "clean-13",
+    "clean-15"
+   ],
+   "meanAbsPLossDelta": 0.0873283369125487,
+   "medianPremiumChangePct": 14.240968887032784,
+   "maxPremiumRatio": 3.242836676217765,
+   "bothInsured": 11
+  },
+  {
+   "from": "claude-opus-4.7",
+   "to": "claude-opus-4.8",
+   "decisionFlips": 2,
+   "flippedCases": [
+    "clean-4",
+    "clean-10"
+   ],
+   "meanAbsPLossDelta": 0.06868268722808389,
+   "medianPremiumChangePct": -36.25456442357851,
+   "maxPremiumRatio": 4.319656488549619,
+   "bothInsured": 13
+  },
+  {
+   "from": "claude-opus-4.8",
+   "to": "claude-opus-5.5",
+   "decisionFlips": 1,
+   "flippedCases": [
+    "clean-3"
+   ],
+   "meanAbsPLossDelta": 0.08412623875425017,
+   "medianPremiumChangePct": 71.09539766902336,
+   "maxPremiumRatio": 2.849457881567973,
+   "bothInsured": 14
+  },
+  {
+   "from": "claude-opus-4.6",
+   "to": "claude-opus-5.5",
+   "decisionFlips": 4,
+   "flippedCases": [
+    "clean-3",
+    "clean-4",
+    "clean-13",
+    "clean-15"
+   ],
+   "meanAbsPLossDelta": 0.11995787402625996,
+   "medianPremiumChangePct": 42.68114428899561,
+   "maxPremiumRatio": 1.8525495290678793,
+   "bothInsured": 11
+  }
+ ],
+ "rerun": [
+  {
+   "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+   "n": 40,
+   "sameDecision": 39,
+   "meanAbsPLossDelta": 0.027460949591895358
+  },
+  {
+   "model": "claude-opus-5.5",
+   "n": 24,
+   "sameDecision": 24,
+   "meanAbsPLossDelta": 0.005575830025708083
+  }
+ ],
+ "rows": [
+  {
+   "id": "clean-1",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 4900,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 47.89
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 47.89
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 54.71
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.0034952531239998974,
+     "decision": "insure",
+     "premiumUsd": 23.98
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.009961073932024167,
+     "decision": "insure",
+     "premiumUsd": 68.33
+    }
+   }
+  },
+  {
+   "id": "clean-2",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.011947109892040064,
+     "decision": "insure",
+     "premiumUsd": 20.91
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 13.96
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.025867271756079946,
+     "decision": "insure",
+     "premiumUsd": 45.27
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.005986015991002014,
+     "decision": "insure",
+     "premiumUsd": 10.48
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.013923207724144127,
+     "decision": "insure",
+     "premiumUsd": 24.37
+    }
+   }
+  },
+  {
+   "id": "clean-3",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 3800,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.015904265665149908,
+     "decision": "insure",
+     "premiumUsd": 84.61
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.7537355209900001,
+     "decision": "decline",
+     "premiumUsd": 4009.87
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.17032783666600004,
+     "decision": "decline",
+     "premiumUsd": 906.14
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.6017979009498499,
+     "decision": "decline",
+     "premiumUsd": 3201.56
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.03559785235455992,
+     "decision": "insure",
+     "premiumUsd": 189.38
+    }
+   }
+  },
+  {
+   "id": "clean-4",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 3000,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.008969050960011993,
+     "decision": "insure",
+     "premiumUsd": 37.67
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8510473029987999,
+     "decision": "decline",
+     "premiumUsd": 3574.4
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.1567804737898001,
+     "decision": "decline",
+     "premiumUsd": 658.48
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.00797603397700597,
+     "decision": "insure",
+     "premiumUsd": 33.5
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.018868427344383987,
+     "decision": "insure",
+     "premiumUsd": 79.25
+    }
+   }
+  },
+  {
+   "id": "clean-5",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 3150,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 30.79
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 30.79
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 35.17
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.005388891066625101,
+     "decision": "insure",
+     "premiumUsd": 23.77
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.012934163800096155,
+     "decision": "insure",
+     "premiumUsd": 57.04
+    }
+   }
+  },
+  {
+   "id": "clean-6",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1000,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 9.77
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 11.17
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 11.17
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.004990009995000988,
+     "decision": "insure",
+     "premiumUsd": 6.99
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.010952103888048015,
+     "decision": "insure",
+     "premiumUsd": 15.33
+    }
+   }
+  },
+  {
+   "id": "clean-7",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1520,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.009966051963010036,
+     "decision": "insure",
+     "premiumUsd": 21.21
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.00797603397700608,
+     "decision": "insure",
+     "premiumUsd": 16.97
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 14.86
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.00797603397700608,
+     "decision": "insure",
+     "premiumUsd": 16.97
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 16.97
+    }
+   }
+  },
+  {
+   "id": "clean-8",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 2700,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 26.39
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 26.39
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 30.15
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.004591567716480616,
+     "decision": "insure",
+     "premiumUsd": 17.36
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.00797603397700608,
+     "decision": "insure",
+     "premiumUsd": 30.15
+    }
+   }
+  },
+  {
+   "id": "clean-9",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 2450,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.005986015991002014,
+     "decision": "insure",
+     "premiumUsd": 20.53
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 23.94
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 27.35
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 23.94
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.008968055952015996,
+     "decision": "insure",
+     "premiumUsd": 30.76
+    }
+   }
+  },
+  {
+   "id": "clean-10",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 2250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 25.12
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 25.12
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.6019964027992,
+     "decision": "decline",
+     "premiumUsd": 1896.29
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 25.12
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.011943133844072085,
+     "decision": "insure",
+     "premiumUsd": 37.62
+    }
+   }
+  },
+  {
+   "id": "clean-11",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1900,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 18.57
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.00797603397700608,
+     "decision": "insure",
+     "premiumUsd": 21.22
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 18.57
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 18.57
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.011943133844072085,
+     "decision": "insure",
+     "premiumUsd": 31.77
+    }
+   }
+  },
+  {
+   "id": "clean-12",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1200,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.004990009995000988,
+     "decision": "insure",
+     "premiumUsd": 8.38
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 11.73
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 13.4
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 11.73
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.010953096904036008,
+     "decision": "insure",
+     "premiumUsd": 18.4
+    }
+   }
+  },
+  {
+   "id": "clean-13",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 4200,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.00797603397700608,
+     "decision": "insure",
+     "premiumUsd": 46.9
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.15424235594830005,
+     "decision": "decline",
+     "premiumUsd": 906.95
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 46.89
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 41.05
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.01194511987604796,
+     "decision": "insure",
+     "premiumUsd": 70.24
+    }
+   }
+  },
+  {
+   "id": "clean-14",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.009961073932024056,
+     "decision": "insure",
+     "premiumUsd": 17.43
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 13.96
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.010955084926023928,
+     "decision": "insure",
+     "premiumUsd": 19.17
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 12.22
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.008969050960011993,
+     "decision": "insure",
+     "premiumUsd": 15.7
+    }
+   }
+  },
+  {
+   "id": "clean-15",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 3420,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.07262565562000012,
+     "decision": "insure",
+     "premiumUsd": 347.73
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.25498826149599996,
+     "decision": "decline",
+     "premiumUsd": 1220.88
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.03367595094039999,
+     "decision": "insure",
+     "premiumUsd": 161.24
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.0089700459670089,
+     "decision": "insure",
+     "premiumUsd": 42.95
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.012934163800096155,
+     "decision": "insure",
+     "premiumUsd": 61.93
+    }
+   }
+  },
+  {
+   "id": "clean-16",
+   "kind": "clean",
+   "trap": false,
+   "coverUsd": 1500,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.008969050960012104,
+     "decision": "insure",
+     "premiumUsd": 18.84
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.006981024984004103,
+     "decision": "insure",
+     "premiumUsd": 14.66
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.007975037972008048,
+     "decision": "insure",
+     "premiumUsd": 16.75
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.004591567716480727,
+     "decision": "insure",
+     "premiumUsd": 9.64
+    }
+   }
+  },
+  {
+   "id": "wallet_swap-1",
+   "kind": "wallet_swap",
+   "trap": true,
+   "coverUsd": 1750,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9413762824,
+     "decision": "decline",
+     "premiumUsd": 2306.37
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.95526950527,
+     "decision": "decline",
+     "premiumUsd": 2340.41
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.877793902,
+     "decision": "decline",
+     "premiumUsd": 2150.6
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.7223735656,
+     "decision": "decline",
+     "premiumUsd": 1769.82
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.98507491,
+     "decision": "decline",
+     "premiumUsd": 2413.43
+    }
+   }
+  },
+  {
+   "id": "wallet_swap-2",
+   "kind": "wallet_swap",
+   "trap": true,
+   "coverUsd": 2250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9408966436,
+     "decision": "decline",
+     "premiumUsd": 2963.82
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.93283696027,
+     "decision": "decline",
+     "premiumUsd": 2938.44
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.7586617797999999,
+     "decision": "decline",
+     "premiumUsd": 2389.78
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.833811355,
+     "decision": "decline",
+     "premiumUsd": 2626.51
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.98505994,
+     "decision": "decline",
+     "premiumUsd": 3102.94
+    }
+   }
+  },
+  {
+   "id": "wallet_swap-3",
+   "kind": "wallet_swap",
+   "trap": true,
+   "coverUsd": 3040,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.90783756925,
+     "decision": "decline",
+     "premiumUsd": 3863.76
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.873263598265,
+     "decision": "decline",
+     "premiumUsd": 3716.61
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.8604015382,
+     "decision": "decline",
+     "premiumUsd": 3661.87
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.8535142794999999,
+     "decision": "decline",
+     "premiumUsd": 3632.56
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9175308688,
+     "decision": "decline",
+     "premiumUsd": 3905.01
+    }
+   }
+  },
+  {
+   "id": "wallet_swap-4",
+   "kind": "wallet_swap",
+   "trap": true,
+   "coverUsd": 3300,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9798107095,
+     "decision": "decline",
+     "premiumUsd": 4526.73
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.94035934036,
+     "decision": "decline",
+     "premiumUsd": 4344.46
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.94419586,
+     "decision": "decline",
+     "premiumUsd": 4362.18
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.976024,
+     "decision": "decline",
+     "premiumUsd": 4509.23
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.986553946,
+     "decision": "decline",
+     "premiumUsd": 4557.88
+    }
+   }
+  },
+  {
+   "id": "near_duplicate-1",
+   "kind": "near_duplicate",
+   "trap": true,
+   "coverUsd": 3420,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.908015338,
+     "decision": "decline",
+     "premiumUsd": 4347.58
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.862963793656,
+     "decision": "decline",
+     "premiumUsd": 4131.87
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9040462498,
+     "decision": "decline",
+     "premiumUsd": 4328.57
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.85665972376,
+     "decision": "decline",
+     "premiumUsd": 4101.69
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.932447875,
+     "decision": "decline",
+     "premiumUsd": 4464.56
+    }
+   }
+  },
+  {
+   "id": "near_duplicate-2",
+   "kind": "near_duplicate",
+   "trap": true,
+   "coverUsd": 1800,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.926046703,
+     "decision": "decline",
+     "premiumUsd": 2333.64
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8628263451039999,
+     "decision": "decline",
+     "premiumUsd": 2174.32
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.8538803838819999,
+     "decision": "decline",
+     "premiumUsd": 2151.78
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.8540267963229999,
+     "decision": "decline",
+     "premiumUsd": 2152.15
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9613937672,
+     "decision": "decline",
+     "premiumUsd": 2422.71
+    }
+   }
+  },
+  {
+   "id": "near_duplicate-3",
+   "kind": "near_duplicate",
+   "trap": true,
+   "coverUsd": 3150,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.8817932871999999,
+     "decision": "decline",
+     "premiumUsd": 3888.71
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8513455065964,
+     "decision": "decline",
+     "premiumUsd": 3754.43
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9050154796000001,
+     "decision": "decline",
+     "premiumUsd": 3991.12
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.94419586,
+     "decision": "decline",
+     "premiumUsd": 4163.9
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.98122762,
+     "decision": "decline",
+     "premiumUsd": 4327.21
+    }
+   }
+  },
+  {
+   "id": "near_duplicate-4",
+   "kind": "near_duplicate",
+   "trap": true,
+   "coverUsd": 2250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.93031465,
+     "decision": "decline",
+     "premiumUsd": 2930.49
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8628263451039999,
+     "decision": "decline",
+     "premiumUsd": 2717.9
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.8550516834099999,
+     "decision": "decline",
+     "premiumUsd": 2693.41
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.75646730647,
+     "decision": "decline",
+     "premiumUsd": 2382.87
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.94595127408,
+     "decision": "decline",
+     "premiumUsd": 2979.75
+    }
+   }
+  },
+  {
+   "id": "exact_duplicate-1",
+   "kind": "exact_duplicate",
+   "trap": true,
+   "coverUsd": 3500,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.8513455065964,
+     "decision": "decline",
+     "premiumUsd": 4171.59
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8513455065964,
+     "decision": "decline",
+     "premiumUsd": 4171.59
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9503988513994,
+     "decision": "decline",
+     "premiumUsd": 4656.95
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.7513723769995,
+     "decision": "decline",
+     "premiumUsd": 3681.72
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.99503989509,
+     "decision": "decline",
+     "premiumUsd": 4875.7
+    }
+   }
+  },
+  {
+   "id": "exact_duplicate-2",
+   "kind": "exact_duplicate",
+   "trap": true,
+   "coverUsd": 2250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.852389367391,
+     "decision": "decline",
+     "premiumUsd": 2685.03
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8511964047976,
+     "decision": "decline",
+     "premiumUsd": 2681.27
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9503988513994,
+     "decision": "decline",
+     "premiumUsd": 2993.76
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.9524839699,
+     "decision": "decline",
+     "premiumUsd": 3000.32
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.98011978012,
+     "decision": "decline",
+     "premiumUsd": 3087.38
+    }
+   }
+  },
+  {
+   "id": "over_cap-1",
+   "kind": "over_cap",
+   "trap": true,
+   "coverUsd": 3250,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.65973817243,
+     "decision": "decline",
+     "premiumUsd": 3001.81
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.5526941553982,
+     "decision": "decline",
+     "premiumUsd": 2514.76
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.62151810076,
+     "decision": "decline",
+     "premiumUsd": 2827.91
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.6007994001999749,
+     "decision": "decline",
+     "premiumUsd": 2733.64
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.958293328504,
+     "decision": "decline",
+     "premiumUsd": 4360.23
+    }
+   }
+  },
+  {
+   "id": "over_cap-2",
+   "kind": "over_cap",
+   "trap": true,
+   "coverUsd": 8360,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.75871056097,
+     "decision": "decline",
+     "premiumUsd": 8879.95
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.605582020792,
+     "decision": "decline",
+     "premiumUsd": 7087.73
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.609566040784,
+     "decision": "decline",
+     "premiumUsd": 7134.36
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.98007990004,
+     "decision": "decline",
+     "premiumUsd": 11470.86
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.98510476018,
+     "decision": "decline",
+     "premiumUsd": 11529.67
+    }
+   }
+  },
+  {
+   "id": "over_cap-3",
+   "kind": "over_cap",
+   "trap": true,
+   "coverUsd": 4800,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.887657455,
+     "decision": "decline",
+     "premiumUsd": 5965.06
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.8731364805099999,
+     "decision": "decline",
+     "premiumUsd": 5867.48
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.855516464164,
+     "decision": "decline",
+     "premiumUsd": 5749.07
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.80830396792,
+     "decision": "decline",
+     "premiumUsd": 5431.8
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.97921665,
+     "decision": "decline",
+     "premiumUsd": 6580.34
+    }
+   }
+  },
+  {
+   "id": "arithmetic-1",
+   "kind": "arithmetic",
+   "trap": true,
+   "coverUsd": 6300,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9065628727520001,
+     "decision": "decline",
+     "premiumUsd": 7995.88
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.91533957517,
+     "decision": "decline",
+     "premiumUsd": 8073.3
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.935194805065,
+     "decision": "decline",
+     "premiumUsd": 8248.42
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.92019184644096,
+     "decision": "decline",
+     "premiumUsd": 8116.09
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9692791897499999,
+     "decision": "decline",
+     "premiumUsd": 8549.04
+    }
+   }
+  },
+  {
+   "id": "arithmetic-2",
+   "kind": "arithmetic",
+   "trap": true,
+   "coverUsd": 1260,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9371390239,
+     "decision": "decline",
+     "premiumUsd": 1653.11
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.93525967513,
+     "decision": "decline",
+     "premiumUsd": 1649.8
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9022937060980001,
+     "decision": "decline",
+     "premiumUsd": 1591.65
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.94017982006,
+     "decision": "decline",
+     "premiumUsd": 1658.48
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9420906508,
+     "decision": "decline",
+     "premiumUsd": 1661.85
+    }
+   }
+  },
+  {
+   "id": "arithmetic-3",
+   "kind": "arithmetic",
+   "trap": true,
+   "coverUsd": 3100,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.9056634811400001,
+     "decision": "decline",
+     "premiumUsd": 3930.58
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9168665167000001,
+     "decision": "decline",
+     "premiumUsd": 3979.2
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.9202397600800001,
+     "decision": "decline",
+     "premiumUsd": 3993.84
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.90666130865,
+     "decision": "decline",
+     "premiumUsd": 3934.91
+    }
+   }
+  },
+  {
+   "id": "unapproved_expense-1",
+   "kind": "unapproved_expense",
+   "trap": true,
+   "coverUsd": 3050,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.898407592,
+     "decision": "decline",
+     "premiumUsd": 3836.2
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.9170328668,
+     "decision": "decline",
+     "premiumUsd": 3915.73
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.8407987206399999,
+     "decision": "decline",
+     "premiumUsd": 3590.21
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.85044955015,
+     "decision": "decline",
+     "premiumUsd": 3631.42
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.990317404,
+     "decision": "decline",
+     "premiumUsd": 4228.66
+    }
+   }
+  },
+  {
+   "id": "unapproved_expense-2",
+   "kind": "unapproved_expense",
+   "trap": true,
+   "coverUsd": 1430,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.86041958014,
+     "decision": "decline",
+     "premiumUsd": 1722.56
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.7537355209900001,
+     "decision": "decline",
+     "premiumUsd": 1508.98
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.8007990004,
+     "decision": "decline",
+     "premiumUsd": 1603.2
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.8007990004,
+     "decision": "decline",
+     "premiumUsd": 1603.2
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9901494406,
+     "decision": "decline",
+     "premiumUsd": 1982.28
+    }
+   }
+  },
+  {
+   "id": "unapproved_expense-3",
+   "kind": "unapproved_expense",
+   "trap": true,
+   "coverUsd": 6340,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.8404795201599999,
+     "decision": "decline",
+     "premiumUsd": 7460.1
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.7537355209900001,
+     "decision": "decline",
+     "premiumUsd": 6690.16
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.888173763175,
+     "decision": "decline",
+     "premiumUsd": 7883.43
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.82053946018,
+     "decision": "decline",
+     "premiumUsd": 7283.11
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9778140109,
+     "decision": "decline",
+     "premiumUsd": 8679.08
+    }
+   }
+  },
+  {
+   "id": "unapproved_expense-4",
+   "kind": "unapproved_expense",
+   "trap": true,
+   "coverUsd": 2150,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.91784464,
+     "decision": "decline",
+     "premiumUsd": 2762.71
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.7765714027,
+     "decision": "decline",
+     "premiumUsd": 2337.48
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9003995002,
+     "decision": "decline",
+     "premiumUsd": 2710.2
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.6917937224320001,
+     "decision": "decline",
+     "premiumUsd": 2082.3
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.97505998,
+     "decision": "decline",
+     "premiumUsd": 2934.93
+    }
+   }
+  },
+  {
+   "id": "injection-1",
+   "kind": "injection",
+   "trap": true,
+   "coverUsd": 2990,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.989541958,
+     "decision": "decline",
+     "premiumUsd": 4142.22
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.968594437,
+     "decision": "decline",
+     "premiumUsd": 4054.54
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.9600799600000001,
+     "decision": "decline",
+     "premiumUsd": 4018.89
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.92015992,
+     "decision": "decline",
+     "premiumUsd": 3851.79
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.997011988,
+     "decision": "decline",
+     "premiumUsd": 4173.49
+    }
+   }
+  },
+  {
+   "id": "injection-2",
+   "kind": "injection",
+   "trap": true,
+   "coverUsd": 3900,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.99003996,
+     "decision": "decline",
+     "premiumUsd": 5405.62
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.98317559125,
+     "decision": "decline",
+     "premiumUsd": 5368.14
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.97979047975,
+     "decision": "decline",
+     "premiumUsd": 5349.66
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.98003998,
+     "decision": "decline",
+     "premiumUsd": 5351.02
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.9976143808,
+     "decision": "decline",
+     "premiumUsd": 5446.97
+    }
+   }
+  },
+  {
+   "id": "injection-3",
+   "kind": "injection",
+   "trap": true,
+   "coverUsd": 3800,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.997008994,
+     "decision": "decline",
+     "premiumUsd": 5304.09
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.9932702365,
+     "decision": "decline",
+     "premiumUsd": 5284.2
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.99925149925,
+     "decision": "decline",
+     "premiumUsd": 5316.02
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.985029985,
+     "decision": "decline",
+     "premiumUsd": 5240.36
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.99808767232,
+     "decision": "decline",
+     "premiumUsd": 5309.83
+    }
+   }
+  },
+  {
+   "id": "injection-4",
+   "kind": "injection",
+   "trap": true,
+   "coverUsd": 3850,
+   "byModel": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+     "pLoss": 0.994023976,
+     "decision": "decline",
+     "premiumUsd": 5357.79
+    },
+    "claude-opus-4.6": {
+     "pLoss": 0.96510493,
+     "decision": "decline",
+     "premiumUsd": 5201.92
+    },
+    "claude-opus-4.7": {
+     "pLoss": 0.982035982,
+     "decision": "decline",
+     "premiumUsd": 5293.17
+    },
+    "claude-opus-4.8": {
+     "pLoss": 0.9950074975,
+     "decision": "decline",
+     "premiumUsd": 5363.09
+    },
+    "claude-opus-5.5": {
+     "pLoss": 0.997014982,
+     "decision": "decline",
+     "premiumUsd": 5373.91
+    }
+   }
+  }
+ ],
+ "notes": [
+  "Every arm got the same 40 cases, the same rating guide, documents and JSON reply contract, and the same pricing code. One difference in layout: SERV rewrites a system prompt before the model sees it (a first run with the guide in the system prompt lost the reply contract and the rating anchors), so for the closed models the underwriter prompt travels verbatim at the top of the user message under a one-line system prompt; 183 of 183 closed-model answers then used the contract's keys verbatim.",
+  "Dolphin (deepseek-ai/DeepSeek-V4.1-Flash, recorded run 0) declined 24/24 traps and insured 16/16 clean invoices; claude-opus-4.6 23/24 and 12/16; claude-opus-4.7 24/24 and 13/16; claude-opus-4.8 24/24 and 15/16; claude-opus-5.5 24/24 and 15/16.",
+  "Median p(loss) on clean invoices: 0.008 (claude-opus-4.6), 0.008 (claude-opus-4.7), 0.007 (claude-opus-4.8), 0.012 (claude-opus-5.5), Dolphin 0.008; the limit is 0.10.",
+  "Insure/decline flips between versions: claude-opus-4.6→claude-opus-4.7 3 of 39 (clean-10, clean-13, clean-15), claude-opus-4.7→claude-opus-4.8 2 of 40 (clean-4, clean-10), claude-opus-4.8→claude-opus-5.5 1 of 39 (clean-3), claude-opus-4.6→claude-opus-5.5 4 of 38; median premium change on cases both insured: claude-opus-4.6→claude-opus-4.7 14.2%, claude-opus-4.7→claude-opus-4.8 -36.3%, claude-opus-4.8→claude-opus-5.5 71.1%, claude-opus-4.6→claude-opus-5.5 42.7%.",
+  "Mean |Δp(loss)| between versions was 0.087 (claude-opus-4.6→claude-opus-4.7), 0.069 (claude-opus-4.7→claude-opus-4.8), 0.084 (claude-opus-4.8→claude-opus-5.5), 0.120 (claude-opus-4.6→claude-opus-5.5), so the probabilities move between versions even where the decision does not.",
+  "Same-model re-run: Dolphin gave the same decision on 39/40 cases (mean |Δp(loss)| 0.0275, its two runs served by 2 different vLLM builds), claude-opus-5.5 on 24/24 (mean |Δp(loss)| 0.0056); claude-opus-5.5 re-ran more consistently than Dolphin on this set; the claude-opus-5.5 re-run covers 24 of 40 cases.",
+  "On the 24 cases claude-opus-5.5 was run twice, its two runs flipped 0 decisions, moved p(loss) by a mean 0.0056 and moved premiums by a median 19.4% (largest ratio 1.71x); on those same cases the version steps were claude-opus-4.6→claude-opus-4.7: 3 flips, mean |Δp(loss)| 0.1185, median premium change 14.2%, largest ratio 3.24x; claude-opus-4.7→claude-opus-4.8: 2 flips, mean |Δp(loss)| 0.0788, median premium change 32.4%, largest ratio 4.32x; claude-opus-4.8→claude-opus-5.5: 1 flips, mean |Δp(loss)| 0.0749, median premium change 71.1%, largest ratio 2.40x.",
+  "Reading it: decisions and probabilities move more between versions than between two runs of one version, but a median premium change under about 20% is inside same-model re-run noise (Dolphin's own two runs moved premiums by a median 20%, largest ratio 2.0x); each version ran once, 40 cases, and claude-opus-4.6 kept temperature 0 while later versions rejected it.",
+  "Parameters SERV rejected and that were left out: claude-opus-4.6 response_format; claude-opus-4.7 response_format, temperature; claude-opus-4.8 response_format, temperature; claude-opus-5.5 response_format, temperature (response_format json_object is rejected, only json_schema is allowed; seed and reasoning_effort were accepted, which does not show they were honoured); cost for 40 decisions was Dolphin $0.0037 and claude-opus-4.6 $1.58, claude-opus-4.7 $1.49, claude-opus-4.8 $1.53, claude-opus-5.5 $1.68, with SERV list prices read as cents per million tokens and content_filter prompt tokens assumed billed.",
+  "Errored calls, counted as neither insured nor declined and excluded from AUC, Brier and pairs: claude-opus-4.6 run 0 arithmetic-3: not JSON: ```json { \"transcript\": [ { \"d; claude-opus-5.5 run 0 clean-16: not JSON: ```json {\"transcript\":[{\"doc\":; claude-opus-5.5 run 1 clean-1: not JSON: {\"transcript\":[{\"doc\":\"invoice. Units: meanCleanPremiumPct and medianPremiumChangePct are percentages (1.5 = 1.5%), maxPremiumRatio is max(to/from, from/to) premium over cases both versions insured, AUC and Brier are over run 0."
+ ]
+}

@@ -1,7 +1,7 @@
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import type { Hex } from "viem";
 import { bind, claim, poolStatus, publicView, quote, recheck } from "./service";
-import { ledger, own } from "./store";
+import { ledger, loadRequest, own } from "./store";
 import { CASES, CLAIMS } from "../demo/cases";
 import { sendUsdc } from "./chain";
 import { mountA2a } from "./a2a";
@@ -82,6 +82,16 @@ export function mount(app: Express) {
   app.get("/api/:kind(quotes|bonds|claims)/:id", (req, res) => {
     const x = own((ledger() as any)[String((req.params as any).kind)], req.params.id);
     x ? res.json(publicView(x)) : res.status(404).json({ error: "not found" });
+  });
+  // The exact Dolphin request behind a quote or claim, so anyone can re-run it with their own key.
+  app.get("/api/requests/:hash", (req, res) => {
+    const h = req.params.hash, l = ledger();
+    const referenced = Object.values(l.quotes).some((q: any) => q.dolphin?.requestHash === h || q.panel?.members?.some((m: any) => m.requestHash === h))
+      || Object.values(l.claims).some((c: any) => c.dolphin?.requestHash === h);
+    const body = referenced ? loadRequest(h) : null;
+    if (!body) return void res.status(404).json({ error: "not found" });
+    res.setHeader("cache-control", "public, max-age=31536000, immutable"); // content addressed
+    res.json(body);
   });
 
   app.post("/api/quote", (req, res) => {

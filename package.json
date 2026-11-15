@@ -9,12 +9,15 @@
     "e2e": "tsx scripts/e2e.ts",
     "typecheck": "tsc --noEmit",
     "render": "tsx scripts/render-cases.ts",
+    "hidden-text": "tsx scripts/hidden-text.ts",
     "backtest": "tsx scripts/backtest.ts",
+    "drift": "tsx scripts/drift.ts",
     "openserv": "tsx openserv/agent.ts",
     "openserv:build": "tsx scripts/build-openserv.mts",
     "openserv:deploy": "npm run openserv:build && tsx scripts/deploy-openserv.mts",
     "start": "tsx openserv/agent.ts",
-    "seal": "tsx scripts/seal-env.ts"
+    "seal": "tsx scripts/seal-env.ts",
+    "verify": "tsx scripts/verify.ts"
   },
   "dependencies": {
     "@openserv-labs/client": "^2.5.3",

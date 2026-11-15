@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bonded · Benchmarks</title>
+<meta name="description" content="Bonded benchmarks: underwriting backtest, drift between pinned open weights and closed model versions, and instructions hidden in the pixels of an invoice. Every number is produced by a script in the repository.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='13' fill='none' stroke='%232f5d3a' stroke-width='3'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#fffff8;--card:#fffffb;--ink:#111;--soft:#3d3a33;--dim:#6b675c;--line:#e4dfcf;--hl:#efe7c6;--green:#2f5d3a;--red:#8a3b2a;--link:#2f4e7a;--img:#fff}
+@media not all{:root{--paper:#151411;--card:#1b1a16;--ink:#ece6d6;--soft:#cfc8b6;--dim:#9a9381;--line:#34312a;--hl:#4a4127;--green:#8cc59b;--red:#e59a86;--link:#9db8e0;--img:#f4f1e8}}
+:root[data-theme=dark]{--paper:#151411;--card:#1b1a16;--ink:#ece6d6;--soft:#cfc8b6;--dim:#9a9381;--line:#34312a;--hl:#4a4127;--green:#8cc59b;--red:#e59a86;--link:#9db8e0;--img:#f4f1e8}
+*{box-sizing:border-box}
+html{background:var(--paper)}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.sc{text-transform:uppercase;letter-spacing:.07em;color:var(--dim);font-size:11px;font-weight:500;overflow-wrap:anywhere}
+.num{font-variant-numeric:lining-nums tabular-nums}
+code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.92em;color:var(--soft)}
+nav{display:flex;align-items:baseline;gap:20px;padding:16px 0 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav a{color:var(--dim);text-decoration:none;font-size:16px}
+nav a:hover{color:var(--ink)}
+nav a.brand{font-style:italic;font-size:26px;margin-right:4px;color:var(--ink)}
+nav #theme{margin-left:auto;font:inherit;font-size:12px;color:var(--dim);background:none;border:1px solid var(--line);border-radius:999px;padding:2px 10px;cursor:pointer}
+nav #theme:focus-visible,summary:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.hero{display:grid;grid-template-columns:1.7fr 1fr;gap:28px;align-items:end;padding:18px 0 14px}
+h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6px}
+.sub{color:var(--soft);font-size:17px;margin:0;max-width:640px}
+.cmds{display:grid;gap:2px;justify-content:end;min-width:0}
+.cmds div{white-space:nowrap}
+.cmds .sc{margin-right:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px 18px;min-width:0;overflow-wrap:anywhere;margin-bottom:16px}
+.card>*{min-width:0}
+h2{font-weight:400;font-size:26px;line-height:1.2;margin:2px 0 8px}
+h2.wide{font-size:23px;max-width:760px}
+.notes{font-size:14px;line-height:1.45;color:var(--soft);margin:0 0 12px;padding-left:18px}
+.notes li{margin:0 0 4px}
+.tw{overflow-x:auto;max-width:100%}
+.tw table{min-width:max-content}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--dim);text-align:left;padding:0 16px 4px 0;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:bottom}
+td{padding:3px 16px 3px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th:last-child,td:last-child{padding-right:0}
+td.r,th.r{text-align:right;white-space:nowrap}
+th.model{white-space:normal;min-width:130px}
+td.diff{background:color-mix(in srgb,var(--hl) 55%,transparent)}
+.meta{color:var(--dim);font-size:13px;margin:8px 0 0;overflow-wrap:anywhere}
+.quiet{color:var(--dim);font-size:14px;margin:6px 0 0}
+.green{color:var(--green)}.red{color:var(--red)}.dim{color:var(--dim)}
+details{margin-top:14px}
+summary{cursor:pointer;color:var(--soft);font-size:15px;padding:4px 0;width:max-content;max-width:100%}
+.sumline{color:var(--dim);font-size:13px;font-weight:400;letter-spacing:0;text-transform:none;margin-left:8px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(156px,1fr));gap:16px;margin-top:12px}
+.thumb{margin:0;min-width:0}
+.thumb a{display:block;line-height:0}
+.thumb img{display:block;width:150px;max-width:100%;height:auto;border:1px solid var(--line);background:var(--img)}
+.thumb figcaption{font-size:12px;line-height:1.4;color:var(--soft);margin-top:5px;overflow-wrap:anywhere}
+.thumb .id{display:block;color:var(--dim);font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px}
+.armlines{list-style:none;margin:4px 0 0;padding:0}
+.armlines li{display:flex;gap:6px;flex-wrap:wrap}
+.armlines .an{color:var(--dim);max-width:100%;overflow-wrap:anywhere}
+footer{color:var(--dim);font-size:14px;padding:6px 0 24px;overflow-wrap:anywhere}
+@media (max-width:960px){.hero{grid-template-columns:1fr}.cmds{justify-content:start}}
+@media (max-width:480px){.wrap{padding:0 14px}.card{padding:14px}.thumb img{width:100%}th,td{padding-right:12px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav aria-label="Main">
+    <a class="brand" href="/">Bonded</a>
+    <a href="/">Console</a>
+    <a href="https://github.com/nice-bills/bonded">Code</a>
+    <button id="theme" aria-label="Toggle dark mode">Dark</button>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Benchmarks</h1>
+      <p class="sub">Every number on this page is produced by a script in the repository and can be re-run.</p>
+    </div>
+    <div class="cmds">
+      <div><span class="sc">backtest</span><code>npm run backtest</code></div>
+      <div><span class="sc">drift</span><code>npm run drift</code></div>
+      <div><span class="sc">hidden text</span><code>npm run hidden-text</code></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" aria-labelledby="h-backtest">
+      <div class="sc">a · underwriting backtest</div>
+      <h2 id="h-backtest">Underwriting backtest</h2>
+      <div id="backtest"><p class="quiet">loading…</p></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-drift">
+      <div class="sc">b · drift</div>
+      <h2 class="wide" id="h-drift">Does the underwriter stay the same? Pinned open weights vs closed model versions</h2>
+      <div id="drift"><p class="quiet">loading…</p></div>
+    </section>
+
+    <section class="card" aria-labelledby="h-hidden">
+      <div class="sc">c · hidden text</div>
+      <h2 class="wide" id="h-hidden">Instructions hidden in the pixels of an invoice</h2>
+      <div id="hidden"><p class="quiet">loading…</p></div>
+    </section>
+  </main>
+
+  <footer>A hackathon demo of an action guarantee pool, not insurance. Code and scripts: <a href="https://github.com/nice-bills/bonded">github.com/nice-bills/bonded</a>.</footer>
+</div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// Numbers only when they are numbers; anything else renders as a dash.
+const nn = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+const num = (v, d = 0) => (nn(v) === null ? "—" : v.toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }));
+const pct1 = (v) => (nn(v) === null ? "—" : (v * 100).toFixed(1) + "%");
+const usd2 = (v) => (nn(v) === null ? "—" : "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+// Costs below a cent keep 4 to 6 significant digits instead of rounding to $0.00.
+function usdCost(v) {
+  if (nn(v) === null) return "—";
+  const a = Math.abs(v);
+  if (a === 0) return "$0.00";
+  if (a >= 0.01) return usd2(v);
+  const dp = Math.min(12, Math.max(4, Math.ceil(-Math.log10(a)) + 3));
+  return "$" + v.toFixed(dp).replace(/0+$/, "").replace(/\.$/, "");
+}
+const ratio = (v) => (nn(v) === null ? "—" : v.toFixed(2) + "×");
+// Values already expressed in percentage points (1.5 = 1.5%).
+const pctUnits = (v, d = 1) => (nn(v) === null ? "—" : v.toFixed(d) + "%");
+const signedPct = (v) => (nn(v) === null ? "—" : (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(1) + "%");
+const shortName = (m) => String(m ?? "—").split("/").filter(Boolean).pop() || "—";
+// Model cell: the short name on the first line, the parts that disambiguate it under it.
+function modelCell(model, extras = []) {
+  const nm = shortName(model);
+  const sub = [...new Set([nm && nm !== model ? model : "", ...extras].filter(Boolean))].join(" · ");
+  return `<td><span>${esc(nm)}</span>${sub ? `<span class="meta" style="display:block;margin:0">${esc(sub)}</span>` : ""}</td>`;
+}
+const dateOnly = (s) => {
+  if (typeof s !== "string" || !s) return "—";
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? s : d.toISOString().slice(0, 10);
+};
+// Fetched links only become href/src when they point at the same origin or the web.
+function safeUrl(u) {
+  const t = typeof u === "string" ? u.trim() : "";
+  return /^(https?:\/\/|\/|\.\/)/i.test(t) && !/\s/.test(t) ? t : "";
+}
+
+function notYet(el) {
+  el.innerHTML = '<p class="quiet">not published yet</p>';
+}
+
+async function loadJSON(url) {
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return null;
+    return JSON.parse(await res.text());
+  } catch {
+    return null;
+  }
+}
+
+function metaLine(parts) {
+  const kept = parts.filter(Boolean);
+  return kept.length ? `<p class="meta">${kept.join(" · ")}</p>` : "";
+}
+
+/* ---------- A. underwriting backtest ---------- */
+
+function renderBacktest(el, d) {
+  const s = d && d.summary;
+  if (!s || typeof s !== "object") return notYet(el);
+  const rows = [
+    ["traps declined", `${num(s.trapsDeclined)} / ${num(s.traps)}`],
+    ["clean invoices insured", `${num(s.cleanInsured)} / ${num(s.cleanTotal)}`],
+    ["AUC", num(s.auc, 3)],
+    ["Brier", num(s.brier, 3)],
+    ["same decision on re-run", pct1(s.rerunAgreement)],
+    ["cost", usdCost(s.costUsdTotal)],
+  ];
+  const models = Array.isArray(s.models) ? s.models : [];
+  el.innerHTML = `<div class="tw"><table class="num"><tbody>${rows
+    .map(([k, v]) => `<tr><td>${esc(k)}</td><td class="r">${v}</td></tr>`)
+    .join("")}</tbody></table></div>${metaLine([
+    `run ${esc(dateOnly(s.ranAt))}`,
+    nn(s.cases) !== null ? `${num(s.cases)} labelled invoices` : "",
+    nn(s.runs) !== null ? `${num(s.runs)} runs` : "",
+    models.length ? `underwriter ${esc(models[0])}` : "",
+    Array.isArray(s.fingerprints) && s.fingerprints.length ? `served from ${s.fingerprints.length} vLLM builds` : "",
+  ])}`;
+}
+
+/* ---------- B. drift ---------- */
+
+function renderDrift(el, d) {
+  if (!d || typeof d !== "object" || !Array.isArray(d.arms) || !d.arms.length) return notYet(el);
+  const traps = nn(d.traps);
+  const clean = nn(d.clean);
+  const cases = nn(d.cases);
+  const arms = d.arms.slice().sort((a, b) => (nn(a.order) ?? 0) - (nn(b.order) ?? 0));
+  const first = arms[0];
+
+  const notes = Array.isArray(d.notes) && d.notes.length
+    ? `<ul class="notes">${d.notes.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`
+    : "";
+
+  const armRows = arms.map((a) => {
+    const dropped = Array.isArray(a.paramsDropped) && a.paramsDropped.length ? a.paramsDropped.join(", ") : "—";
+    return `<tr>
+      ${modelCell(a.model, [a.host])}
+      <td>${a.pinned ? "yes" : "no"}</td>
+      <td class="r">${num(a.trapsDeclined)}${traps === null ? "" : ` / ${num(traps)}`}</td>
+      <td class="r">${num(a.cleanInsured)}${clean === null ? "" : ` / ${num(clean)}`}</td>
+      <td class="r">${num(a.auc, 3)}</td>
+      <td class="r">${num(a.brier, 3)}</td>
+      <td class="r">${pctUnits(a.meanCleanPremiumPct, 2)}</td>
+      <td class="r">${usdCost(a.costPerDecisionUsd)}</td>
+      <td>${esc(dropped)}</td>
+    </tr>`;
+  }).join("");
+
+  const armsTable = `<div class="tw"><table class="num"><thead><tr>
+      <th class="model">model</th><th>pinned</th><th class="r">traps declined</th><th class="r">clean insured</th>
+      <th class="r">AUC</th><th class="r">Brier</th><th class="r">mean clean premium</th><th class="r">cost per decision</th><th>parameters refused</th>
+    </tr></thead><tbody>${armRows}</tbody></table></div>`;
+
+  const pairs = Array.isArray(d.pairs) ? d.pairs : [];
+  const pairsTable = pairs.length
+    ? `<h3 class="sc" style="margin:18px 0 4px">one model against another</h3><div class="tw"><table class="num"><thead><tr>
+        <th>from → to</th><th class="r">decision flips</th><th class="r">median premium change</th><th class="r">largest premium ratio</th>
+      </tr></thead><tbody>${pairs.map((p) => `<tr>
+        <td>${esc(shortName(p.from))} → ${esc(shortName(p.to))}</td>
+        <td class="r">${num(p.decisionFlips)}${cases === null ? "" : ` / ${num(cases)}`}</td>
+        <td class="r">${signedPct(p.medianPremiumChangePct)}</td>
+        <td class="r">${ratio(p.maxPremiumRatio)}</td>
+      </tr>`).join("")}</tbody></table></div>`
+    : "";
+
+  const rerun = Array.isArray(d.rerun) ? d.rerun : [];
+  const rerunTable = rerun.length
+    ? `<h3 class="sc" style="margin:18px 0 4px">same request, run again</h3><div class="tw"><table class="num"><thead><tr>
+        <th class="model">model</th><th class="r">same decision</th><th class="r">mean |Δ p(loss)|</th>
+      </tr></thead><tbody>${rerun.map((r) => `<tr>
+        <td>${esc(shortName(r.model))}</td>
+        <td class="r">${num(r.sameDecision)} / ${num(r.n)}</td>
+        <td class="r">${num(r.meanAbsPLossDelta, 4)}</td>
+      </tr>`).join("")}</tbody></table></div>`
+    : "";
+
+  const rows = Array.isArray(d.rows) ? d.rows : [];
+  const base = first && first.model;
+  const head = arms.map((a) => `<th class="r model">${esc(shortName(a.model))}</th>`).join("");
+  const body = rows.map((r) => {
+    const baseDec = base && r.byModel && r.byModel[base] ? r.byModel[base].decision : null;
+    const cells = arms.map((a) => {
+      const m = r.byModel ? r.byModel[a.model] : null;
+      if (!m) return '<td class="r dim">—</td>';
+      const insured = m.decision === "insure";
+      const tint = baseDec && m.decision !== baseDec ? " diff" : "";
+      const tip = nn(m.pLoss) === null ? "" : ` title="chance of loss ${esc(pct1(m.pLoss))}"`;
+      return `<td class="r${tint}"${tip}>${insured ? usd2(m.premiumUsd) : "declined"}</td>`;
+    }).join("");
+    return `<tr><td><span>${esc(r.id)}</span><span class="meta" style="display:block;margin:0">${esc(r.kind || (r.trap ? "trap" : ""))}</span></td>${cells}</tr>`;
+  }).join("");
+  const everyCase = rows.length
+    ? `<details><summary>Every case<span class="sumline">${num(rows.length)} cases · one column per model · tinted where the decision differs from ${esc(shortName(base))}</span></summary>
+        <div class="tw"><table class="num"><thead><tr><th class="model">case</th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>`
+    : "";
+
+  el.innerHTML = notes + armsTable + pairsTable + rerunTable + everyCase + metaLine([
+    `generated ${esc(dateOnly(d.generatedAt))}`,
+    cases !== null ? `${num(cases)} cases` : "",
+    traps !== null && clean !== null ? `${num(traps)} traps, ${num(clean)} clean` : "",
+    typeof d.ratingGuideHash === "string" && d.ratingGuideHash ? `<span title="${esc(d.ratingGuideHash)}">rating guide ${esc(d.ratingGuideHash.slice(0, 12))}…</span>` : "",
+  ]);
+}
+
+/* ---------- C. hidden text ---------- */
+
+function renderHidden(el, d) {
+  if (!d || typeof d !== "object" || !Array.isArray(d.arms) || !d.arms.length) return notYet(el);
+  const attacks = nn(d.attacks);
+  const controls = nn(d.controls);
+  const arms = d.arms;
+
+  const notes = Array.isArray(d.notes) && d.notes.length
+    ? `<ul class="notes">${d.notes.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>`
+    : "";
+
+  const armRows = arms.map((a) => `<tr>
+      ${modelCell(a.model, [a.name, a.host])}
+      <td class="r">${num(a.attacksFlagged)}${attacks === null ? "" : ` / ${num(attacks)}`}</td>
+      <td class="r">${num(a.attacksTranscribed)}${attacks === null ? "" : ` / ${num(attacks)}`}</td>
+      <td class="r">${num(a.attacksDeclined)}${attacks === null ? "" : ` / ${num(attacks)}`}</td>
+      <td class="r">${num(a.controlsFalseFlag)}${controls === null ? "" : ` / ${num(controls)}`}</td>
+      <td class="r">${usdCost(a.costPerImageUsd)}</td>
+    </tr>`).join("");
+
+  const armsTable = `<div class="tw"><table class="num"><thead><tr>
+      <th class="model">model</th><th class="r">hidden text flagged</th><th class="r">read out verbatim</th><th class="r">declined</th><th class="r">false flags on clean invoices</th><th class="r">cost per image</th>
+    </tr></thead><tbody>${armRows}</tbody></table></div>`;
+
+  const tech = Array.isArray(d.byTechnique) ? d.byTechnique : [];
+  const byTechnique = tech.length
+    ? `<h3 class="sc" style="margin:18px 0 4px">by technique</h3><div class="tw"><table class="num"><thead><tr>
+        <th>technique</th>${arms.map((a) => `<th class="r">${esc(a.name)}</th>`).join("")}
+      </tr></thead><tbody>${tech.map((t) => `<tr>
+        <td>${esc(t.technique)}</td>${arms.map((a) => {
+          const f = t.flagged ? t.flagged[a.name] : null;
+          return `<td class="r">${f === undefined || f === null ? "—" : `${num(f)} / ${num(t.n)}`}</td>`;
+        }).join("")}
+      </tr>`).join("")}</tbody></table></div>`
+    : "";
+
+  const rows = Array.isArray(d.rows) ? d.rows : [];
+  const thumbs = rows.map((r) => {
+    const url = safeUrl(r.image);
+    const lines = arms.map((a) => {
+      const m = r.byArm ? r.byArm[a.name] : null;
+      if (!m) return `<li><span class="an">${esc(a.name)}</span><span class="dim">—</span></li>`;
+      const outcome = r.attack
+        ? (m.flagged ? '<span class="green">flagged</span>' : '<span class="red">missed</span>')
+        : (m.flagged ? '<span class="red">false flag</span>' : '<span class="green">clean</span>');
+      return `<li><span class="an">${esc(a.name)}</span><span class="dim num">${pct1(m.tampered)}</span> ${outcome}</li>`;
+    }).join("");
+    return `<figure class="thumb">
+      ${url ? `<a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc(url)}" alt="${esc(r.technique)}" loading="lazy" width="150"></a>` : '<div class="quiet">no image</div>'}
+      <figcaption><span class="id">${esc(r.id)}</span><span>${esc(r.technique || (r.attack ? "attack" : "clean"))}</span><ul class="armlines">${lines}</ul></figcaption>
+    </figure>`;
+  }).join("");
+  const everyImage = rows.length
+    ? `<details><summary>Every image<span class="sumline">${num(rows.length)} invoices · tampered share and what each arm did</span></summary><div class="thumbs">${thumbs}</div></details>`
+    : "";
+
+  el.innerHTML = notes + armsTable + byTechnique + everyImage + metaLine([
+    `generated ${esc(dateOnly(d.generatedAt))}`,
+    nn(d.images) !== null ? `${num(d.images)} images` : "",
+    attacks !== null && controls !== null ? `${num(attacks)} attacks, ${num(controls)} clean controls` : "",
+  ]);
+}
+
+/* ---------- boot ---------- */
+
+const report = (name, err) => { try { console.warn("benchmark: " + name, err); } catch {} };
+const safeRender = (fn, el, data) => { try { fn(el, data); } catch (e) { report(el.id, e); notYet(el); } };
+
+const themeBtn = $("#theme");
+const setTheme = (t) => { document.documentElement.dataset.theme = t; themeBtn.textContent = t === "dark" ? "Light" : "Dark"; try { localStorage.setItem("theme", t); } catch {} };
+try { setTheme(localStorage.getItem("theme") || "light"); } catch { setTheme("light"); }
+themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+
+(async () => {
+  const [backtest, drift, hidden] = await Promise.all([loadJSON("/backtest.json"), loadJSON("/drift.json"), loadJSON("/hidden-text.json")]);
+  safeRender(renderBacktest, $("#backtest"), backtest);
+  safeRender(renderDrift, $("#drift"), drift);
+  safeRender(renderHidden, $("#hidden"), hidden);
+})();
+</script>
+</body>
+</html>
