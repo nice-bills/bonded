@@ -152,6 +152,4 @@ Bonded's side of the same quotes is visible on its console:
 - **Reused tasks**: executions share stable task ids; a fresh execution must create a fresh quote —
   the runner verifies the returned quote exists in Bonded's ledger and matches the invoice
   (`bonded.verified` in the run record).
-- **`/api/a2a/runs` on Render**: the deployed SDK app shell currently answers 401 for paths outside
-  its allowlist (`/api/pool`, `/api/quotes/:id` are open); the route is served unauthenticated by a
-  build carrying `mountA2a` (any local `npm start`).
+- **`/api/a2a/runs` on Render**: served unauthenticated by the deployed build (checked 2026-11-15); it is seeded from `public/a2a-proof.json` after a redeploy.

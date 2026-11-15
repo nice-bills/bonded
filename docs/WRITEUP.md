@@ -36,6 +36,12 @@ The backtest found something closed APIs hide: within one run Dolphin served fro
 ## Proof
 Backtest on Payrun's 40 labelled invoices (24 traps), two runs each: 24/24 traps declined; clean invoices insured on 31 of 32 underwrites across both runs (16/16 on run 0, one clean invoice declined on the re-run at p 0.186); AUC 1.000 and Brier 0.009 on run 0; ~1.75% mean clean premium; 97.5% identical decisions on re-run; $81k of bad exposure declined; $0.0074 total model cost. `npm run backtest` reproduces it.
 
+**Does the underwriter stay the same?** The same 40 invoices went to four generations of Claude Opus on SERV with the same rating guide and pricing code. Each version priced a different book: 12, 13, 15 and 15 of 16 clean invoices insured, 1 to 3 decisions flipped per release, single premiums moved by up to 4.3x, while one version run twice barely moved. Dolphin's pinned weights declined 24/24 traps and insured 16/16 clean at about 450 times less per decision. Opus 5.5 is better calibrated; the open model's advantage is that it stays available to re-run (`npm run drift`).
+
+**Hidden text in pixels.** 24 invoice images carrying instructions only in the pixels (eight hiding techniques) and 12 clean controls: Dolphin declined 24/24 at $0.00012 an image, read the line out verbatim on 19, and wrongly flagged 1 control. Opus 5.5 and GPT-6-Luna also declined 24/24 (`npm run hidden-text`).
+
+**Verify it yourself.** `GET /api/requests/:hash` serves the exact stored request; `npm run verify -- <id>` re-runs it on your own Dolphin key and compares the decision. All three are on the [benchmarks page](https://bonded-pool.onrender.com/benchmark).
+
 ## Revenue
 Premium spread (loading 40% over expected loss), plus a per-quote x402 fee ($0.02) for agents that only want the risk read. Every bonded action is also a labelled data point, so the pool's loss history becomes the moat, and it stays valid because the weights don't move.
 
