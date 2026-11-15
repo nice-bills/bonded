@@ -58,7 +58,7 @@ h1{font-weight:400;font-size:clamp(28px,3vw,36px);line-height:1.12;margin:0 0 6p
 .verdict h2{font-style:italic;font-size:34px;margin:0}
 .verdict .fig{font-size:15px;color:var(--dim)}
 .verdict number-flow{font-size:34px;color:var(--ink);margin-left:4px;font-variant-numeric:lining-nums}
-.green{color:var(--green)}.red{color:var(--red)}
+.green{color:var(--green)}.red{color:var(--red)}.dim{color:var(--dim)}
 .summary{color:var(--soft);margin:4px 0 8px;font-size:16px;overflow-wrap:anywhere}
 .slipgrid{display:grid;grid-template-columns:1fr 200px;gap:18px}
 table{width:100%;border-collapse:collapse;font-size:15px}
@@ -368,6 +368,13 @@ async function runClaim(id) {
       ${c.shadow ? `<p><span class="sc">shadow agent.</span> ${c.shadow.verdict === "agree" ? "Agrees with the decision" : c.shadow.verdict === "object" ? "Objected (advisory, not a veto)" : c.shadow.verdict === "blocked" ? "Prompt Guard refused its copy" : "Unavailable"}${c.shadow.reason && c.shadow.verdict !== "agree" ? `: ${esc(c.shadow.reason.length > 180 ? c.shadow.reason.slice(0, 180) + "…" : c.shadow.reason)}` : ""}</p>` : ""}
       <p class="sc">peril ${esc(c.judgment.peril)} · serv ${esc(c.serv.verdict)}${c.shadow ? ` · shadow ${esc(c.shadow.verdict)}` : ""}${c.multipath ? ` · multipath ${esc(c.multipath.verdict)}` : ""}</p>
       <button class="btn sm g" id="reClaim">Re-check on the same weights</button><div id="afterClaim"></div>`;
+    if (pay) {
+      // Re-render the certificate (now paid) through renderBond; it rebuilds #claims, so keep this result node.
+      try {
+        const res = await fetch(`/api/bonds/${encodeURIComponent(lastBond.id)}`);
+        if (res.ok) { const kept = $("#claimout"); renderBond(await res.json()); $("#claimout").replaceWith(kept); }
+      } catch {}
+    }
     mark($("#cword"), pay ? { type: "circle", color: css("--green"), padding: 6 } : { type: "strike-through", color: css("--red"), strokeWidth: 2 });
     $("#reClaim").onclick = () => recheck(c.id, $("#afterClaim"));
   } catch (e) { finish(out); out.insertAdjacentHTML("beforeend", `<div class="note bad">${esc(e.message)}</div>`); }
@@ -391,11 +398,13 @@ async function loadBacktest() {
   } catch { el.innerHTML = `<div class="sc">backtest</div><p>Not available.</p>`; }
 }
 
+// Agent-to-agent outcomes; an unknown one shows its raw text.
+const OUTCOME = { bound: { label: "bonded", cls: "green" }, refused: { label: "refused", cls: "red" }, "paid-unbound": { label: "paid, not bound", cls: "dim" } };
 async function a2aRows() {
   try {
     const { runs } = await (await fetch("/api/a2a/runs")).json();
     if (!runs.length) return "";
-    const tr = runs.slice(0, 3).map((r) => `<tr><td>${esc(r.invoice.title || r.invoice.payee || r.bonded.quoteId)}</td><td class="r ${r.outcome === "bound" ? "green" : "red"}">${r.outcome === "bound" ? (r.bondUrl ? `<a href="${r.bondUrl}">bonded</a>` : "bonded") : "refused"}</td><td class="r">${r.payTxUrl ? `<a href="${r.payTxUrl}">tx</a>` : ""}</td></tr>`).join("");
+    const tr = runs.slice(0, 3).map((r) => `<tr><td>${esc(r.invoice.title || r.invoice.payee || r.bonded.quoteId)}</td><td class="r ${OUTCOME[r.outcome]?.cls ?? ""}">${r.outcome === "bound" && r.bondUrl ? `<a href="${r.bondUrl}">bonded</a>` : esc(OUTCOME[r.outcome]?.label ?? r.outcome)}</td><td class="r">${r.payTxUrl ? `<a href="${r.payTxUrl}">tx</a>` : ""}</td></tr>`).join("");
     return `<div class="sc" style="margin-top:12px">agent to agent · Payrun Lite on OpenServ</div><table class="ledger num">${tr}</table>`;
   } catch { return ""; }
 }
