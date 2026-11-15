@@ -94,6 +94,7 @@ tr.hot td{color:var(--red)}
 .claim span{font-size:13px;color:var(--dim)}
 .btn.sm{font-size:14px;padding:4px 10px}
 .ledger td{font-size:14px}
+.ledger td+td{padding-left:12px}
 footer{color:var(--dim);font-size:14px;padding:6px 0 24px}
 dialog{max-width:min(860px,94vw);border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);padding:18px}
 dialog::backdrop{background:rgba(20,18,14,.45)}
@@ -321,7 +322,7 @@ function renderBond(bond, quote = lastQuote) {
       <tr><td>premium tx</td><td class="r">${bond.premiumTxUrl ? `<a href="${bond.premiumTxUrl}">${short(bond.premiumTx)}</a>` : esc(short(bond.premiumTx) || "—")}</td></tr>
       <tr><td>claims window</td><td class="r">30 days</td></tr></table>
       <div id="sig" aria-label="Signed: Bonded"></div><div class="sigline">signed by the underwriter · re-checkable on the same weights</div>
-      <div class="note ok">Cover is reserved in the pool. Payrun may now pay the invoice.</div>
+      ${bond.status === "paid" ? `<div class="note ok">A claim on this bond was paid: the cover went out from the pool on Base Sepolia.</div>` : `<div class="note ok">Cover is reserved in the pool. Payrun may now pay the invoice.</div>`}
       ${quote ? "" : `<div class="note">The original quote is not on this server; the claim buttons below still read the bond's stored case.</div>`}
     </div>${quote ? notes(quote.dolphin, quote.serv) : ""}</div>`;
   flow($("#cov"), bond.coverUsd, money);
