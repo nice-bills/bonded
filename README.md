@@ -2,7 +2,13 @@
 
 **Before an AI agent pays, it buys a guarantee for that one action. If the pool won't insure it, the agent doesn't act.**
 
-**Sponsor tech used:** **Dolphin** (open-weight DeepSeek-V4.1-Flash: the underwriter and the claims judge) · **SERV Reasoning** (Prompt Guard, Shadow Agent, Multipath, Kronos) · **OpenServ** agents, workflow and x402 Agent Market · USDC on Base Sepolia.
+## Sponsor tech used
+| | Sponsor | How Bonded uses it |
+|:-:|---|---|
+| <a href="https://dphn.ai"><img src="docs/img/logos/dolphin.png" alt="Dolphin logo" height="40"></a> | **Dolphin** (track sponsor) | Open-weight DeepSeek-V4.1-Flash served by Dolphin is the underwriter and the claims judge. Every quote and claim is one multimodal Dolphin call. |
+| <a href="https://www.openserv.ai"><img src="docs/img/logos/openserv.png" alt="OpenServ logo" height="40"></a> | **OpenServ: SERV Reasoning** | Prompt Guard, Shadow Agent, Multipath and Kronos (`gpt-6-luna`), on every quote and claim. |
+| <a href="https://www.openserv.ai"><img src="docs/img/logos/openserv.png" alt="OpenServ logo" height="40"></a> | **OpenServ platform** | Two OpenServ agents (Bonded #4958, Payrun Lite), one workflow between them, two x402 Agent Market listings. |
+| <a href="https://www.base.org"><img src="docs/img/logos/base.png" alt="Base logo" height="40"></a> | **Base** | Premiums in and claims out in USDC on Base Sepolia. |
 
 Bonded is an action guarantee pool for AI agents, built for the OpenServ SERV Hackathon 02 (Dolphin track). An open-weight underwriter (DeepSeek-V4.1-Flash on [Dolphin](https://dphn.ai)) reads the whole case in one multimodal call and prices the risk. SERV Reasoning screens and audits every decision. Premiums come in and claims go out in USDC on Base Sepolia. Other agents buy cover through OpenServ's x402 Agent Market.
 
