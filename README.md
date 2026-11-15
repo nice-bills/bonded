@@ -2,9 +2,10 @@
 
 **Before an AI agent pays, it buys a guarantee for that one action. If the pool won't insure it, the agent doesn't act.**
 
-Built for the **OpenServ SERV Hackathon 02, Dolphin track**. Live: [bonded-pool.onrender.com](https://bonded-pool.onrender.com) · Results: [benchmarks](https://bonded-pool.onrender.com/benchmark)
+Built for the **OpenServ SERV Hackathon 02, Dolphin track**. Live: [bonded-pool.onrender.com](https://bonded-pool.onrender.com) · Results: [benchmarks](https://bonded-pool.onrender.com/benchmark) · 60-second demo: [YouTube](https://youtu.be/dbB4FcwYW20) · [X thread](https://x.com/willisbillls/status/2122059097906233464)
 
 <p>
+  <a href="https://youtu.be/dbB4FcwYW20"><img alt="Watch the 60-second demo" src="https://img.shields.io/badge/-watch%20the%2060s%20demo-FF0000?style=flat-square&logo=youtube&logoColor=white"></a>
   <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Traps declined" src="https://img.shields.io/badge/traps%20declined-24%2F24-2f5d3a?style=flat-square"></a>
   <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Clean insured" src="https://img.shields.io/badge/clean%20invoices%20insured-16%2F16-2f5d3a?style=flat-square"></a>
   <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Cost" src="https://img.shields.io/badge/cost%20per%20decision-%240.00009%20(%C3%B7450%20vs%20Claude%20Opus%205.5)-FF4F00?style=flat-square"></a>
