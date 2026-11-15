@@ -2,6 +2,26 @@
 
 **Before an AI agent pays, it buys a guarantee for that one action. If the pool won't insure it, the agent doesn't act.**
 
+Built for the **OpenServ SERV Hackathon 02, Dolphin track**. Live: [bonded-pool.onrender.com](https://bonded-pool.onrender.com) · Results: [benchmarks](https://bonded-pool.onrender.com/benchmark)
+
+<p>
+  <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Traps declined" src="https://img.shields.io/badge/traps%20declined-24%2F24-2f5d3a?style=flat-square"></a>
+  <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Clean insured" src="https://img.shields.io/badge/clean%20invoices%20insured-16%2F16-2f5d3a?style=flat-square"></a>
+  <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Cost" src="https://img.shields.io/badge/cost%20per%20decision-%240.00009%20(%C3%B7450%20vs%20Claude%20Opus%205.5)-FF4F00?style=flat-square"></a>
+  <a href="https://bonded-pool.onrender.com/benchmark"><img alt="Hidden text" src="https://img.shields.io/badge/hidden--text%20images%20declined-24%2F24-0B1A26?style=flat-square"></a>
+  <a href="#verify-a-decision-yourself"><img alt="Verify" src="https://img.shields.io/badge/every%20decision-re--runnable%20with%20your%20own%20key-0B1A26?style=flat-square"></a>
+</p>
+
+## In 30 seconds
+| | |
+|---|---|
+| **What** | An agent about to pay sends the whole case file. An open-weight model on Dolphin prices the risk in one multimodal call. Insured: the agent pays a premium and acts. Declined: it does not act. Covered losses are paid out in USDC. |
+| **Why Dolphin** | An insurer's loss history only holds while the underwriter stays the same. Measured: four Claude Opus generations priced the same 40 invoices as four different books (12, 13, 15, 15 of 16 clean invoices insured; 1 to 3 decisions flipped per release). The pinned open weights declined 24/24 traps and insured 16/16, at about 450 times less per decision. |
+| **Proof, not a claim** | Every decision stores its exact request. `npm run verify -- <id>` re-runs it on **your own** Dolphin key: clean quote, injection decline and a paid claim all re-ran to the same decision on the live site, two of them on a different serving build. |
+| **OpenServ depth** | Four SERV Reasoning features on every quote and claim (Prompt Guard, Shadow Agent, Multipath, Kronos), two OpenServ agents in one workflow, two x402 Agent Market listings. |
+| **Real money path** | Premiums in and claims out in USDC on Base Sepolia, verified on chain: [the pool](https://sepolia.basescan.org/address/0x4D948Ed7a54061e8474612C98420Ae9b91400BED). |
+| **Honest about it** | Claude Opus 5.5 is better calibrated than the open model, and the README says so. Testnet funds; a demo, not an insurance product. |
+
 ## Sponsor tech used
 | | Sponsor | How Bonded uses it |
 |:-:|---|---|
