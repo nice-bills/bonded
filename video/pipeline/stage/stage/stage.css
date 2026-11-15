@@ -1,0 +1,97 @@
+/* stage.css — static styling only. NO transitions / animations: every moving value is set inline by stage.js from seek(t). */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #fffff8; overflow: hidden; }
+body { font-family: Inter, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; }
+
+#stage {
+  position: relative; overflow: hidden; background: var(--bg); color: var(--ink);
+  font-feature-settings: "ss01" 0, "cv11" 1; font-kerning: normal;
+}
+#stage.wide { width: 1920px; height: 1080px; }
+#stage.tall { width: 1080px; height: 1350px; }
+
+/* one very soft, large glow behind the device */
+.glow { position: absolute; pointer-events: none; }
+.wide .glow { left: 318px; top: -260px; width: 1920px; height: 1600px; }
+.tall .glow { left: -360px; top: 96px; width: 1800px; height: 1500px; }
+#glow-light { background: radial-gradient(closest-side, rgba(250, 226, 172, .38), rgba(250, 226, 172, .16) 45%, rgba(250, 226, 172, 0) 100%); }
+#glow-dark { background: radial-gradient(closest-side, rgba(255, 214, 150, .075), rgba(255, 214, 150, .03) 45%, rgba(255, 214, 150, 0) 100%); }
+
+#brand { position: absolute; font-style: italic; font-weight: 400; color: var(--ink); letter-spacing: -.01em; white-space: nowrap; }
+.wide #brand { left: 96px; top: 58px; font-size: 30px; line-height: 36px; }
+.tall #brand { right: 48px; bottom: 26px; font-size: 26px; line-height: 32px; }
+
+/* ---------- caption ---------- */
+.cap { position: absolute; display: none; flex-direction: column; }
+.wide .cap { left: 96px; width: 564px; top: 0; height: 1080px; justify-content: center; }
+.tall .cap { left: 48px; width: 984px; top: 58px; }
+.wide .cap.solo { width: 1500px; }
+.tall .cap.solo { top: 0; height: 1266px; justify-content: center; }
+.cap .eyebrow { font-size: 20px; line-height: 24px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: 22px; white-space: nowrap; }
+.cap .eyebrow .num { color: var(--accent); margin-right: .7em; font-variant-numeric: tabular-nums; }
+.cap .hl { font-family: "Inter Display", Inter, sans-serif; color: var(--ink); line-height: 1.04; letter-spacing: -.032em; text-wrap: balance; }
+.cap .hl.nowrap { white-space: nowrap; }
+.cap .l1 { font-weight: 300; }
+.cap .l2 { font-weight: 700; }
+.cap .sentence { color: var(--dim); font-weight: 400; text-wrap: balance; letter-spacing: -.005em; }
+.wide .cap .sentence { font-size: 26px; line-height: 37px; margin-top: 28px; max-width: 540px; }
+.tall .cap .sentence { font-size: 28px; line-height: 38px; margin-top: 18px; max-width: 940px; }
+.tall .cap .eyebrow { margin-bottom: 16px; }
+.wide .cap.solo .sentence { font-size: 36px; line-height: 50px; margin-top: 40px; max-width: 1200px; }
+.tall .cap.solo .sentence { font-size: 34px; line-height: 46px; margin-top: 32px; }
+.cap.solo .eyebrow { font-size: 24px; line-height: 28px; margin-bottom: 30px; }
+
+/* ---------- device: a browser window ---------- */
+#device {
+  position: absolute; box-sizing: content-box; border: 1px solid var(--hair); border-radius: 14px; background: var(--chrome);
+  box-shadow: 0 48px 120px -24px var(--shadow), 0 10px 28px -6px var(--shadow2);
+}
+#bar { position: absolute; left: 0; top: 0; right: 0; height: 44px; border-bottom: 1px solid var(--hair); }
+#bar .dots { position: absolute; left: 18px; top: 16px; display: flex; gap: 8px; }
+#bar .dots i { display: block; width: 11px; height: 11px; border-radius: 50%; background: var(--dot); }
+#url {
+  position: absolute; left: 50%; top: 9px; transform: translateX(-50%); height: 26px; line-height: 26px; padding: 0 18px;
+  border-radius: 13px; background: var(--pill); color: var(--dim); font-size: 15px; font-weight: 500; white-space: nowrap; letter-spacing: .005em;
+}
+#chip {
+  position: absolute; right: 14px; top: 10px; height: 24px; line-height: 24px; padding: 0 11px; border-radius: 12px;
+  background: var(--pill); color: var(--accent); font-size: 13px; font-weight: 600; white-space: nowrap; letter-spacing: .02em;
+  font-variant-numeric: tabular-nums; visibility: hidden;
+}
+#body { position: absolute; left: 0; top: 44px; overflow: hidden; border-radius: 0 0 13px 13px; background: #fffff8; }
+#footage { display: block; width: 100%; height: 100%; }
+#callouts { position: absolute; left: 0; top: 44px; width: 0; height: 0; }
+
+/* ---------- callout (colours are fixed: it sits on product footage, not on the stage) ---------- */
+.callout { position: absolute; width: 0; height: 0; display: none; }
+.callout .dot { position: absolute; left: -10px; top: -10px; width: 20px; height: 20px; border-radius: 50%; background: #2f5d3a; border: 2px solid #fffff8; box-shadow: 0 1px 4px rgba(17, 17, 17, .28); }
+.callout .ring { position: absolute; left: -13px; top: -13px; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid #2f5d3a; }
+.callout .arm { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.callout .leader { position: absolute; background: #111; height: 2px; box-shadow: 0 0 0 .75px rgba(255, 255, 248, .7); }
+.callout .label {
+  position: absolute; white-space: nowrap; background: #111; color: #fffff8; font-size: 26px; line-height: 32px; font-weight: 600;
+  padding: 10px 20px; border-radius: 26px; letter-spacing: .005em; box-shadow: 0 8px 22px rgba(17, 17, 17, .2);
+}
+.callout.right .leader { left: 10px; top: -.75px; width: 44px; height: 1.5px; }
+.callout.right .label { left: 54px; top: -26px; }
+.callout.left .leader { left: -54px; top: -.75px; width: 44px; height: 1.5px; }
+.callout.left .label { right: 54px; top: -26px; }
+.callout.top .leader { left: -.75px; top: -54px; width: 1.5px; height: 44px; }
+.callout.top .label { left: 0; bottom: 54px; transform: translateX(-50%); }
+.callout.bottom .leader { left: -.75px; top: 10px; width: 1.5px; height: 44px; }
+.callout.bottom .label { left: 0; top: 54px; transform: translateX(-50%); }
+
+/* ---------- progress index ---------- */
+#progress { position: absolute; display: flex; gap: 22px; font-size: 18px; line-height: 22px; font-weight: 500; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.wide #progress { left: 96px; bottom: 62px; }
+.tall #progress { left: 48px; bottom: 32px; }
+#progress .pn { position: relative; display: block; }
+#progress .pn i { position: absolute; left: 0; right: .08em; bottom: -8px; height: 2px; background: var(--accent); }
+
+/* partner credit: persistent, quiet, top-right (wide) / top under caption (tall) */
+#credit { position: absolute; white-space: nowrap; color: var(--dim); font-size: 19px; line-height: 24px; font-weight: 500; letter-spacing: .01em; }
+#credit b { color: var(--ink); font-weight: 600; }
+#credit .sep { display: inline-block; margin: 0 .7em; color: var(--hair); }
+.wide #credit { right: 72px; top: 64px; }
+.tall #credit { left: 48px; bottom: 30px; font-size: 17px; }
+.tall #progress { display: none; }
