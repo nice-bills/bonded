@@ -5,6 +5,10 @@ import { randomBytes } from "node:crypto";
 // shortcut: one JSON file on local disk, lost on container redeploy; move to a hosted KV if real bonds are written.
 const DIR = process.env.BONDED_DATA_DIR ?? "data";
 const FILE = join(DIR, "ledger.json");
+// The host's disk resets on deploy. A snapshot of the live ledger (real quotes, bonds and claims, taken
+// through the public API) and the demo quotes' requests are committed under seed/ and loaded on a fresh
+// disk. Only with the default data dir, so tests and local runs with their own BONDED_DATA_DIR start empty.
+const SEED = process.env.BONDED_DATA_DIR ? null : new URL("../seed/", import.meta.url).pathname;
 
 export interface Ledger {
   quotes: Record<string, any>;
@@ -18,7 +22,8 @@ let cache: Ledger | null = null;
 export function ledger(): Ledger {
   if (cache) return cache;
   mkdirSync(join(DIR, "requests"), { recursive: true });
-  cache = existsSync(FILE) ? JSON.parse(readFileSync(FILE, "utf8")) : { quotes: {}, bonds: {}, claims: {}, usedTx: [] };
+  const src = existsSync(FILE) ? FILE : SEED && existsSync(`${SEED}ledger.json`) ? `${SEED}ledger.json` : null;
+  cache = src ? JSON.parse(readFileSync(src, "utf8")) : { quotes: {}, bonds: {}, claims: {}, usedTx: [] };
   return cache!;
 }
 
@@ -40,8 +45,8 @@ export function saveRequest(hash: string, body: unknown) {
 
 export function loadRequest(hash: string): Record<string, unknown> | null {
   if (!/^[a-f0-9]{64}$/.test(hash)) return null;
-  const f = join(DIR, "requests", `${hash}.json`);
-  return existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : null;
+  const f = [join(DIR, "requests", `${hash}.json`), ...(SEED ? [`${SEED}requests/${hash}.json`] : [])].find((x) => existsSync(x));
+  return f ? JSON.parse(readFileSync(f, "utf8")) : null;
 }
 
 export const newId = (prefix: string) => `${prefix}_${randomBytes(5).toString("hex")}`;
