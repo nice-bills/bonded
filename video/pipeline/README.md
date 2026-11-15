@@ -13,3 +13,9 @@ How `video/bonded-demo-*.mp4` was made. Everything runs locally; nothing here is
    (`--timeline` validates, `--frame-at T out.png` previews one frame).
 5. **Sound** `python3 audio/make_audio.py out/cues.json --out audio_out --vo vo.json`, then
    `audio/mux.sh out/wide.mp4 audio_out/mix_full.wav final.mp4`.
+
+## v3 (benchmark chapters 09-12)
+`capture/benchmark/`: `serve.cjs` serves the PR branch's `public/` statically on :3300 (the /benchmark page needs no API),
+`stills.cjs` takes the 2x stills (drift table, hidden-text arms, every image), `term.cjs` renders the `npm run verify` card.
+The stills are appended to a copy of take1's frames.json at t=300/310/320/330 (capture/take2).
+`story/build3.py` re-cuts chapter 07 (hard cut between the "bonded" and "refused" rows) and adds 09-11; `--verify` adds 12.

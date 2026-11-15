@@ -1,0 +1,24 @@
+const {chromium}=require('playwright');
+const rows=(p,sel,n)=>p.evaluate(([sel,n])=>[...document.querySelectorAll(sel)].slice(0,n).map(tr=>[...tr.children].map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height),e.innerText.replace(/\s+/g,' ').slice(0,30)]})),[sel,n]);
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:1280,height:720},deviceScaleFactor:2});
+await p.goto('http://localhost:3300/benchmark',{waitUntil:'networkidle'});await p.waitForTimeout(800);
+const out={};
+const tA=await p.evaluate(()=>document.querySelector('#drift table').getBoundingClientRect().top+scrollY);
+await p.evaluate(y=>scrollTo(0,y),tA-120);await p.waitForTimeout(300);
+out.A={scrollY:await p.evaluate(()=>scrollY),rows:await rows(p,'#drift tr',12)};
+await p.screenshot({path:'A.jpg',quality:92,type:'jpeg'});
+const tB=await p.evaluate(()=>document.querySelector('#hidden table').getBoundingClientRect().top+scrollY);
+await p.evaluate(y=>scrollTo(0,y),tB-120);await p.waitForTimeout(300);
+out.B={scrollY:await p.evaluate(()=>scrollY),rows:await rows(p,'#hidden tr',5)};
+await p.screenshot({path:'B.jpg',quality:92,type:'jpeg'});
+await p.evaluate(()=>{const d=[...document.querySelectorAll('#hidden details')].pop();d.open=true;});
+await p.waitForTimeout(300);
+const imgs=await p.$$('#hidden details img');for(const i of imgs){await i.scrollIntoViewIfNeeded();}
+await p.waitForFunction(()=>[...document.querySelectorAll('#hidden details img')].every(i=>i.complete&&i.naturalWidth>0),null,{timeout:20000});
+const tC=await p.evaluate(()=>[...document.querySelectorAll('#hidden details')].pop().getBoundingClientRect().top+scrollY);
+await p.evaluate(y=>scrollTo(0,y),tC-10);await p.waitForTimeout(500);
+out.C={scrollY:await p.evaluate(()=>scrollY),n:imgs.length,imgs:await p.evaluate(()=>[...document.querySelectorAll('#hidden details img')].slice(0,16).map(e=>{const r=e.getBoundingClientRect();return [Math.round(r.x),Math.round(r.y),Math.round(r.width),Math.round(r.height)]}))};
+await p.screenshot({path:'C.jpg',quality:92,type:'jpeg'});
+require('fs').writeFileSync('stills.json',JSON.stringify(out,null,0));
+for(const r of out.A.rows)console.log(JSON.stringify(r));console.log(JSON.stringify(out.B));console.log(JSON.stringify(out.C));
+await b.close()})();

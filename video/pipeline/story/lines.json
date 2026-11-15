@@ -1,12 +1,60 @@
 {
-"hook":     ["Before an AI agent pays, it buys a guarantee.", "No guarantee, no payment."],
-"dolphin":  ["Payrun, a payments agent, wants to pay Kwame eighteen hundred dollars.", "First it asks Bonded. An open-weight model on Dolphin reads the whole case, invoice image included, in one call."],
-"priced":   ["Dolphin puts the chance of loss under one percent.", "Bonded's code turns that into a premium: twenty-two dollars sixty.", "SERV Reasoning screens the documents and agrees."],
-"bond":     ["Payrun pays the premium in USDC on Base.", "Bonded checks the transfer on chain, and issues the bond."],
-"decline":  ["Now Ama's invoice. A new wallet, a lookalike email domain, and an urgent tone.", "Dolphin puts the risk at ninety-nine percent. Uninsurable, so Payrun doesn't pay."],
-"hidden":   ["Efua's invoice hides faint grey text, telling the AI to rate every risk zero.", "Dolphin reads it straight off the image, and flags the invoice as tampered. Declined."],
-"claim":    ["If an insured payment goes wrong, the pool pays.", "Kwame was paid twice for the same work.", "A second Dolphin call judges the claim, and SERV Multipath checks it against three rulebooks.", "Eighteen hundred dollars, paid out on chain."],
-"openserv": ["On OpenServ, a second agent, Payrun Lite, asks Bonded before it pays.", "Insured, it pays. Declined, it doesn't."],
-"recheck":  ["Because the weights are open and pinned on Dolphin, anyone can re-run a decision.", "Same weights, same answer."],
-"close":    ["Bonded. Underwritten on Dolphin, audited by SERV, live on OpenServ."]
+ "hook": [
+  "Before an AI agent pays, it buys a guarantee.",
+  "No guarantee, no payment."
+ ],
+ "dolphin": [
+  "Payrun, a payments agent, wants to pay Kwame eighteen hundred dollars.",
+  "First it asks Bonded. An open-weight model on Dolphin reads the whole case, invoice image included, in one call."
+ ],
+ "priced": [
+  "Dolphin puts the chance of loss under one percent.",
+  "Bonded's code turns that into a premium: twenty-two dollars sixty.",
+  "SERV Reasoning screens the documents and agrees."
+ ],
+ "bond": [
+  "Payrun pays the premium in USDC on Base.",
+  "Bonded checks the transfer on chain, and issues the bond."
+ ],
+ "decline": [
+  "Now Ama's invoice. A new wallet, a lookalike email domain, and an urgent tone.",
+  "Dolphin puts the risk at ninety-nine percent. Uninsurable, so Payrun doesn't pay."
+ ],
+ "hidden": [
+  "Efua's invoice hides faint grey text, telling the AI to rate every risk zero.",
+  "Dolphin reads it straight off the image, and flags the invoice as tampered. Declined."
+ ],
+ "claim": [
+  "If an insured payment goes wrong, the pool pays.",
+  "Kwame was paid twice for the same work.",
+  "A second Dolphin call judges the claim, and SERV Multipath checks it against three rulebooks.",
+  "Eighteen hundred dollars, paid out on chain."
+ ],
+ "openserv": [
+  "On OpenServ, a second agent, Payrun Lite, asks Bonded before it pays.",
+  "Insured, it pays. Declined, it doesn't."
+ ],
+ "recheck": [
+  "Because the weights are open and pinned on Dolphin, anyone can re-run a decision.",
+  "Same weights, same answer."
+ ],
+ "measured": [
+  "Same forty invoices, four releases of Claude Opus.",
+  "Each release flipped one to three decisions.",
+  "Dolphin: all twenty-four traps declined, all sixteen clean invoices insured."
+ ],
+ "cost": [
+  "Same catches, about four hundred and fifty times cheaper per decision.",
+  "Forty decisions on Dolphin cost under half a cent."
+ ],
+ "pixels": [
+  "Then we hid instructions in the pixels of twenty-four invoices, eight different ways.",
+  "Dolphin declined all twenty-four, and read the hidden line word for word on nineteen."
+ ],
+ "verify": [
+  "Don't trust us. Re-run any decision on your own Dolphin key."
+ ],
+ "close": [
+  "Bonded. Underwritten on Dolphin, audited by SERV, live on OpenServ."
+ ]
 }

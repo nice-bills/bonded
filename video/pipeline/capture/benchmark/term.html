@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;width:1280px;height:720px;background:#fffff8;font-family:'JetBrains Mono',monospace}
+.win{position:absolute;left:90px;top:150px;width:1100px;background:#16150f;border-radius:14px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.18)}
+.bar{height:38px;background:#25231b;display:flex;align-items:center;padding:0 16px;gap:8px;color:#9a9381;font-size:14px}
+.d{width:12px;height:12px;border-radius:50%;background:#4a463a}
+.t{margin-left:14px}
+pre{margin:0;padding:22px 26px 26px;color:#e8e2d0;font:400 17px/1.75 'JetBrains Mono',monospace;white-space:pre}
+.p{color:#8cc59b;font-weight:600}.v{color:#8cc59b;font-weight:600}
+</style></head><body>
+<div class="win"><div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">npm run verify</span></div>
+<pre><span class="p">PASS</span>  request hash e7c0b7e627449e59… matches the served body (86 KB)
+<span class="p">PASS</span>  system prompt carries the published rating guide (sha256 b5b4b18586e903e5…)
+<span class="p">PASS</span>  model deepseek-ai/DeepSeek-V4.1-Flash, temperature 0, seed 7
+<span class="p">PASS</span>  Dolphin answered in 3.4 s, served by deepseek-ai/DeepSeek-V4.1-Flash
+  decision     original insure   re-run insure
+<span class="v">VERIFIED: same decision</span></pre></div>
+</body></html>

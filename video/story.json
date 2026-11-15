@@ -1,8 +1,8 @@
 {
  "fps": 30,
  "bpm": 120,
- "capture_dir": "/tmp/claude-0/-home-user-bonded/b6ab4b79-0a98-565b-91b6-60949bf2310e/scratchpad/capture/take1",
- "output_dir": "/tmp/claude-0/-home-user-bonded/b6ab4b79-0a98-565b-91b6-60949bf2310e/scratchpad/final2/out",
+ "capture_dir": "/tmp/claude-0/-home-user-bonded/b6ab4b79-0a98-565b-91b6-60949bf2310e/scratchpad/capture/take2",
+ "output_dir": "/tmp/claude-0/-home-user-bonded/b6ab4b79-0a98-565b-91b6-60949bf2310e/scratchpad/final3/out",
  "formats": {
   "wide": {
    "w": 1920,
@@ -1014,12 +1014,8 @@
    },
    "footage": [
     {
-     "in": 267.5,
-     "out": 272.0
-    },
-    {
-     "in": 272.0,
-     "hold": 5.5
+     "in": 271.7,
+     "hold": 10.0
     }
    ],
    "camera": {
@@ -1027,52 +1023,74 @@
      {
       "t": 0,
       "rect": [
-       790,
-       280,
-       440,
-       275
+       810,
+       152,
+       384,
+       240
       ]
+     },
+     {
+      "t": 7.6,
+      "rect": [
+       810,
+       428,
+       384,
+       240
+      ],
+      "move": 0.04,
+      "ease": "inout"
      }
     ],
     "tall": [
      {
       "t": 0,
       "rect": [
-       790,
-       300,
-       440,
-       376
+       880,
+       119,
+       320,
+       273
       ]
+     },
+     {
+      "t": 7.6,
+      "rect": [
+       880,
+       428,
+       320,
+       273
+      ],
+      "move": 0.04,
+      "ease": "inout"
      }
     ]
    },
    "callouts": [
     {
-     "t": 1.4,
-     "end": 4.8,
+     "t": 1.0,
+     "end": 4.6,
      "at": [
-      905,
-      355
+      960,
+      360
      ],
      "label": "Payrun Lite, an OpenServ agent",
      "side": "top"
     },
     {
-     "t": 6.3,
-     "end": 7.8,
+     "t": 5.0,
+     "end": 7.4,
      "at": [
-      900,
-      396
+      1141,
+      383
      ],
      "label": "Insured: bond, then pay",
-     "side": "bottom"
+     "side": "top"
     },
     {
-     "t": 8.0,
+     "t": 7.9,
      "end": 9.8,
      "at": [
-      1100,
-      455
+      1141,
+      439
      ],
      "label": "Declined: nothing paid",
      "side": "bottom"
@@ -1084,15 +1102,19 @@
      "name": "light"
     },
     {
-     "t": 1.4,
+     "t": 1.0,
      "name": "callout"
     },
     {
-     "t": 6.3,
+     "t": 5.0,
      "name": "check"
     },
     {
-     "t": 8.0,
+     "t": 7.6,
+     "name": "tap"
+    },
+    {
+     "t": 7.9,
      "name": "decline"
     }
    ],
@@ -1169,6 +1191,326 @@
     }
    ],
    "bars": 5
+  },
+  {
+   "id": "measured",
+   "theme": "light",
+   "number": "09",
+   "name": "Measured",
+   "caption": {
+    "light": "Four Opus versions,",
+    "bold": "four different books.",
+    "sentence": "Same 40 invoices, same rating guide, same pricing code."
+   },
+   "footage": [
+    {
+     "in": 300.0,
+     "hold": 14.0
+    }
+   ],
+   "camera": {
+    "wide": [
+     {
+      "t": 0,
+      "rect": [
+       80,
+       0,
+       860,
+       537
+      ]
+     }
+    ],
+    "tall": [
+     {
+      "t": 0,
+      "rect": [
+       230,
+       0,
+       830,
+       709
+      ]
+     }
+    ]
+   },
+   "callouts": [
+    {
+     "t": 1.0,
+     "end": 4.4,
+     "at": [
+      690,
+      263
+     ],
+     "label": "Opus: 12, 13, 15, 15 of 16",
+     "side": "right"
+    },
+    {
+     "t": 5.0,
+     "end": 7.5,
+     "at": [
+      690,
+      490
+     ],
+     "label": "1-3 flips per release",
+     "side": "right"
+    },
+    {
+     "t": 8.0,
+     "end": 13.4,
+     "at": [
+      690,
+      165
+     ],
+     "label": "Dolphin: 24/24, 16/16",
+     "side": "right"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 1.0,
+     "name": "callout"
+    },
+    {
+     "t": 5.0,
+     "name": "tick"
+    },
+    {
+     "t": 8.0,
+     "name": "check"
+    }
+   ],
+   "bars": 7
+  },
+  {
+   "id": "cost",
+   "theme": "light",
+   "number": "10",
+   "name": "Cost",
+   "caption": {
+    "light": "Same catches,",
+    "bold": "450x cheaper.",
+    "sentence": "$0.00009 a decision on Dolphin, $0.042 on Claude Opus 5.5."
+   },
+   "footage": [
+    {
+     "in": 300.0,
+     "hold": 10.0
+    }
+   ],
+   "camera": {
+    "wide": [
+     {
+      "t": 0,
+      "rect": [
+       600,
+       112,
+       540,
+       337
+      ]
+     }
+    ],
+    "tall": [
+     {
+      "t": 0,
+      "rect": [
+       600,
+       112,
+       540,
+       461
+      ]
+     }
+    ]
+   },
+   "callouts": [
+    {
+     "t": 1.0,
+     "end": 4.8,
+     "at": [
+      1050,
+      165
+     ],
+     "label": "Dolphin: $0.00009 a decision",
+     "side": "bottom"
+    },
+    {
+     "t": 5.3,
+     "end": 9.2,
+     "at": [
+      1075,
+      361
+     ],
+     "label": "Claude Opus: $0.04 a decision",
+     "side": "left"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 1.0,
+     "name": "callout"
+    },
+    {
+     "t": 5.3,
+     "name": "callout"
+    }
+   ],
+   "bars": 5
+  },
+  {
+   "id": "pixels",
+   "theme": "light",
+   "number": "11",
+   "name": "Pixels",
+   "caption": {
+    "light": "Hidden in the pixels,",
+    "bold": "declined 24 of 24.",
+    "sentence": "Eight hiding techniques, 36 invoice images, $0.00012 an image."
+   },
+   "footage": [
+    {
+     "in": 320.0,
+     "hold": 6.0
+    },
+    {
+     "in": 310.0,
+     "hold": 8.0
+    }
+   ],
+   "camera": {
+    "wide": [
+     {
+      "t": 0,
+      "rect": [
+       70,
+       0,
+       1152,
+       720
+      ]
+     },
+     {
+      "t": 6.0,
+      "rect": [
+       80,
+       105,
+       780,
+       488
+      ],
+      "move": 0.04,
+      "ease": "inout"
+     },
+     {
+      "t": 11.9,
+      "rect": [
+       760,
+       105,
+       440,
+       275
+      ],
+      "move": 0.04,
+      "ease": "inout"
+     }
+    ],
+    "tall": [
+     {
+      "t": 0,
+      "rect": [
+       70,
+       0,
+       840,
+       717
+      ]
+     },
+     {
+      "t": 6.0,
+      "rect": [
+       80,
+       105,
+       780,
+       666
+      ],
+      "move": 0.04,
+      "ease": "inout"
+     },
+     {
+      "t": 11.9,
+      "rect": [
+       760,
+       105,
+       440,
+       376
+      ],
+      "move": 0.04,
+      "ease": "inout"
+     }
+    ]
+   },
+   "callouts": [
+    {
+     "t": 1.2,
+     "end": 5.6,
+     "at": [
+      164,
+      120
+     ],
+     "label": "24 attacks, 8 techniques, 12 clean",
+     "side": "right"
+    },
+    {
+     "t": 6.4,
+     "end": 8.9,
+     "at": [
+      808,
+      165
+     ],
+     "label": "Declined 24 / 24",
+     "side": "left"
+    },
+    {
+     "t": 9.2,
+     "end": 11.7,
+     "at": [
+      724,
+      165
+     ],
+     "label": "Read it verbatim: 19 / 24",
+     "side": "bottom"
+    },
+    {
+     "t": 12.2,
+     "end": 13.8,
+     "at": [
+      1052,
+      165
+     ],
+     "label": "1 of 12 clean wrongly flagged",
+     "side": "bottom"
+    }
+   ],
+   "sfx": [
+    {
+     "t": 1.2,
+     "name": "callout"
+    },
+    {
+     "t": 6.0,
+     "name": "tap"
+    },
+    {
+     "t": 6.4,
+     "name": "decline"
+    },
+    {
+     "t": 9.2,
+     "name": "callout"
+    },
+    {
+     "t": 11.9,
+     "name": "tap"
+    },
+    {
+     "t": 12.2,
+     "name": "tick"
+    }
+   ],
+   "bars": 7
   },
   {
    "id": "close",
